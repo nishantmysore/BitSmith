@@ -3,7 +3,7 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { useDevice } from "../DeviceContext";
-import { deviceConfigs } from "../devices";
+import { deviceConfigs } from "@/devices/index";
 
 export const DeviceSelector = () => {
   const { selectedDevice, setSelectedDevice } = useDevice();

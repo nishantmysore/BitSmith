@@ -1,8 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useState } from 'react';
-import { Device } from './device';
-import { deviceConfigs } from './devices';
+import { Device } from '@/devices/device';
+import { deviceConfigs } from '@/devices/index';
 
 type DeviceContextType = {
   selectedDevice: Device | null;
