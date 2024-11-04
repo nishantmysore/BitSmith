@@ -9,6 +9,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { registers } from '@/registers';
 import { getAccessColor } from '@/utils/access_color';
 import FieldHoverCard from "@/components/FieldHoverCard"
+import ValueFormatActions from './ValueFormatActions';
 
 type InputFormat = 'hex' | 'decimal' | 'binary';
 
@@ -197,6 +198,8 @@ const RegisterBitViewer = () => {
               </div>
             ))}
           </div>
+          {/* Add Value Format Actions */}
+          <ValueFormatActions binaryValue={binaryValue} />
         </div>
         {/* Field Values */}
         {currentRegister && (
