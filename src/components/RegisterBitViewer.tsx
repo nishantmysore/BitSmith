@@ -163,12 +163,35 @@ const RegisterBitViewer = () => {
             {binaryValue.split('').map((bit, index) => (
               <div
                 key={31 - index}
-                className="p-1 border rounded bg-secondary text-xs"
+                className={`p-1 border rounded bg-secondary text-xs cursor-pointer 
+                  hover:bg-secondary/80 active:bg-secondary/60 transition-colors`}
+                onClick={() => {
+                  const newBinary = binaryValue.split('');
+                  newBinary[index] = bit === '1' ? '0' : '1';
+                  const newBinaryString = newBinary.join('');
+                  setBinaryValue(newBinaryString);
+
+                  // Update the input value based on current format
+                  const newNum = parseInt(newBinaryString, 2);
+                  switch(inputFormat) {
+                    case 'hex':
+                      setValue(newNum.toString(16).toUpperCase());
+                      break;
+                    case 'decimal':
+                      setValue(newNum.toString(10));
+                      break;
+                    case 'binary':
+                      setValue(newBinaryString);
+                      break;
+                  }
+                }}
               >
                 <div className={`font-mono ${bit === '1' ? 'text-red-500' : ''}`}>
                   {bit}
                 </div>
-                <div className="text-[10px] text-muted-foreground">{31 - index}</div>
+                <div className="text-[10px] text-muted-foreground">
+                  {31 - index}
+                </div>
               </div>
             ))}
           </div>
