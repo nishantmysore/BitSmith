@@ -1,4 +1,6 @@
 import { ThemeProvider } from "@/components/ThemeProvider"
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import { AppSidebar } from "@/components/AppSidebar"
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -34,7 +36,11 @@ export default function RootLayout({
           disableTransitionOnChange
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <SidebarProvider>
+              <AppSidebar />
+        <SidebarTrigger />
         {children}
+        </SidebarProvider>
         </ThemeProvider>
       </body>
     </html>

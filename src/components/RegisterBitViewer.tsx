@@ -6,10 +6,10 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { registers } from '@/registers';
 import { getAccessColor } from '@/utils/access_color';
 import FieldHoverCard from "@/components/FieldHoverCard"
 import ValueFormatActions from './ValueFormatActions';
+import { useDevice } from "@/DeviceContext";
 
 type InputFormat = 'hex' | 'decimal' | 'binary';
 
@@ -18,6 +18,20 @@ const RegisterBitViewer = () => {
   const [value, setValue] = React.useState<string>("");
   const [inputFormat, setInputFormat] = React.useState<InputFormat>('hex');
   const [binaryValue, setBinaryValue] = React.useState<string>("".padStart(32, '0'));
+
+  const { selectedDevice } = useDevice();
+  if (!selectedDevice) {
+    return (
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>Register Value Viewer</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-center text-muted-foreground">No device selected</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   // Convert input to binary based on selected format
   const handleValueChange = (input: string) => {
@@ -83,7 +97,9 @@ const RegisterBitViewer = () => {
   };
 
   // Get current register definition
-  const currentRegister = registers[selectedRegister as keyof typeof registers];
+  const currentRegister = selectedRegister 
+    ? selectedDevice.registers[selectedRegister as keyof typeof selectedDevice.registers]
+    : null;
 
   const getFieldValue = (msb: number, lsb: number) => {
     const fieldBits = binaryValue.slice(31 - msb, 32 - lsb);
@@ -113,7 +129,7 @@ const RegisterBitViewer = () => {
             onChange={(e) => setSelectedRegister(e.target.value)}
           >
             <option value="">Select a register...</option>
-            {Object.entries(registers).map(([key, reg]) => (
+            {Object.entries(selectedDevice.registers).map(([key, reg]) => (
               <option key={key} value={key}>
                 {reg.name} ({reg.address})
               </option>
@@ -159,6 +175,9 @@ const RegisterBitViewer = () => {
           />
         </div>
 
+
+          {/* Add Value Format Actions */}
+          <ValueFormatActions binaryValue={binaryValue} />
         {/* Bit Display */}
         <div className="space-y-2">
           <Label>Binary Value</Label>
@@ -198,8 +217,6 @@ const RegisterBitViewer = () => {
               </div>
             ))}
           </div>
-          {/* Add Value Format Actions */}
-          <ValueFormatActions binaryValue={binaryValue} />
         </div>
         {/* Field Values */}
         {currentRegister && (
