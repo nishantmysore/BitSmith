@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { registers } from '@/registers';
+import { getAccessColor } from '@/utils/access_color';
+import FieldHoverCard from "@/components/FieldHoverCard"
 
 type InputFormat = 'hex' | 'decimal' | 'binary';
 
@@ -196,7 +198,6 @@ const RegisterBitViewer = () => {
             ))}
           </div>
         </div>
-
         {/* Field Values */}
         {currentRegister && (
           <div className="space-y-2">
@@ -212,7 +213,9 @@ const RegisterBitViewer = () => {
                 return (
                   <div
                     key={field.name}
-                    className="flex justify-between items-center p-2 bg-secondary/50 rounded"
+                    className={`relative group flex justify-between items-center p-2 
+                      rounded transition-colors cursor-pointer
+                      ${getAccessColor(field.access)}`}
                   >
                     <span className="font-medium">{field.name}</span>
                     <div className="space-x-2 text-sm">
@@ -226,6 +229,8 @@ const RegisterBitViewer = () => {
                         ({fieldValue.decimal})
                       </span>
                     </div>
+
+                    <FieldHoverCard field={field} fieldValue={fieldValue} />
                   </div>
                 );
               })}
