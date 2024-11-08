@@ -1,12 +1,10 @@
 'use client';
-
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { useDevice } from "../DeviceContext";
-import { deviceConfigs } from "@/devices/index";
 
 export const DeviceSelector = () => {
-  const { selectedDevice, setSelectedDevice } = useDevice();
+  const { selectedDevice, setSelectedDevice, devices } = useDevice();
 
   return (
     <Card className="mb-4">
@@ -16,7 +14,7 @@ export const DeviceSelector = () => {
           <Select
             value={selectedDevice?.id}
             onValueChange={(deviceId) => {
-              const device = deviceConfigs.find(d => d.id === deviceId);
+              const device = devices.find(d => d.id === deviceId);
               if (device) setSelectedDevice(device);
             }}
           >
@@ -24,7 +22,7 @@ export const DeviceSelector = () => {
               <SelectValue placeholder="Select device" />
             </SelectTrigger>
             <SelectContent>
-              {deviceConfigs.map((device) => (
+              {devices.map((device) => (
                 <SelectItem key={device.id} value={device.id}>
                   {device.name} - {device.description}
                 </SelectItem>

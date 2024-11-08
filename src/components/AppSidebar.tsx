@@ -14,7 +14,7 @@ import {
 const appitems = [
   {
     title: "Register Value Viewer",
-    url: "#",
+    url: "/",
     icon: Home,
   },
 ]
@@ -27,7 +27,7 @@ const deviceitems = [
   },
   {
     title: "Upload Configuration",
-    url: "#",
+    url: "upload",
     icon: Home,
   },
 ]
