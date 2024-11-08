@@ -1,35 +1,81 @@
 'use client';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import type { Device, Register } from '@prisma/client';
 
-import React, { createContext, useContext, useState } from 'react';
-import { Device } from '@/devices/device';
-import { deviceConfigs } from '@/devices/index';
+// Extended types to include nested relations
+type DeviceWithRelations = Device & {
+  registers: (Register & {
+    fields: {
+      name: string;
+      bits: string;
+      access: string;
+      description: string;
+    }[];
+  })[];
+};
 
 type DeviceContextType = {
-  selectedDevice: Device | null;
-  setSelectedDevice: (device: Device) => void;
-  getRegisterByAddress: (address: string) => [string, Device['registers'][string]] | null;
+  devices: DeviceWithRelations[];
+  selectedDevice: DeviceWithRelations | null;
+  setSelectedDevice: (device: DeviceWithRelations) => void;
+  getRegisterByAddress: (address: string) => Register | null;
+  loading: boolean;
+  error: string | null;
 };
 
 const DeviceContext = createContext<DeviceContextType | null>(null);
 
 export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Initialize with the first device in the config
-  const [selectedDevice, setSelectedDevice] = useState<Device | null>(
-    deviceConfigs.length > 0 ? deviceConfigs[0] : null
-  );
+  const [devices, setDevices] = useState<DeviceWithRelations[]>([]);
+  const [selectedDevice, setSelectedDevice] = useState<DeviceWithRelations | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const getRegisterByAddress = (address: string): [string, Device['registers'][string]] | null => {
+  // Fetch devices on component mount
+  useEffect(() => {
+    const fetchDevices = async () => {
+      try {
+        const response = await fetch('/api/devices');
+        if (!response.ok) {
+          throw new Error('Failed to fetch devices');
+        }
+        const data = await response.json();
+        console.log(data)
+        setDevices(data);
+        // Set the first device as selected if we have devices and no device is selected
+        if (data.length > 0 && !selectedDevice) {
+          setSelectedDevice(data[0]);
+        }
+        setError(null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDevices();
+  }, []);
+
+  const getRegisterByAddress = (address: string): Register | null => {
     if (!selectedDevice) return null;
     
-    const entry = Object.entries(selectedDevice.registers).find(
-      ([_, register]) => register.address === address
-    );
-    
-    return entry || null;
+    return selectedDevice.registers.find(
+      register => register.address === address
+    ) || null;
   };
 
   return (
-    <DeviceContext.Provider value={{ selectedDevice, setSelectedDevice, getRegisterByAddress }}>
+    <DeviceContext.Provider 
+      value={{ 
+        devices,
+        selectedDevice, 
+        setSelectedDevice, 
+        getRegisterByAddress,
+        loading,
+        error
+      }}
+    >
       {children}
     </DeviceContext.Provider>
   );
