@@ -5,10 +5,12 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
-import { type Register } from '@/registers';
+import { Register, Field } from "@prisma/client"
 
 interface RegisterVisualizerProps {
-  register: Register;
+  register: Register & {
+  fields: Field[]
+  };
 }
 
 const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({ register }) => {
@@ -37,7 +39,7 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({ register }) => 
           <CardContent className="p-6">
             <div className="space-y-6">
               <div className="w-full h-12 bg-secondary relative rounded-md">
-                {register.fields.map((field) => {
+                {register.fields.map((field : Field) => {
                   const [msb, lsb] = field.bits.includes(":") 
                     ? field.bits.split(":").map(Number)
                     : [Number(field.bits), Number(field.bits)];
@@ -75,7 +77,7 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({ register }) => 
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {register.fields.map((field) => (
+                  {register.fields.map((field : Field) => (
                     <TableRow key={field.name}>
                       <TableCell className="font-medium">{field.name}</TableCell>
                       <TableCell>{field.bits}</TableCell>

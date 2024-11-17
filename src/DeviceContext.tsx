@@ -1,6 +1,6 @@
 'use client';
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { Device, Register } from '@prisma/client';
+import type { Device, Register, AccessType} from '@prisma/client';
 
 // Extended types to include nested relations
 type DeviceWithRelations = Device & {
@@ -8,7 +8,7 @@ type DeviceWithRelations = Device & {
     fields: {
       name: string;
       bits: string;
-      access: string;
+      access: AccessType;
       description: string;
     }[];
   })[];

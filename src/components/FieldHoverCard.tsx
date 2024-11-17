@@ -1,7 +1,14 @@
-import { type Field, type AccessType } from '@prisma/client';
+import { type AccessType } from '@prisma/client';
+
+interface FieldInfo {
+  name: string;
+  description: string;
+  bits: string;
+  access: AccessType;
+}
 
 interface FieldHoverCardProps {
-  field: Field;
+  field: FieldInfo;
   fieldValue: {
     hex: string;
     decimal: number;

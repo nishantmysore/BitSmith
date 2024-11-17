@@ -1,11 +1,11 @@
 'use client'
-
 import { useSession, signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { useEffect } from "react"
+import { Suspense } from "react"
 
-export default function LoginPage() {
+function LoginContent() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -41,5 +41,17 @@ export default function LoginPage() {
         </Button>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen">
+        <p>Loading...</p>
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
   )
 }
