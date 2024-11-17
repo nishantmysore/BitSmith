@@ -7,6 +7,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum AccessType {
+  RO
+  WO
+  RW
+  RW1C
+  W1S
+  W1C
+  RSVD
+}
+
 // Auth related models
 model User {
   id            String    @id @default(cuid())
@@ -38,7 +48,6 @@ model Account {
   id_token          String?
   session_state     String?
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
   @@unique([provider, providerAccountId])
 }
 
@@ -54,7 +63,6 @@ model VerificationToken {
   identifier String
   token      String   @unique
   expires    DateTime
-
   @@unique([identifier, token])
 }
 
@@ -80,7 +88,6 @@ model Device {
   registers   Register[]  @relation("DeviceToRegister")
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
-
   @@index([ownerId])
   @@index([originalDeviceId])
 }
@@ -97,15 +104,14 @@ model Register {
 }
 
 model Field {
-  id          String    @id @default(cuid())
+  id          String      @id @default(cuid())
   name        String
   bits        String
-  access      String
+  access      AccessType  // Changed from String to AccessType
   description String
   registerId  String
-  register    Register  @relation("RegisterToField", fields: [registerId], references: [id], onDelete: Cascade)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  
+  register    Register    @relation("RegisterToField", fields: [registerId], references: [id], onDelete: Cascade)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
   @@index([registerId])
 }
