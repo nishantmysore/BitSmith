@@ -1,5 +1,5 @@
 import { Calendar, Home, Inbox, Search, Settings } from "lucide-react"
-
+import Link from "next/link"
 import {
   Sidebar,
   SidebarContent,
@@ -27,7 +27,7 @@ const deviceitems = [
   },
   {
     title: "Upload Configuration",
-    url: "upload",
+    url: "/upload",  // Make sure to include the leading slash
     icon: Home,
   },
 ]
@@ -43,10 +43,10 @@ export function AppSidebar() {
               {appitems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <a href={item.url}>
+                    <Link href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -60,10 +60,10 @@ export function AppSidebar() {
               {deviceitems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <a href={item.url}>
+                    <Link href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -74,4 +74,3 @@ export function AppSidebar() {
     </Sidebar>
   )
 }
-

@@ -7,13 +7,89 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum AccessType {
+  RO
+  WO
+  RW
+  RW1C
+  W1S
+  W1C
+  RSVD
+}
+
+// Auth related models
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  
+  // Device relationships
+  ownedDevices     Device[]  @relation("DeviceOwner")
+  sharedDevices    Device[]  @relation("DeviceSharing")
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  @@unique([identifier, token])
+}
+
 model Device {
   id          String     @id
   name        String
   description String
-  registers   Register[] @relation("DeviceToRegister")
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  isPublic    Boolean    @default(false)
+  
+  // Owner relationship
+  ownerId     String?
+  owner       User?      @relation("DeviceOwner", fields: [ownerId], references: [id])
+  
+  // Users who have access to this device
+  sharedWith  User[]     @relation("DeviceSharing")
+  
+  // If this device was copied from another device
+  originalDeviceId String?
+  originalDevice   Device?  @relation("DeviceCopies", fields: [originalDeviceId], references: [id])
+  copies          Device[] @relation("DeviceCopies")
+  
+  // Existing relationships
+  registers   Register[]  @relation("DeviceToRegister")
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  @@index([ownerId])
+  @@index([originalDeviceId])
 }
 
 model Register {
@@ -28,14 +104,14 @@ model Register {
 }
 
 model Field {
-  id          String    @id @default(cuid())
+  id          String      @id @default(cuid())
   name        String
   bits        String
-  access      String
+  access      AccessType  // Changed from String to AccessType
   description String
   registerId  String
-  register    Register  @relation("RegisterToField", fields: [registerId], references: [id], onDelete: Cascade)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  register    Register    @relation("RegisterToField", fields: [registerId], references: [id], onDelete: Cascade)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
   @@index([registerId])
 }
