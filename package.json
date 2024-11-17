@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@auth/core": "^0.34.2",
     "@auth/prisma-adapter": "^2.7.3",
     "@prisma/client": "^5.22.0",
     "@radix-ui/react-checkbox": "^1.1.2",

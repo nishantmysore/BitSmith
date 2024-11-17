@@ -1,5 +1,11 @@
 // src/components/FieldHoverCard.tsx
-import { type RegisterField } from '@/registers';
+
+import {AccessType, Field} from '@prisma/client';
+
+// Define the expected request body type using Prisma types
+type FieldInput = Omit<Register, 'id' | 'deviceId' | 'createdAt' | 'updatedAt'> & {
+  fields: Array<Omit<Field, 'id' | 'registerId' | 'createdAt' | 'updatedAt'>>
+};
 
 interface FieldHoverCardProps {
   field: RegisterField;
@@ -10,7 +16,7 @@ interface FieldHoverCardProps {
   };
 }
 
-const getAccessDescription = (access: string) => {
+const getAccessDescription = (access: AccessType) => {
   switch (access) {
     case 'RO':
       return 'Read Only - This field can only be read';

@@ -79,7 +79,7 @@ const RegisterBitViewer = () => {
       // Convert to 32-bit binary string
       const binary = num.toString(2).padStart(32, '0');
       setBinaryValue(binary);
-    } catch (e) {
+    } catch {
       setBinaryValue("".padStart(32, '0'));
     }
   };
