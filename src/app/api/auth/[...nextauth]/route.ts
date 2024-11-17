@@ -14,7 +14,7 @@ export const authOptions: AuthOptions = {
     signIn: "/login",
   },
   callbacks: {
-    async session({ session, token }) {
+    async session({ session}) {
       // Add any additional session data here if needed
       return session
     },
