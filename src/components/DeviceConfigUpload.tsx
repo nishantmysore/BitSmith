@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Prisma, AccessType } from '@prisma/client';
+import { useSession } from 'next-auth/react';
 
 // Use Prisma's generated types, excluding auto-generated fields
 type DeviceCreateInput = Omit<Prisma.DeviceCreateInput, 'registers'> & {
@@ -36,7 +37,7 @@ export default function DeviceConfigUpload() {
   const [registersJson, setRegistersJson] = useState('');
   const [error, setError] = useState('');
   const [isUploading, setIsUploading] = useState(false);
-  
+  const { data: session } = useSession()
   const { toast } = useToast();
 
   const validateConfig = (): DeviceCreateInput => {
@@ -75,7 +76,7 @@ export default function DeviceConfigUpload() {
         description: deviceDescription,
         isPublic,
         owner: {
-          connect: { id: '' } // This will be set on the server
+          connect: { id: session?.user.id }
         },
         registers
       };
