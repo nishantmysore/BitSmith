@@ -1,4 +1,4 @@
-import { Home } from "lucide-react"
+import { Home, Pencil, Upload } from "lucide-react"
 import Link from "next/link"
 import {
   Sidebar,
@@ -13,7 +13,7 @@ import {
 
 const appitems = [
   {
-    title: "Register Value Viewer",
+    title: "Register Maps",
     url: "/",
     icon: Home,
   },
@@ -21,14 +21,14 @@ const appitems = [
 
 const deviceitems = [
   {
-    title: "View Devices",
+    title: "Edit/View Device Configurations",
     url: "#",
-    icon: Home,
+    icon: Pencil,
   },
   {
-    title: "Upload Configuration",
-    url: "/upload",  // Make sure to include the leading slash
-    icon: Home,
+    title: "Upload New Configuration",
+    url: "/upload",  
+    icon: Upload,
   },
 ]
 
