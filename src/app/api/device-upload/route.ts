@@ -1,83 +1,71 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { z } from 'zod';
+import { Prisma, Device, Register, Field} from '@prisma/client';
 
-// Validation schema for the request
-const FieldSchema = z.object({
-  name: z.string(),
-  bits: z.string(),
-  access: z.string(),
-  description: z.string()
-});
+// Define the expected request body type using Prisma types
+type RegisterInput = Omit<Register, 'id' | 'deviceId' | 'createdAt' | 'updatedAt'> & {
+  fields: Array<Omit<Field, 'id' | 'registerId' | 'createdAt' | 'updatedAt'>>
+};
 
-const RegisterSchema = z.object({
-  name: z.string(),
-  address: z.string(),
-  fields: z.array(FieldSchema)
-});
-
-const DeviceConfigSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  description: z.string(),
-  registers: z.record(RegisterSchema)
-});
+type DeviceInput = Omit<Device, 'createdAt' | 'updatedAt'> & {
+  registers: Record<string, RegisterInput>;
+};
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-
-    // Validate request body
-    const validatedData = DeviceConfigSchema.parse(body);
-
-    // Use a transaction to ensure all related records are created together
+    const body: DeviceInput = await request.json();
+    
     const result = await prisma.$transaction(async (tx) => {
-      // Create the device
       const device = await tx.device.create({
         data: {
-          id: validatedData.id,
-          name: validatedData.name,
-          description: validatedData.description,
+          id: body.id,
+          name: body.name,
+          description: body.description,
+          isPublic: body.isPublic ?? false,
+          ownerId: body.ownerId,
+          originalDeviceId: body.originalDeviceId,
+          registers: {
+            create: Object.values(body.registers).map(register => ({
+              name: register.name,
+              address: register.address,
+              fields: {
+                create: register.fields.map(field => ({
+                  name: field.name,
+                  bits: field.bits,
+                  access: field.access,
+                  description: field.description
+                }))
+              }
+            }))
+          }
         },
-      });
-
-      // Create registers and their fields
-      for (const [_, registerData] of Object.entries(validatedData.registers)) {
-        const register = await tx.register.create({
-          data: {
-            name: registerData.name,
-            address: registerData.address,
-            deviceId: device.id,
-            fields: {
-              create: registerData.fields.map(field => ({
-                name: field.name,
-                bits: field.bits,
-                access: field.access,
-                description: field.description
-              }))
+        include: {
+          registers: {
+            include: {
+              fields: true
             }
           }
-        });
-      }
+        }
+      });
 
       return device;
     });
 
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Invalid request data', details: error.errors },
-        { status: 400 }
-      );
-    }
-
-    if (error instanceof Error && error.message.includes('Unique constraint')) {
-      console.log("reached")
-      return NextResponse.json(
-        { error: 'Device ID already exists' },
-        { status: 409 }
-      );
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === 'P2002') {
+        return NextResponse.json(
+          { error: 'Device ID already exists' },
+          { status: 409 }
+        );
+      }
+      if (error.code === 'P2003') {
+        return NextResponse.json(
+          { error: 'Invalid reference. Please check ownerId and originalDeviceId' },
+          { status: 400 }
+        );
+      }
     }
 
     console.error('Failed to create device:', error);
@@ -88,7 +76,6 @@ export async function POST(request: Request) {
   }
 }
 
-// Optional: Add GET method to fetch a specific device configuration
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -104,9 +91,23 @@ export async function GET(request: Request) {
     const device = await prisma.device.findUnique({
       where: { id },
       include: {
+        owner: {
+          select: {
+            id: true,
+            name: true,
+            email: true
+          }
+        },
         registers: {
           include: {
             fields: true
+          }
+        },
+        sharedWith: {
+          select: {
+            id: true,
+            name: true,
+            email: true
           }
         }
       }
@@ -123,7 +124,7 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error('Failed to fetch device:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch device' },
+      { error: 'Failed to create device' },
       { status: 500 }
     );
   }

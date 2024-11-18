@@ -3,9 +3,23 @@ import React from 'react';
 import RegisterVisualizer from './RegisterVisualizer';
 import { useDevice } from "@/DeviceContext";
 import { Card, CardContent } from "@/components/ui/card";
+import { Device, Register, Field } from "@prisma/client";
+
+// Type for the device with its relations
+type DeviceWithRegisters = Device & {
+  registers: (Register & {
+    fields: Field[]
+  })[];
+};
+
+// Type for the context
+type DeviceContextType = {
+  selectedDevice: DeviceWithRegisters | null;
+};
 
 const RegisterList = () => {
-  const { selectedDevice } = useDevice();
+  // Update the useDevice hook to use the proper type
+  const { selectedDevice } = useDevice() as DeviceContextType;
 
   if (!selectedDevice) {
     return (
@@ -19,10 +33,10 @@ const RegisterList = () => {
 
   return (
     <div className="space-y-4">
-      {Object.values(selectedDevice.registers).map((register) => (
+      {selectedDevice.registers.map((register) => (
         <RegisterVisualizer 
-          key={register.address} 
-          register={register} 
+          key={register.id} // Using id instead of address for key is generally better
+          register={register}
         />
       ))}
     </div>
