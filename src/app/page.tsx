@@ -11,9 +11,11 @@ export default async function Home() {
   }
 
   return (
-    <main>
+    <div className="min-h-screen flex flex-col">
       <Header />
-      <ClientContent />
-    </main>
+      <main className="flex-1">
+        <ClientContent />
+      </main>
+    </div>
   );
 }

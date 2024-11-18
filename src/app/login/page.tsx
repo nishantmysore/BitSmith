@@ -2,6 +2,7 @@
 import { useSession, signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { useEffect } from "react"
 import { Suspense } from "react"
 
@@ -20,26 +21,31 @@ function LoginContent() {
 
   if (status === "loading") {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="grid place-items-center h-screen w-screen">
         <p>Loading...</p>
       </div>
     )
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="w-full max-w-sm p-6 space-y-6 bg-white rounded-lg shadow-lg dark:bg-slate-800">
-        <div className="space-y-2 text-center">
-          <h1 className="text-3xl font-bold">Welcome</h1>
-          <p className="text-gray-500 dark:text-gray-400">Sign in to continue</p>
-        </div>
-        <Button 
-          className="w-full"
-          onClick={() => signIn('google')}
-        >
-          Sign in with Google
-        </Button>
-      </div>
+    <div className="grid place-items-center min-h-screen w-screen">
+      <Card className="w-full max-w-sm mx-4">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-3xl font-bold text-center">Welcome</CardTitle>
+          <CardDescription className="text-center">
+            Sign in to continue
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button 
+            className="w-full border-2"
+            variant="outline"
+            onClick={() => signIn('google')}
+          >
+            Sign in with Google
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   )
 }
@@ -47,7 +53,7 @@ function LoginContent() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="grid place-items-center h-screen w-screen">
         <p>Loading...</p>
       </div>
     }>
