@@ -1,12 +1,12 @@
-import DeviceConfigUpload from "@/components/DeviceConfigUpload"
+import DeviceConfigUpload from "@/components/DeviceConfigUpload";
 import { getCurrentUser } from "@/lib/session";
-import { redirect } from "next/navigation"
+import { redirect } from "next/navigation";
 
 export default async function Page() {
-  const user = await getCurrentUser()
-   
+  const user = await getCurrentUser();
+
   if (!user) {
-    redirect('/login')
+    redirect("/login");
   }
-  return <DeviceConfigUpload/>;
+  return <DeviceConfigUpload />;
 }

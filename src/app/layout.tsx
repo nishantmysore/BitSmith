@@ -1,9 +1,9 @@
-import { ThemeProvider } from "@/components/ThemeProvider"
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/AppSidebar"
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/AppSidebar";
 import type { Metadata } from "next";
 import "./globals.css";
-import { AuthProvider } from "@/components/AuthProvider"
+import { AuthProvider } from "@/components/AuthProvider";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -23,14 +23,14 @@ export default function RootLayout({
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
-      >
-        <AuthProvider>
-        <SidebarProvider>
+        >
+          <AuthProvider>
+            <SidebarProvider>
               <AppSidebar />
-        <SidebarTrigger />
-        {children}
-        </SidebarProvider>
-        </AuthProvider>
+              <SidebarTrigger />
+              {children}
+            </SidebarProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

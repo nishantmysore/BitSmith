@@ -10,22 +10,22 @@ interface ValueFormatActionsProps {
 const ValueFormatActions = ({ binaryValue }: ValueFormatActionsProps) => {
   const [copiedFormat, setCopiedFormat] = useState<string | null>(null);
 
-  const copyValue = (format: 'hex' | 'decimal' | 'binary') => {
+  const copyValue = (format: "hex" | "decimal" | "binary") => {
     const num = parseInt(binaryValue, 2);
-    let valueToCopy = '';
-    
-    switch(format) {
-      case 'hex':
-        valueToCopy = '0x' + num.toString(16).toUpperCase().padStart(8, '0');
+    let valueToCopy = "";
+
+    switch (format) {
+      case "hex":
+        valueToCopy = "0x" + num.toString(16).toUpperCase().padStart(8, "0");
         break;
-      case 'decimal':
+      case "decimal":
         valueToCopy = num.toString(10);
         break;
-      case 'binary':
+      case "binary":
         valueToCopy = binaryValue;
         break;
     }
-    
+
     navigator.clipboard.writeText(valueToCopy);
     setCopiedFormat(format);
     setTimeout(() => setCopiedFormat(null), 2000);
@@ -37,9 +37,9 @@ const ValueFormatActions = ({ binaryValue }: ValueFormatActionsProps) => {
         variant="outline"
         size="sm"
         className="flex items-center gap-2"
-        onClick={() => copyValue('hex')}
+        onClick={() => copyValue("hex")}
       >
-        {copiedFormat === 'hex' ? (
+        {copiedFormat === "hex" ? (
           <Check className="h-4 w-4" />
         ) : (
           <Copy className="h-4 w-4" />
@@ -50,9 +50,9 @@ const ValueFormatActions = ({ binaryValue }: ValueFormatActionsProps) => {
         variant="outline"
         size="sm"
         className="flex items-center gap-2"
-        onClick={() => copyValue('decimal')}
+        onClick={() => copyValue("decimal")}
       >
-        {copiedFormat === 'decimal' ? (
+        {copiedFormat === "decimal" ? (
           <Check className="h-4 w-4" />
         ) : (
           <Copy className="h-4 w-4" />
@@ -63,9 +63,9 @@ const ValueFormatActions = ({ binaryValue }: ValueFormatActionsProps) => {
         variant="outline"
         size="sm"
         className="flex items-center gap-2"
-        onClick={() => copyValue('binary')}
+        onClick={() => copyValue("binary")}
       >
-        {copiedFormat === 'binary' ? (
+        {copiedFormat === "binary" ? (
           <Check className="h-4 w-4" />
         ) : (
           <Copy className="h-4 w-4" />

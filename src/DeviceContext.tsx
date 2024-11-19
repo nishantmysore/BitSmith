@@ -1,6 +1,6 @@
-'use client';
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { Device, Register, AccessType} from '@prisma/client';
+"use client";
+import React, { createContext, useContext, useState, useEffect } from "react";
+import type { Device, Register, AccessType } from "@prisma/client";
 
 // Extended types to include nested relations
 type DeviceWithRelations = Device & {
@@ -29,24 +29,27 @@ type DeviceContextType = {
 
 const DeviceContext = createContext<DeviceContextType | null>(null);
 
-export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [devices, setDevices] = useState<DeviceWithRelations[]>([]);
-  const [selectedDevice, setSelectedDevice] = useState<DeviceWithRelations | null>(null);
+  const [selectedDevice, setSelectedDevice] =
+    useState<DeviceWithRelations | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [baseAddr, setBaseAddr] = useState('');
+  const [baseAddr, setBaseAddr] = useState("");
   const [offsetBaseAddr, setOffsetBaseAddr] = useState(false);
 
   // Fetch devices on component mount
   useEffect(() => {
     const fetchDevices = async () => {
       try {
-        const response = await fetch('/api/devices');
+        const response = await fetch("/api/devices");
         if (!response.ok) {
-          throw new Error('Failed to fetch devices');
+          throw new Error("Failed to fetch devices");
         }
         const data = await response.json();
-        console.log(data)
+        console.log(data);
         setDevices(data);
         // Set the first device as selected if we have devices and no device is selected
         if (data.length > 0 && !selectedDevice) {
@@ -57,7 +60,7 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           setBaseAddr(selectedDevice.base_address);
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
+        setError(err instanceof Error ? err.message : "An error occurred");
       } finally {
         setLoading(false);
       }
@@ -68,25 +71,27 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const getRegisterByAddress = (address: string): Register | null => {
     if (!selectedDevice) return null;
-    
-    return selectedDevice.registers.find(
-      register => register.address === address
-    ) || null;
+
+    return (
+      selectedDevice.registers.find(
+        (register) => register.address === address,
+      ) || null
+    );
   };
 
   return (
-    <DeviceContext.Provider 
-      value={{ 
+    <DeviceContext.Provider
+      value={{
         devices,
-        selectedDevice, 
-        setSelectedDevice, 
+        selectedDevice,
+        setSelectedDevice,
         getRegisterByAddress,
         loading,
         error,
         baseAddr,
         setBaseAddr,
         offsetBaseAddr,
-        setOffsetBaseAddr
+        setOffsetBaseAddr,
       }}
     >
       {children}
@@ -97,7 +102,7 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 export const useDevice = () => {
   const context = useContext(DeviceContext);
   if (!context) {
-    throw new Error('useDevice must be used within a DeviceProvider');
+    throw new Error("useDevice must be used within a DeviceProvider");
   }
   return context;
 };

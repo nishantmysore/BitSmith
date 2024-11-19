@@ -1,6 +1,6 @@
 services:
   postgres:
-    container_name: device_db  # This is your container name
+    container_name: device_db # This is your container name
     image: postgres:latest
     environment:
       POSTGRES_USER: postgres
@@ -14,4 +14,3 @@ services:
 
 volumes:
   postgres_data:
-

@@ -1,7 +1,7 @@
 // src/components/DeviceConfigUpload.tsx
-'use client'
+"use client";
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,68 +12,93 @@ import { AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import { Switch } from "@/components/ui/switch";
-import { Prisma, AccessType } from '@prisma/client';
-import { useSession } from 'next-auth/react';
+import { Prisma, AccessType } from "@prisma/client";
+import { useSession } from "next-auth/react";
 
 // Use Prisma's generated types, excluding auto-generated fields
-type DeviceCreateInput = Omit<Prisma.DeviceCreateInput, 'registers'> & {
-  registers: Record<string, {
-    name: string;
-    address: string;
-    width: number;
-    description: string;
-    fields: Array<{
+type DeviceCreateInput = Omit<Prisma.DeviceCreateInput, "registers"> & {
+  registers: Record<
+    string,
+    {
       name: string;
-      bits: string;
-      access: AccessType;
+      address: string;
+      width: number;
       description: string;
-    }>;
-  }>;
+      fields: Array<{
+        name: string;
+        bits: string;
+        access: AccessType;
+        description: string;
+      }>;
+    }
+  >;
 };
 
 export default function DeviceConfigUpload() {
-  const [baseAddr, setBaseAddr] = useState('');
-  const [deviceName, setDeviceName] = useState('');
-  const [deviceDescription, setDeviceDescription] = useState('');
+  const [baseAddr, setBaseAddr] = useState("");
+  const [deviceName, setDeviceName] = useState("");
+  const [deviceDescription, setDeviceDescription] = useState("");
   const [isPublic, setIsPublic] = useState(false);
-  const [registersJson, setRegistersJson] = useState('');
-  const [error, setError] = useState('');
+  const [registersJson, setRegistersJson] = useState("");
+  const [error, setError] = useState("");
   const [isUploading, setIsUploading] = useState(false);
-  const { data: session } = useSession()
+  const { data: session } = useSession();
   const { toast } = useToast();
   const acceptedWidths = [1, 2, 4, 8, 16, 24, 32, 64, 128, 256];
-  const isValidWidth = (width : number) => acceptedWidths.includes(width);
+  const isValidWidth = (width: number) => acceptedWidths.includes(width);
 
   const validateConfig = (): DeviceCreateInput => {
     try {
-      if (!baseAddr.trim()) throw new Error('Device ID is required');
-      if (!deviceName.trim()) throw new Error('Device Name is required');
-      if (!deviceDescription.trim()) throw new Error('Device Description is required');
+      if (!baseAddr.trim()) throw new Error("Device ID is required");
+      if (!deviceName.trim()) throw new Error("Device Name is required");
+      if (!deviceDescription.trim())
+        throw new Error("Device Description is required");
 
       // Parse and validate registers JSON
-      const registers: DeviceCreateInput['registers'] = JSON.parse(registersJson);
-      
-      if (typeof registers !== 'object' || Object.keys(registers).length === 0) {
-        throw new Error('At least one register must be defined');
+      const registers: DeviceCreateInput["registers"] =
+        JSON.parse(registersJson);
+
+      if (
+        typeof registers !== "object" ||
+        Object.keys(registers).length === 0
+      ) {
+        throw new Error("At least one register must be defined");
       }
 
       // Validate each register and its fields
       Object.entries(registers).forEach(([key, register]) => {
-        if (!register.name || !register.address || !Array.isArray(register.fields) || !register.description) {
+        if (
+          !register.name ||
+          !register.address ||
+          !Array.isArray(register.fields) ||
+          !register.description
+        ) {
           throw new Error(`Invalid register configuration for ${key}`);
         }
 
-        if (!(register.width > 0) || !(isValidWidth)) {
-          throw new Error('Invalid register width. Register width must be one of: ' + acceptedWidths.join(', '))
+        if (!(register.width > 0) || !isValidWidth) {
+          throw new Error(
+            "Invalid register width. Register width must be one of: " +
+              acceptedWidths.join(", "),
+          );
         }
 
         // Validate fields and ensure access type is valid
         register.fields.forEach((field, index) => {
-          if (!field.name || !field.bits || !field.access || !field.description) {
-            throw new Error(`Invalid field configuration in register ${key} at index ${index}`);
+          if (
+            !field.name ||
+            !field.bits ||
+            !field.access ||
+            !field.description
+          ) {
+            throw new Error(
+              `Invalid field configuration in register ${key} at index ${index}`,
+            );
           }
           if (!Object.values(AccessType).includes(field.access)) {
-            throw new Error(`Invalid access type "${field.access}" in register ${key} field ${index}`);
+            throw new Error(
+              `Invalid access type "${field.access}" in register ${key} field ${index}`,
+            );
           }
         });
       });
@@ -84,33 +109,35 @@ export default function DeviceConfigUpload() {
         description: deviceDescription,
         isPublic,
         owner: {
-          connect: { id: session?.user.id }
+          connect: { id: session?.user.id },
         },
-        registers
+        registers,
       };
     } catch (err) {
-      throw new Error(err instanceof Error ? err.message : 'Invalid configuration format');
+      throw new Error(
+        err instanceof Error ? err.message : "Invalid configuration format",
+      );
     }
   };
 
   const handleSubmit = async () => {
-    setError('');
+    setError("");
     setIsUploading(true);
 
     try {
       const config = validateConfig();
 
-      const response = await fetch('/api/device-upload', {
-        method: 'POST',
+      const response = await fetch("/api/device-upload", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(config),
       });
 
-      if (!response.ok) {   
+      if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to upload configuration');
+        throw new Error(errorData.error || "Failed to upload configuration");
       }
 
       toast({
@@ -119,18 +146,20 @@ export default function DeviceConfigUpload() {
       });
 
       // Clear form
-      setBaseAddr('');
-      setDeviceName('');
-      setDeviceDescription('');
+      setBaseAddr("");
+      setDeviceName("");
+      setDeviceDescription("");
       setIsPublic(false);
-      setRegistersJson('');
-
+      setRegistersJson("");
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to upload configuration');
+      setError(
+        err instanceof Error ? err.message : "Failed to upload configuration",
+      );
       toast({
         variant: "destructive",
         title: "Error",
-        description: err instanceof Error ? err.message : 'Failed to upload configuration',
+        description:
+          err instanceof Error ? err.message : "Failed to upload configuration",
       });
     } finally {
       setIsUploading(false);
@@ -175,14 +204,14 @@ export default function DeviceConfigUpload() {
           </div>
 
           <div className="flex items-center space-x-2">
-            <Switch 
-              className="mr-2"  // or use mr-3 for more space
+            <Switch
+              className="mr-2" // or use mr-3 for more space
               id="is-public"
               checked={isPublic}
               onCheckedChange={(checked: boolean) => setIsPublic(checked)}
             />
-            <Label 
-              htmlFor="is-public" 
+            <Label
+              htmlFor="is-public"
               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
               Make this device public
@@ -224,8 +253,8 @@ Example format:
           )}
 
           <div className="flex space-x-4">
-            <Button 
-              onClick={handleSubmit} 
+            <Button
+              onClick={handleSubmit}
               className="w-full"
               disabled={isUploading}
             >

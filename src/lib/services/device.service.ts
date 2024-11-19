@@ -1,5 +1,5 @@
-import { prisma } from '../prisma'
-import type { Device } from '@prisma/client'
+import { prisma } from "../prisma";
+import type { Device } from "@prisma/client";
 
 export class DeviceService {
   static async getAllDevices() {
@@ -7,11 +7,11 @@ export class DeviceService {
       include: {
         registers: {
           include: {
-            fields: true
-          }
-        }
-      }
-    })
+            fields: true,
+          },
+        },
+      },
+    });
   }
 
   static async getDeviceById(id: string) {
@@ -20,16 +20,16 @@ export class DeviceService {
       include: {
         registers: {
           include: {
-            fields: true
-          }
-        }
-      }
-    })
+            fields: true,
+          },
+        },
+      },
+    });
   }
 
   static async validateDevice(device: Device): Promise<boolean> {
     if (!device.id || !device.name || !device.description) {
-      return false
+      return false;
     }
 
     const deviceWithRelations = await prisma.device.findUnique({
@@ -37,28 +37,28 @@ export class DeviceService {
       include: {
         registers: {
           include: {
-            fields: true
-          }
-        }
-      }
-    })
+            fields: true,
+          },
+        },
+      },
+    });
 
     if (!deviceWithRelations?.registers.length) {
-      return false
+      return false;
     }
 
     for (const register of deviceWithRelations.registers) {
       if (!register.name || !register.address || !register.fields.length) {
-        return false
+        return false;
       }
 
       for (const field of register.fields) {
         if (!field.name || !field.bits || !field.access || !field.description) {
-          return false
+          return false;
         }
       }
     }
 
-    return true
+    return true;
   }
 }

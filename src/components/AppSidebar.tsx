@@ -1,5 +1,5 @@
-import { Home, Pencil, Upload } from "lucide-react"
-import Link from "next/link"
+import { Home, Pencil, Upload } from "lucide-react";
+import Link from "next/link";
 import {
   Sidebar,
   SidebarContent,
@@ -10,7 +10,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
 const appitems = [
   {
@@ -18,7 +18,7 @@ const appitems = [
     url: "/",
     icon: Home,
   },
-]
+];
 
 const deviceitems = [
   {
@@ -28,10 +28,10 @@ const deviceitems = [
   },
   {
     title: "Upload New Configuration",
-    url: "/upload",  
+    url: "/upload",
     icon: Upload,
   },
-]
+];
 
 export function AppSidebar() {
   return (
@@ -75,5 +75,5 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>
-  )
+  );
 }

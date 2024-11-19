@@ -1,11 +1,11 @@
-'use client'
+"use client";
 
-import { ModeToggle } from "@/components/ModeToggle"
-import { useSession, signOut } from "next-auth/react"
-import { Button } from "@/components/ui/button"
+import { ModeToggle } from "@/components/ModeToggle";
+import { useSession, signOut } from "next-auth/react";
+import { Button } from "@/components/ui/button";
 
 export function Header() {
-  const { data: session } = useSession()
+  const { data: session } = useSession();
 
   return (
     <div className="w-full border-b">
@@ -20,7 +20,7 @@ export function Header() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => signOut({ callbackUrl: '/login' })}
+                onClick={() => signOut({ callbackUrl: "/login" })}
               >
                 Sign out
               </Button>
@@ -30,5 +30,5 @@ export function Header() {
         </div>
       </div>
     </div>
-  )
+  );
 }
