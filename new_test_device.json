@@ -1,0 +1,204 @@
+{
+  "id": "test_device",
+  "name": "Test Controller",
+  "description": "64-bit capable test device with multiple functions",
+  "registers": {
+    "MAIN_CTRL": {
+      "name": "MAIN_CTRL",
+      "address": "0x0000",
+      "width": 64,
+      "description": "Main Control Register",
+      "fields": [
+        {
+          "name": "ENABLE",
+          "bits": "63",
+          "access": "RW",
+          "description": "Device Enable"
+        },
+        {
+          "name": "MODE_SELECT",
+          "bits": "62:60",
+          "access": "RW",
+          "description": "Operating Mode Selection"
+        },
+        {
+          "name": "CLOCK_SOURCE",
+          "bits": "59:56",
+          "access": "RW",
+          "description": "Clock Source Selection"
+        },
+        {
+          "name": "PRESCALER",
+          "bits": "55:48",
+          "access": "RW",
+          "description": "Clock Prescaler Value"
+        },
+        {
+          "name": "TRIGGER_CONFIG",
+          "bits": "47:40",
+          "access": "RW",
+          "description": "Trigger Configuration"
+        },
+        {
+          "name": "DATA_FORMAT",
+          "bits": "39:32",
+          "access": "RW",
+          "description": "Data Format Settings"
+        },
+        {
+          "name": "BUFFER_SIZE",
+          "bits": "31:16",
+          "access": "RW",
+          "description": "Buffer Size Configuration"
+        },
+        {
+          "name": "WATERMARK",
+          "bits": "15:0",
+          "access": "RW",
+          "description": "Buffer Watermark Level"
+        }
+      ]
+    },
+    "TIMING_CTRL": {
+      "name": "TIMING_CTRL",
+      "address": "0x0008",
+      "width": 32,
+      "description": "Timing Control Register",
+      "fields": [
+        {
+          "name": "DELAY_VALUE",
+          "bits": "31:24",
+          "access": "RW",
+          "description": "Delay Value Setting"
+        },
+        {
+          "name": "PULSE_WIDTH",
+          "bits": "23:16",
+          "access": "RW",
+          "description": "Pulse Width Setting"
+        },
+        {
+          "name": "HOLD_TIME",
+          "bits": "15:8",
+          "access": "RW",
+          "description": "Hold Time Setting"
+        },
+        {
+          "name": "SETUP_TIME",
+          "bits": "7:0",
+          "access": "RW",
+          "description": "Setup Time Setting"
+        }
+      ]
+    },
+    "DATA_PROC": {
+      "name": "DATA_PROC",
+      "address": "0x0010",
+      "width": 64,
+      "description": "Data Processing Configuration",
+      "fields": [
+        {
+          "name": "FILTER_COEF",
+          "bits": "63:48",
+          "access": "RW",
+          "description": "Filter Coefficients"
+        },
+        {
+          "name": "SCALE_FACTOR",
+          "bits": "47:32",
+          "access": "RW",
+          "description": "Scaling Factor"
+        },
+        {
+          "name": "OFFSET_VALUE",
+          "bits": "31:16",
+          "access": "RW",
+          "description": "Offset Value"
+        },
+        {
+          "name": "THRESHOLD",
+          "bits": "15:0",
+          "access": "RW",
+          "description": "Processing Threshold"
+        }
+      ]
+    },
+    "INT_CTRL": {
+      "name": "INT_CTRL",
+      "address": "0x0018",
+      "width": 32,
+      "description": "Interrupt Control Register",
+      "fields": [
+        {
+          "name": "INT_ENABLE",
+          "bits": "31:24",
+          "access": "RW",
+          "description": "Interrupt Enable Bits"
+        },
+        {
+          "name": "INT_POLARITY",
+          "bits": "23:16",
+          "access": "RW",
+          "description": "Interrupt Polarity Selection"
+        },
+        {
+          "name": "INT_TYPE",
+          "bits": "15:8",
+          "access": "RW",
+          "description": "Interrupt Type Selection"
+        },
+        {
+          "name": "INT_PRIORITY",
+          "bits": "7:0",
+          "access": "RW",
+          "description": "Interrupt Priority Levels"
+        }
+      ]
+    },
+    "DIAG_CTRL": {
+      "name": "DIAG_CTRL",
+      "address": "0x0020",
+      "width": 64,
+      "description": "Diagnostic Control Register",
+      "fields": [
+        {
+          "name": "TEST_PATTERN",
+          "bits": "63:48",
+          "access": "RW",
+          "description": "Test Pattern Generator"
+        },
+        {
+          "name": "LOOPBACK_CTRL",
+          "bits": "47:40",
+          "access": "RW",
+          "description": "Loopback Control"
+        },
+        {
+          "name": "BIST_MODE",
+          "bits": "39:32",
+          "access": "RW",
+          "description": "Built-in Self Test Mode"
+        },
+        {
+          "name": "DEBUG_LEVEL",
+          "bits": "31:24",
+          "access": "RW",
+          "description": "Debug Level Setting"
+        },
+        {
+          "name": "ERROR_INJECT",
+          "bits": "23:16",
+          "access": "RW",
+          "description": "Error Injection Control"
+        },
+        {
+          "name": "COUNTER_CTRL",
+          "bits": "15:0",
+          "access": "RW",
+          "description": "Diagnostic Counter Control"
+        }
+      ]
+    }
+  }
+}
+

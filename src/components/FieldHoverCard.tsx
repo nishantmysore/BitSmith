@@ -13,7 +13,7 @@ interface FieldHoverCardProps {
   field: FieldInfo;
   fieldValue: {
     hex: string;
-    decimal: number;
+    decimal: bigint;
     binary: string;
   };
 }
