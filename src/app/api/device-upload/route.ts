@@ -5,10 +5,13 @@ import { Prisma, Device, Register, Field} from '@prisma/client';
 // Define the expected request body type using Prisma types
 type RegisterInput = Omit<Register, 'id' | 'deviceId' | 'createdAt' | 'updatedAt'> & {
   fields: Array<Omit<Field, 'id' | 'registerId' | 'createdAt' | 'updatedAt'>>
+  width: Number;
+  description: string;
 };
 
-type DeviceInput = Omit<Device, 'createdAt' | 'updatedAt'> & {
+type DeviceInput = Omit<Device, 'id' | 'createdAt' | 'updatedAt'> & {
   registers: Record<string, RegisterInput>;
+  base_address: string;
 };
 
 export async function POST(request: Request) {
@@ -18,16 +21,18 @@ export async function POST(request: Request) {
     const result = await prisma.$transaction(async (tx) => {
       const device = await tx.device.create({
         data: {
-          id: body.id,
           name: body.name,
           description: body.description,
           isPublic: body.isPublic ?? false,
           ownerId: body.ownerId,
+          base_address: body.base_address,
           originalDeviceId: body.originalDeviceId,
           registers: {
             create: Object.values(body.registers).map(register => ({
               name: register.name,
               address: register.address,
+              width: register.width,
+              description: register.description,
               fields: {
                 create: register.fields.map(field => ({
                   name: field.name,

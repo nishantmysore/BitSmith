@@ -14,6 +14,7 @@ enum AccessType {
   RW1C
   W1S
   W1C
+  RMW
   RSVD
 }
 
@@ -67,9 +68,10 @@ model VerificationToken {
 }
 
 model Device {
-  id          String     @id
+  id          String     @id @default(cuid())
   name        String
   description String
+  base_address String    
   isPublic    Boolean    @default(false)
   
   // Owner relationship
@@ -95,6 +97,8 @@ model Device {
 model Register {
   id          String     @id @default(cuid())
   name        String
+  description String
+  width       Int 
   address     String
   deviceId    String
   device      Device     @relation("DeviceToRegister", fields: [deviceId], references: [id], onDelete: Cascade)

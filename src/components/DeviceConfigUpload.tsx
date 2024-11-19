@@ -20,6 +20,8 @@ type DeviceCreateInput = Omit<Prisma.DeviceCreateInput, 'registers'> & {
   registers: Record<string, {
     name: string;
     address: string;
+    width: number;
+    description: string;
     fields: Array<{
       name: string;
       bits: string;
@@ -30,7 +32,7 @@ type DeviceCreateInput = Omit<Prisma.DeviceCreateInput, 'registers'> & {
 };
 
 export default function DeviceConfigUpload() {
-  const [deviceId, setDeviceId] = useState('');
+  const [baseAddr, setBaseAddr] = useState('');
   const [deviceName, setDeviceName] = useState('');
   const [deviceDescription, setDeviceDescription] = useState('');
   const [isPublic, setIsPublic] = useState(false);
@@ -39,10 +41,12 @@ export default function DeviceConfigUpload() {
   const [isUploading, setIsUploading] = useState(false);
   const { data: session } = useSession()
   const { toast } = useToast();
+  const acceptedWidths = [1, 2, 4, 8, 16, 24, 32, 64, 128, 256];
+  const isValidWidth = (width : number) => acceptedWidths.includes(width);
 
   const validateConfig = (): DeviceCreateInput => {
     try {
-      if (!deviceId.trim()) throw new Error('Device ID is required');
+      if (!baseAddr.trim()) throw new Error('Device ID is required');
       if (!deviceName.trim()) throw new Error('Device Name is required');
       if (!deviceDescription.trim()) throw new Error('Device Description is required');
 
@@ -55,8 +59,12 @@ export default function DeviceConfigUpload() {
 
       // Validate each register and its fields
       Object.entries(registers).forEach(([key, register]) => {
-        if (!register.name || !register.address || !Array.isArray(register.fields)) {
+        if (!register.name || !register.address || !Array.isArray(register.fields) || !register.description) {
           throw new Error(`Invalid register configuration for ${key}`);
+        }
+
+        if (!(register.width > 0) || !(isValidWidth)) {
+          throw new Error('Invalid register width. Register width must be one of: ' + acceptedWidths.join(', '))
         }
 
         // Validate fields and ensure access type is valid
@@ -71,7 +79,7 @@ export default function DeviceConfigUpload() {
       });
 
       return {
-        id: deviceId,
+        base_address: baseAddr,
         name: deviceName,
         description: deviceDescription,
         isPublic,
@@ -111,7 +119,7 @@ export default function DeviceConfigUpload() {
       });
 
       // Clear form
-      setDeviceId('');
+      setBaseAddr('');
       setDeviceName('');
       setDeviceDescription('');
       setIsPublic(false);
@@ -137,12 +145,12 @@ export default function DeviceConfigUpload() {
       <CardContent className="space-y-6">
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="device-id">Device ID</Label>
+            <Label htmlFor="base-addr">Base Address (Hex)</Label>
             <Input
-              id="device-id"
-              value={deviceId}
-              onChange={(e) => setDeviceId(e.target.value)}
-              placeholder="e.g., adc"
+              id="base-addr"
+              value={baseAddr}
+              onChange={(e) => setBaseAddr(e.target.value)}
+              placeholder="e.g., 0x20000000"
             />
           </div>
 

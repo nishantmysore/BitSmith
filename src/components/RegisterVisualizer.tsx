@@ -6,6 +6,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
 import { Register, Field } from "@prisma/client"
+import {Alert, AlertTitle, AlertDescription} from "@/components/ui/alert"
 
 interface RegisterVisualizerProps {
   register: Register & {
@@ -36,7 +37,13 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({ register }) => 
         </CollapsibleTrigger>
         
         <CollapsibleContent>
-          <CardContent className="p-6">
+          <CardContent className="p-6 ">
+            <Alert className="mb-6">
+              <AlertTitle className="text-base font-semibold">Description</AlertTitle>
+              <AlertDescription className="text-base mt-2 text-muted-foreground">
+                {register.description}
+              </AlertDescription>
+            </Alert>
             <div className="space-y-6">
               <div className="w-full h-12 bg-secondary relative rounded-md">
                 {register.fields.map((field : Field) => {
