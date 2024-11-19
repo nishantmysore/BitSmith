@@ -11,7 +11,7 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { Prisma, AccessType } from '@prisma/client';
 import { useSession } from 'next-auth/react';
 
@@ -167,7 +167,8 @@ export default function DeviceConfigUpload() {
           </div>
 
           <div className="flex items-center space-x-2">
-            <Checkbox 
+            <Switch 
+              className="mr-2"  // or use mr-3 for more space
               id="is-public"
               checked={isPublic}
               onCheckedChange={(checked: boolean) => setIsPublic(checked)}

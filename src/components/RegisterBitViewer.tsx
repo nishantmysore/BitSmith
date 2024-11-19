@@ -3,6 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Tabs, TabsList, TabsTrigger} from "@/components/ui/tabs"
 import { getAccessColor } from '@/utils/access_color';
 import FieldHoverCard from "@/components/FieldHoverCard";
 import ValueFormatActions from './ValueFormatActions';
@@ -123,22 +124,22 @@ const RegisterBitViewer: React.FC<RegisterBitViewerProps> = () => {
 
         <div className="space-y-2">
           <Label>Input Format</Label>
-          <RadioGroup
-            value={inputFormat}
+          <Tabs defaultValue={inputFormat} 
+          
+
             onValueChange={(value: string) => {
               setInputFormat(value as InputFormat);
               setValue('');
               setBinaryValue("0".repeat(32));
             }}
-            className="flex space-x-4"
-          >
-            {(['hex', 'decimal', 'binary'] as const).map((format) => (
-              <div key={format} className="flex items-center space-x-2">
-                <RadioGroupItem value={format} id={format} />
-                <Label htmlFor={format}>{format.charAt(0).toUpperCase() + format.slice(1)}</Label>
-              </div>
-            ))}
-          </RadioGroup>
+          className="w-[400px]">
+            
+            <TabsList>
+              <TabsTrigger value="hex">Hex</TabsTrigger>
+              <TabsTrigger value="decimal">Decimal</TabsTrigger>
+              <TabsTrigger value="binary">Binary</TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
 
         <div className="space-y-2">

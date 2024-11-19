@@ -9,6 +9,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarSeparator,
 } from "@/components/ui/sidebar"
 
 const appitems = [
@@ -34,7 +35,7 @@ const deviceitems = [
 
 export function AppSidebar() {
   return (
-    <Sidebar>
+    <Sidebar variant="sidebar">
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Application</SidebarGroupLabel>
@@ -53,6 +54,8 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        <SidebarSeparator />
         <SidebarGroup>
           <SidebarGroupLabel>Device Register Maps</SidebarGroupLabel>
           <SidebarGroupContent>

@@ -56,7 +56,7 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({ register }) => 
                         width: `${width}%`,
                         backgroundColor: field.name === "RESERVED" 
                           ? 'hsl(var(--secondary))' 
-                          : 'hsl(var(--primary)/0.5)'
+                          : 'hsl(var(--primary)/0.8)'
                       }}
                     >
                       <div className="font-medium truncate w-full text-center text-foreground">
