@@ -21,6 +21,10 @@ type DeviceContextType = {
   getRegisterByAddress: (address: string) => Register | null;
   loading: boolean;
   error: string | null;
+  baseAddr: string;
+  setBaseAddr: (addr: string) => void;
+  offsetBaseAddr: boolean;
+  setOffsetBaseAddr: (offset: boolean) => void;
 };
 
 const DeviceContext = createContext<DeviceContextType | null>(null);
@@ -30,6 +34,8 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [selectedDevice, setSelectedDevice] = useState<DeviceWithRelations | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [baseAddr, setBaseAddr] = useState('');
+  const [offsetBaseAddr, setOffsetBaseAddr] = useState(false);
 
   // Fetch devices on component mount
   useEffect(() => {
@@ -47,6 +53,9 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           setSelectedDevice(data[0]);
         }
         setError(null);
+        if (selectedDevice?.base_address) {
+          setBaseAddr(selectedDevice.base_address);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
@@ -55,7 +64,7 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     };
 
     fetchDevices();
-  }, []);
+  }, [selectedDevice]);
 
   const getRegisterByAddress = (address: string): Register | null => {
     if (!selectedDevice) return null;
@@ -73,7 +82,11 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         setSelectedDevice, 
         getRegisterByAddress,
         loading,
-        error
+        error,
+        baseAddr,
+        setBaseAddr,
+        offsetBaseAddr,
+        setOffsetBaseAddr
       }}
     >
       {children}

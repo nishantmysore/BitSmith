@@ -15,11 +15,13 @@ type DeviceWithRegisters = Device & {
 // Type for the context
 type DeviceContextType = {
   selectedDevice: DeviceWithRegisters | null;
+  baseAddr: string;
+  offsetBaseAddr: boolean;
 };
 
 const RegisterList = () => {
   // Update the useDevice hook to use the proper type
-  const { selectedDevice } = useDevice() as DeviceContextType;
+  const { selectedDevice,baseAddr,offsetBaseAddr } = useDevice() as DeviceContextType;
 
   if (!selectedDevice) {
     return (
@@ -37,6 +39,8 @@ const RegisterList = () => {
         <RegisterVisualizer 
           key={register.id} // Using id instead of address for key is generally better
           register={register}
+          baseAddr={baseAddr}
+          offsetBaseAddr={offsetBaseAddr}
         />
       ))}
     </div>

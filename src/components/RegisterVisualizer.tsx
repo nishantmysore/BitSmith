@@ -6,16 +6,52 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
 import { Register, Field } from "@prisma/client"
-import {Alert, AlertTitle, AlertDescription} from "@/components/ui/alert"
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
 
 interface RegisterVisualizerProps {
+  offsetBaseAddr: boolean;
+  baseAddr: string;
   register: Register & {
-  fields: Field[]
+    fields: Field[]
   };
 }
 
-const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({ register }) => {
+// Helper function to calculate final address
+const calculateAddress = (baseAddr: string, registerAddr: string, shouldOffset: boolean): string => {
+  if (!shouldOffset) return registerAddr;
+  
+  // Convert hex strings to numbers, perform addition, convert back to hex
+  const base = parseInt(baseAddr.replace('0x', ''), 16);
+  const addr = parseInt(registerAddr.replace('0x', ''), 16);
+  const result = base + addr;
+  
+  return '0x' + result.toString(16).toUpperCase().padStart(8, '0');
+};
+
+// Helper function to calculate field position and width
+const calculateFieldDimensions = (field: Field, registerWidth: number) => {
+  const [msb, lsb] = field.bits.includes(":") 
+    ? field.bits.split(":").map(Number)
+    : [Number(field.bits), Number(field.bits)];
+  
+  const width = ((msb - lsb + 1) / registerWidth) * 100;
+  const left = ((registerWidth - 1 - msb) / registerWidth) * 100;
+  
+  return { width, left, msb, lsb };
+};
+
+const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({ 
+  register, 
+  baseAddr, 
+  offsetBaseAddr 
+}) => {
   const [isOpen, setIsOpen] = React.useState(true);
+  
+  // Default to 32 if width is not specified
+  const registerWidth = register.width || 32;
+  
+  // Calculate final address once
+  const finalAddress = calculateAddress(baseAddr, register.address, offsetBaseAddr);
 
   return (
     <Card className="w-full max-w-4xl">
@@ -31,13 +67,13 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({ register }) => 
                 />
                 <CardTitle className="text-xl font-semibold">{register.name}</CardTitle>
               </div>
-              <span className="text-xl font-semibold">Address: {register.address}</span>
+              <span className="text-xl font-semibold">Address: {finalAddress}</span>
             </div>
           </CardHeader>
         </CollapsibleTrigger>
         
         <CollapsibleContent>
-          <CardContent className="p-6 ">
+          <CardContent className="p-6">
             <Alert className="mb-6">
               <AlertTitle className="text-base font-semibold">Description</AlertTitle>
               <AlertDescription className="text-base mt-2 text-muted-foreground">
@@ -46,13 +82,8 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({ register }) => 
             </Alert>
             <div className="space-y-6">
               <div className="w-full h-12 bg-secondary relative rounded-md">
-                {register.fields.map((field : Field) => {
-                  const [msb, lsb] = field.bits.includes(":") 
-                    ? field.bits.split(":").map(Number)
-                    : [Number(field.bits), Number(field.bits)];
-                  
-                  const width = ((msb - lsb + 1) / 32) * 100;
-                  const left = ((31 - msb) / 32) * 100;
+                {register.fields.map((field) => {
+                  const { width, left } = calculateFieldDimensions(field, registerWidth);
                   
                   return (
                     <div
@@ -84,7 +115,7 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({ register }) => 
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {register.fields.map((field : Field) => (
+                  {register.fields.map((field) => (
                     <TableRow key={field.name}>
                       <TableCell className="font-medium">{field.name}</TableCell>
                       <TableCell>{field.bits}</TableCell>
