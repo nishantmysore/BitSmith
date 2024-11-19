@@ -3,6 +3,7 @@
 import React from "react";
 import { Copy, Check } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import AccessBadge from "./AccessBadge";
 import {
   Table,
   TableHeader,
@@ -174,7 +175,7 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
                         {field.name}
                       </TableCell>
                       <TableCell>{field.bits}</TableCell>
-                      <TableCell>{field.access}</TableCell>
+                      <TableCell><AccessBadge access={field.access}/></TableCell>
                       <TableCell>{field.description}</TableCell>
                     </TableRow>
                   ))}
