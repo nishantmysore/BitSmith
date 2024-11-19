@@ -1,10 +1,12 @@
 "use client"
 
 import React from 'react';
+import { Copy, Check } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Register, Field } from "@prisma/client"
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
 
@@ -19,7 +21,7 @@ interface RegisterVisualizerProps {
 // Helper function to calculate final address
 const calculateAddress = (baseAddr: string, registerAddr: string, shouldOffset: boolean): string => {
   if (!shouldOffset) return registerAddr;
-  
+
   // Convert hex strings to numbers, perform addition, convert back to hex
   const base = parseInt(baseAddr.replace('0x', ''), 16);
   const addr = parseInt(registerAddr.replace('0x', ''), 16);
@@ -45,7 +47,8 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
   baseAddr, 
   offsetBaseAddr 
 }) => {
-  const [isOpen, setIsOpen] = React.useState(true);
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [isCopied, setIsCopied] = React.useState(false);
   
   // Default to 32 if width is not specified
   const registerWidth = register.width || 32;
@@ -53,10 +56,16 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
   // Calculate final address once
   const finalAddress = calculateAddress(baseAddr, register.address, offsetBaseAddr);
 
+  const handleCopy = () => {
+    navigator.clipboard.writeText(finalAddress);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  };
+
   return (
     <Card className="w-full max-w-4xl">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <CollapsibleTrigger className="w-full">
+        <CollapsibleTrigger asChild className="w-full">
           <CardHeader className="border-b hover:bg-secondary/50 transition-colors">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -67,7 +76,23 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
                 />
                 <CardTitle className="text-xl font-semibold">{register.name}</CardTitle>
               </div>
-              <span className="text-xl font-semibold">Address: {finalAddress}</span>
+              <div className="flex items-center gap-2">
+              <span className="text-xl font-mono">{finalAddress}</span>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+                onClick={ (e) => {
+                  e.stopPropagation();
+                  handleCopy()}}
+              >
+                {isCopied ? (
+                  <Check className="h-4 w-4" />
+                ) : (
+                  <Copy className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
             </div>
           </CardHeader>
         </CollapsibleTrigger>
