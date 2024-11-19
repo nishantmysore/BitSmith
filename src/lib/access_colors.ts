@@ -23,13 +23,25 @@ import { AccessType } from "@prisma/client";
   export const getAccessStyles = (access: AccessType) => {
     switch (access) {
       case "RO":
-        return "bg-blue-500/20 text-blue-700";
+        // A calm blue that works in both modes
+        return "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-200";
       case "WO":
-        return "bg-purple-500/20 text-purple-700";
+        // A rich purple that matches the sophistication of the theme
+        return "bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-200";
       case "RW":
-        return "bg-green-500/20 text-green-700";
-      default:
-        return "bg-secondary";
+        // A success-like green that's visible but not too bright
+        return "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200";
+      case "RW1C":
+        // A warm amber for special operations
+        return "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200";
+      case "W1S":
+        // A distinct indigo for set operations
+        return "bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-200";
+      case "W1C":
+        // A rose color that complements the theme's red
+        return "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-200";
+      case "RSVD":
+        // Using the theme's muted colors for reserved
+        return "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-200";
     }
   };
-
