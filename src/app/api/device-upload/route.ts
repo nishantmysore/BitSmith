@@ -5,7 +5,7 @@ import { Prisma, Device, Register, Field} from '@prisma/client';
 // Define the expected request body type using Prisma types
 type RegisterInput = Omit<Register, 'id' | 'deviceId' | 'createdAt' | 'updatedAt'> & {
   fields: Array<Omit<Field, 'id' | 'registerId' | 'createdAt' | 'updatedAt'>>
-  width: Number;
+  width: number;
   description: string;
 };
 
