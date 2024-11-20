@@ -44,7 +44,7 @@ const ValueFormatActions = ({ binaryValue }: ValueFormatActionsProps) => {
         ) : (
           <Copy className="h-4 w-4" />
         )}
-        Copy as Hex
+        Hex
       </Button>
       <Button
         variant="outline"
@@ -57,7 +57,7 @@ const ValueFormatActions = ({ binaryValue }: ValueFormatActionsProps) => {
         ) : (
           <Copy className="h-4 w-4" />
         )}
-        Copy as Decimal
+        Decimal
       </Button>
       <Button
         variant="outline"
@@ -70,7 +70,7 @@ const ValueFormatActions = ({ binaryValue }: ValueFormatActionsProps) => {
         ) : (
           <Copy className="h-4 w-4" />
         )}
-        Copy as Binary
+        Binary
       </Button>
     </div>
   );
