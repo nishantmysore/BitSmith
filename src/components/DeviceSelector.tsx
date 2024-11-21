@@ -7,38 +7,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useDevice } from "../DeviceContext";
 
+// Hex validation functions remain the same
 const isValidHex = (value: string): boolean => {
-  // Allow empty input or partial hex values
   if (!value || value === "0x") return true;
-
-  // Check if it's a valid hex format
   const hexRegex = /^0x[0-9A-Fa-f]{1,16}$/;
   return hexRegex.test(value);
 };
 
 const formatHexInput = (value: string): string => {
-  // Remove any non-hex characters
   let cleaned = value.replace(/[^0-9A-Fa-f]/g, "").toUpperCase();
-
-  // Handle special cases
   if (!value.startsWith("0x")) {
-    // If input doesn't start with 0x, add it
     cleaned = `0x${cleaned}`;
   } else {
-    // If it starts with 0x, preserve it and clean the rest
-    cleaned = `0x${value
-      .slice(2)
-      .replace(/[^0-9A-Fa-f]/g, "")
-      .toUpperCase()}`;
+    cleaned = `0x${value.slice(2).replace(/[^0-9A-Fa-f]/g, "").toUpperCase()}`;
   }
-
   return cleaned;
 };
 
@@ -64,11 +52,12 @@ export const DeviceSelector = () => {
 
   return (
     <Card className="mb-4">
-      <CardHeader className="space-y-4">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-semibold">
-            Device Selection
-          </CardTitle>
+      <CardHeader>
+        <CardTitle className="text-lg font-semibold">Device Selection</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* Device Selection Section */}
+        <div className="space-y-3">
           <Select
             value={selectedDevice?.id}
             onValueChange={(deviceId) => {
@@ -76,7 +65,7 @@ export const DeviceSelector = () => {
               if (device) setSelectedDevice(device);
             }}
           >
-            <SelectTrigger className="w-[280px]">
+            <SelectTrigger>
               <SelectValue placeholder="Select device" />
             </SelectTrigger>
             <SelectContent>
@@ -87,35 +76,49 @@ export const DeviceSelector = () => {
               ))}
             </SelectContent>
           </Select>
+
+          {/* Device Description */}
+          {selectedDevice?.description && (
+            <p className="text-sm text-muted-foreground">
+              {selectedDevice.description}
+            </p>
+          )}
         </div>
-        <div className="flex items-center justify-end gap-4">
-          <Label htmlFor="base-addr-input">Base Address</Label>
-          <div className="flex flex-col gap-1">
-            <Input
-              id="base-addr-input"
-              className={`w-36 font-mono text-sm ${!isValid ? "border-red-500 focus-visible:ring-red-500" : ""}`}
-              value={baseAddr}
-              onChange={(e) => handleBaseAddrChange(e.target.value)}
-              placeholder="0x00000000"
-            />
+
+        {/* Configuration Controls */}
+        <div className="space-y-4">
+          {/* Base Address Input */}
+          <div className="flex flex-col space-y-2">
+            <Label htmlFor="base-addr-input">Base Address</Label>
+            <div className="flex items-center space-x-4">
+              <Input
+                id="base-addr-input"
+                className={`w-36 font-mono text-sm ${
+                  !isValid ? "border-red-500 focus-visible:ring-red-500" : ""
+                }`}
+                value={baseAddr}
+                onChange={(e) => handleBaseAddrChange(e.target.value)}
+                placeholder="0x00000000"
+              />
+              {/* Offset Registers Toggle */}
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="offset-base-addr"
+                  checked={offsetBaseAddr}
+                  onCheckedChange={setOffsetBaseAddr}
+                />
+                <Label htmlFor="offset-base-addr">Offset Registers</Label>
+              </div>
+            </div>
             {!isValid && (
-              <Alert variant="destructive" className="p-2">
-                <AlertDescription className="text-xs">
-                  Please enter a valid hex address (0x00000000 - 0xFFFFFFFF)
-                </AlertDescription>
-              </Alert>
+              <p className="text-xs text-red-500">
+                Please enter a valid hex address (0x00000000 - 0xFFFFFFFF)
+              </p>
             )}
           </div>
         </div>
-        <div className="flex items-center justify-end gap-4">
-          <Label htmlFor="offset-base-addr">Offset Registers</Label>
-          <Switch
-            id="offset-base-addr"
-            checked={offsetBaseAddr}
-            onCheckedChange={setOffsetBaseAddr}
-          />
-        </div>
-      </CardHeader>
+      </CardContent>
     </Card>
   );
 };
+
