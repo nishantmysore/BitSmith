@@ -1,16 +1,23 @@
-import { Register } from "@prisma/client";
+import { Register, Field } from "@prisma/client";
+
+export type RegisterError = {
+  name?: string;
+  address?: string;
+  width?: string;
+  fields?: {
+    name?: string;
+    bits?: string;
+    access?: string;
+    description?: string;
+  }[];
+};
 
 export interface FormErrors {
   name?: string;
   description?: string;
   base_address?: string;
   registers?: {
-    [key: string]: {
-      name?: string;
-      address?: string;
-      width?: string;
-      fields?: string;
-    };
+    [key: string]: RegisterError;
   };
 }
 
@@ -19,6 +26,6 @@ export interface FormData {
   description: string;
   base_address: string;
   isPublic: boolean;
-  registers: Register[];
+  registers: (Register & { fields: Field[] })[];
 }
 

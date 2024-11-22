@@ -1,158 +1,238 @@
-// components/RegisterEditor.tsx
+// src/components/RegisterEditor.tsx
+"use client";
 
-import React from "react";
+import { useState } from "react";
+import {
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/components/ui/accordion";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { RegisterFormData, FieldFormData } from "@/types/device";
-import { FormErrors } from "@/types/validation";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 import { FieldEditor } from "./FieldEditor";
-import { Plus, Trash } from "lucide-react";
+import { Trash2 } from "lucide-react";
+import { Register, Field, AccessType } from "@prisma/client";
+import { RegisterError} from "@/types/validation";
+const acceptedWidths = [1, 2, 4, 8, 16, 24, 32, 64, 128, 256];
 
 interface RegisterEditorProps {
-  register: RegisterFormData;
-  onUpdate: (updatedRegister: RegisterFormData) => void;
-  onDelete: () => void;
-  errors?: FormErrors["registers"][string];
+  register: (Register & { fields: Field[] });
+  errors: RegisterError;
   touched: Set<string>;
-  onBlur: () => void;
+  onBlur: (field: string) => void;
+  onChange: (updatedRegister: Register) => void;
+  onDelete: () => void;
 }
 
-export const RegisterEditor: React.FC<RegisterEditorProps> = ({
+export function RegisterEditor({
   register,
-  onUpdate,
-  onDelete,
   errors,
   touched,
   onBlur,
-}) => {
-  const handleRegisterChange = (field: keyof RegisterFormData, value: any) => {
-    onUpdate({ ...register, [field]: value });
-    onBlur();
+  onChange,
+  onDelete,
+}: RegisterEditorProps) {
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+  const handleFieldChange = (fieldIndex: number, updatedField: Field) => {
+    const newFields = [...register.fields];
+    newFields[fieldIndex] = updatedField;
+    onChange({ 
+      ...register,
+      fields: undefined,
+    } as Register);
   };
 
-  const createNewField = (): FieldFormData => ({
-    id: `temp_field_${Date.now()}`,
-    name: "",
-    bits: "",
-    access: "RO", // Default access type
-    description: "",
-  });
+  const handleFieldDelete = (fieldIndex: number) => {
+    const newFields = register.fields.filter(
+      (_: any, i: number) => i !== fieldIndex,
+    );
+    onChange({ ...register, fields: newFields } as Register);
+  };
+
+  const addNewField = () => {
+    const newField: Field = {
+      id: `temp_${Date.now()}`,
+      name: "",
+      bits: "",
+      access: "RW" as AccessType,
+      description: "",
+      registerId: register.id,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    onChange({
+      ...register,
+      fields: undefined,
+    } as Register);
+  };
+
+  const getFieldKey = (field: string) => `registers.${register.id}.${field}`;
 
   return (
-    <div className="border p-4 my-4 space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Register: {register.name || "New Register"}</h3>
-        <Button variant="destructive" onClick={onDelete}>
-          <Trash className="mr-2 h-4 w-4" />
-          Delete Register
-        </Button>
-      </div>
+    <div className="relative">
+      <AccordionItem
+        value={register.id || "new"}
+        className="border rounded-lg mb-4"
+      >
+        <AccordionTrigger className="px-4">
+          <div className="flex items-center justify-between w-full">
+            <span>{register.name || "New Register"}</span>
+          </div>
+        </AccordionTrigger>
 
-      {/* Register Name */}
-      <div className="space-y-2">
-        <Label htmlFor={`register-name-${register.id}`}>Register Name</Label>
-        <Input
-          id={`register-name-${register.id}`}
-          value={register.name}
-          onChange={(e) =>
-            handleRegisterChange("name", e.target.value)
-          }
-          className={errors?.name ? "border-red-500" : ""}
-        />
-        {errors?.name && (
-          <p className="text-sm text-red-500">{errors.name}</p>
-        )}
-      </div>
+        <AccordionContent className="p-4">
+          <div className="space-y-4">
+            {/* Register Properties */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor={`${register.id}-name`}>Register Name</Label>
+                <Input
+                  id={`${register.id}-name`}
+                  value={register.name}
+                  onChange={(e) =>
+                    onChange({ ...register, name: e.target.value })
+                  }
+                  onBlur={() => onBlur(getFieldKey('name'))}
+                  className={errors?.name ? 'border-red-500' : ''}
+                />
+                {touched.has(getFieldKey('name')) && errors?.name && (
+                  <p className="text-sm text-red-500">{errors.name}</p>
+                )}
+              </div>
 
-      {/* Address */}
-      <div className="space-y-2">
-        <Label htmlFor={`register-address-${register.id}`}>Address</Label>
-        <Input
-          id={`register-address-${register.id}`}
-          value={register.address}
-          onChange={(e) =>
-            handleRegisterChange("address", e.target.value)
-          }
-          className={errors?.address ? "border-red-500" : ""}
-        />
-        {errors?.address && (
-          <p className="text-sm text-red-500">{errors.address}</p>
-        )}
-      </div>
+              <div className="space-y-2">
+                <Label htmlFor={`${register.id}-address`}>Address (Hex)</Label>
+                <Input
+                  id={`${register.id}-address`}
+                  value={register.address}
+                  onChange={(e) =>
+                    onChange({ ...register, address: e.target.value })
+                  }
+                  onBlur={() => onBlur(getFieldKey('address'))}
+                  placeholder="0x00"
+                  className={errors?.address ? 'border-red-500' : ''}
+                />
+                {touched.has(getFieldKey('address')) && errors?.address && (
+                  <p className="text-sm text-red-500">{errors.address}</p>
+                )}
+              </div>
 
-      {/* Width */}
-      <div className="space-y-2">
-        <Label htmlFor={`register-width-${register.id}`}>Width</Label>
-        <Input
-          id={`register-width-${register.id}`}
-          type="number"
-          value={register.width}
-          onChange={(e) =>
-            handleRegisterChange("width", parseInt(e.target.value, 10))
-          }
-          className={errors?.width ? "border-red-500" : ""}
-        />
-        {errors?.width && (
-          <p className="text-sm text-red-500">{errors.width}</p>
-        )}
-      </div>
+              <div className="space-y-2">
+                <Label htmlFor={`${register.id}-width`}>Width (bits)</Label>
+                <Select
+                  value={register.width.toString()}
+                  onValueChange={(value) => {
+                    onChange({ ...register, width: parseInt(value) });
+                    onBlur(getFieldKey('width'));
+                  }}
+                >
+                  <SelectTrigger 
+                    className={errors?.width ? 'border-red-500' : ''}
+                  >
+                    <SelectValue placeholder="Select width" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {acceptedWidths.map((width) => (
+                      <SelectItem key={width} value={width.toString()}>
+                        {width}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {touched.has(getFieldKey('width')) && errors?.width && (
+                  <p className="text-sm text-red-500">{errors.width}</p>
+                )}
+              </div>
 
-      {/* Description */}
-      <div className="space-y-2">
-        <Label htmlFor={`register-description-${register.id}`}>Description</Label>
-        <Input
-          id={`register-description-${register.id}`}
-          value={register.description}
-          onChange={(e) =>
-            handleRegisterChange("description", e.target.value)
-          }
-          className={errors?.description ? "border-red-500" : ""}
-        />
-        {errors?.description && (
-          <p className="text-sm text-red-500">{errors.description}</p>
-        )}
-      </div>
+              <div className="space-y-2">
+                <Label htmlFor={`${register.id}-description`}>Description</Label>
+                <Input
+                  id={`${register.id}-description`}
+                  value={register.description}
+                  onChange={(e) =>
+                    onChange({ ...register, description: e.target.value })
+                  }
+                  onBlur={() => onBlur(getFieldKey('description'))}
+                />
+              </div>
+            </div>
 
-      {/* Fields */}
-      <div className="space-y-4">
-        <h4 className="text-md font-semibold">Fields</h4>
-        {register.fields.map((field, index) => (
-          <FieldEditor
-            key={field.id || index}
-            field={field}
-            onUpdate={(updatedField) => {
-              const newFields = [...register.fields];
-              newFields[index] = updatedField;
-              onUpdate({ ...register, fields: newFields });
-              onBlur();
-            }}
-            onDelete={() => {
-              const newFields = register.fields.filter(
-                (_, i) => i !== index
-              );
-              onUpdate({ ...register, fields: newFields });
-              onBlur();
-            }}
-            errors={errors?.fields && errors.fields[field.id || `new_field_${index}`]}
-          />
-        ))}
+            {/* Fields Section */}
+            <div className="space-y-4">
+              <h4 className="font-semibold">Fields</h4>
+              {register.fields.map((field: any, index: number) => (
+                <FieldEditor
+                  key={index}
+                  field={field}
+                  onChange={(updatedField) =>
+                    handleFieldChange(index, updatedField)
+                  }
+                  onDelete={() => handleFieldDelete(index)}
+                  errors={errors?.fields ? errors.fields[index] : undefined}
+                  touched={touched}
+                  onBlur={(fieldName) => onBlur(getFieldKey(`fields.${index}.${fieldName}`))}
+                />
+              ))}
 
-        <Button
-          variant="outline"
-          onClick={() => {
-            onUpdate({
-              ...register,
-              fields: [...register.fields, createNewField()],
-            });
-            onBlur();
-          }}
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Add Field
-        </Button>
-      </div>
+              <Button variant="outline" onClick={addNewField}>
+                Add Field
+              </Button>
+            </div>
+          </div>
+        </AccordionContent>
+      </AccordionItem>
+
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
+        <AlertDialogTrigger asChild>
+          <div className="absolute right-4 top-3">
+            <div
+              className="p-2 hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Trash2 className="h-4 w-4 text-destructive" />
+            </div>
+          </div>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Register</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this register? This action cannot
+              be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={onDelete}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
-};
+}
 

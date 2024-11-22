@@ -1,115 +1,129 @@
-// components/FieldEditor.tsx
+// src/components/FieldEditor.tsx
+"use client";
 
-import React from "react";
+import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { FieldFormData } from "@/types/device";
-import { FormErrors } from "@/types/validation";
-import { Trash } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AccessType } from "@prisma/client";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
+import { Trash2 } from "lucide-react";
+import { Field, AccessType } from "@prisma/client";
 
 interface FieldEditorProps {
-  field: FieldFormData;
-  onUpdate: (updatedField: FieldFormData) => void;
+  field: Field;
+  errors?: {
+    name?: string;
+    bits?: string;
+    access?: string;
+    description?: string;
+  };
+  touched: Set<string>;
+  onBlur: (field: string) => void;
+  onChange: (updatedField: Field) => void;
   onDelete: () => void;
-  errors?: FormErrors["registers"][string]["fields"][string];
 }
 
-export const FieldEditor: React.FC<FieldEditorProps> = ({
-  field,
-  onUpdate,
-  onDelete,
-  errors,
-}) => {
-  const handleFieldChange = (fieldName: keyof FieldFormData, value: any) => {
-    onUpdate({ ...field, [fieldName]: value });
-  };
+export function FieldEditor({ field, onChange, onDelete }: FieldEditorProps) {
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   return (
-    <div className="border p-4 my-4 space-y-4">
-      <div className="flex justify-between items-center">
-        <h5 className="text-md font-semibold">Field: {field.name || "New Field"}</h5>
-        <Button variant="destructive" onClick={onDelete}>
-          <Trash className="mr-2 h-4 w-4" />
-          Delete Field
-        </Button>
-      </div>
+    <Card>
+      <CardContent className="pt-6">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="fieldName">Field Name</Label>
+            <Input
+              id="fieldName"
+              value={field.name}
+              onChange={(e) => onChange({ ...field, name: e.target.value })}
+            />
+          </div>
 
-      {/* Field Name */}
-      <div className="space-y-2">
-        <Label htmlFor={`field-name-${field.id}`}>Field Name</Label>
-        <Input
-          id={`field-name-${field.id}`}
-          value={field.name}
-          onChange={(e) =>
-            handleFieldChange("name", e.target.value)
-          }
-          className={errors?.name ? "border-red-500" : ""}
-        />
-        {errors?.name && (
-          <p className="text-sm text-red-500">{errors.name}</p>
-        )}
-      </div>
+          <div className="space-y-2">
+            <Label htmlFor="bits">Bits</Label>
+            <Input
+              id="bits"
+              value={field.bits}
+              onChange={(e) => onChange({ ...field, bits: e.target.value })}
+              placeholder="e.g., 0 or 7:0"
+            />
+          </div>
 
-      {/* Bits */}
-      <div className="space-y-2">
-        <Label htmlFor={`field-bits-${field.id}`}>Bits</Label>
-        <Input
-          id={`field-bits-${field.id}`}
-          value={field.bits}
-          onChange={(e) =>
-            handleFieldChange("bits", e.target.value)
-          }
-          className={errors?.bits ? "border-red-500" : ""}
-        />
-        {errors?.bits && (
-          <p className="text-sm text-red-500">{errors.bits}</p>
-        )}
-      </div>
+          <div className="space-y-2">
+            <Label htmlFor="access">Access Type</Label>
+            <Select
+              value={field.access}
+              onValueChange={(value) => onChange({ ...field, access: value as AccessType })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select access type" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.values(AccessType).map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-      {/* Access Type */}
-      <div className="space-y-2">
-        <Label htmlFor={`field-access-${field.id}`}>Access Type</Label>
-        <Select
-          value={field.access}
-          onValueChange={(value) =>
-            handleFieldChange("access", value as AccessType)
-          }
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select Access Type" />
-          </SelectTrigger>
-          <SelectContent>
-            {Object.values(AccessType).map((accessType) => (
-              <SelectItem key={accessType} value={accessType}>
-                {accessType}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {errors?.access && (
-          <p className="text-sm text-red-500">{errors.access}</p>
-        )}
-      </div>
+          <div className="space-y-2">
+            <Label htmlFor="fieldDescription">Description</Label>
+            <Input
+              id="fieldDescription"
+              value={field.description}
+              onChange={(e) =>
+                onChange({ ...field, description: e.target.value })
+              }
+            />
+          </div>
+        </div>
 
-      {/* Description */}
-      <div className="space-y-2">
-        <Label htmlFor={`field-description-${field.id}`}>Description</Label>
-        <Input
-          id={`field-description-${field.id}`}
-          value={field.description}
-          onChange={(e) =>
-            handleFieldChange("description", e.target.value)
-          }
-          className={errors?.description ? "border-red-500" : ""}
-        />
-        {errors?.description && (
-          <p className="text-sm text-red-500">{errors.description}</p>
-        )}
-      </div>
-    </div>
+        <div className="flex justify-end mt-4">
+          <AlertDialog
+            open={isDeleteDialogOpen}
+            onOpenChange={setIsDeleteDialogOpen}
+          >
+            <AlertDialogTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Trash2 className="h-4 w-4 text-destructive" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Field</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete this field? This action cannot
+                  be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={onDelete}>Delete</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </CardContent>
+    </Card>
   );
-};
-
+}
