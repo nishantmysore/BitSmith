@@ -31,17 +31,29 @@ import {
 } from "@/components/ui/alert-dialog";
 import { FieldEditor } from "./FieldEditor";
 import { Trash2 } from "lucide-react";
+import { Register } from "@prisma/client";
 
 const acceptedWidths = [1, 2, 4, 8, 16, 24, 32, 64, 128, 256];
 
 interface RegisterEditorProps {
-  register: any;
-  onChange: (updatedRegister: any) => void;
+  register: Register;
+  errors?: {
+    name?: string;
+    address?: string;
+    width?: string;
+    fields?: string;
+  };
+  touched: Set<string>;
+  onBlur: (field: string) => void;
+  onChange: (updatedRegister: Register) => void;
   onDelete: () => void;
 }
 
 export function RegisterEditor({
   register,
+  errors,
+  touched,
+  onBlur,
   onChange,
   onDelete,
 }: RegisterEditorProps) {
@@ -75,6 +87,8 @@ export function RegisterEditor({
     });
   };
 
+  const getFieldKey = (field: string) => `registers.${register.id}.${field}`;
+
   return (
     <div className="relative">
       <AccordionItem
@@ -92,37 +106,50 @@ export function RegisterEditor({
             {/* Register Properties */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Register Name</Label>
+                <Label htmlFor={`${register.id}-name`}>Register Name</Label>
                 <Input
-                  id="name"
+                  id={`${register.id}-name`}
                   value={register.name}
                   onChange={(e) =>
                     onChange({ ...register, name: e.target.value })
                   }
+                  onBlur={() => onBlur(getFieldKey('name'))}
+                  className={errors?.name ? 'border-red-500' : ''}
                 />
+                {touched.has(getFieldKey('name')) && errors?.name && (
+                  <p className="text-sm text-red-500">{errors.name}</p>
+                )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="address">Address (Hex)</Label>
+                <Label htmlFor={`${register.id}-address`}>Address (Hex)</Label>
                 <Input
-                  id="address"
+                  id={`${register.id}-address`}
                   value={register.address}
                   onChange={(e) =>
                     onChange({ ...register, address: e.target.value })
                   }
+                  onBlur={() => onBlur(getFieldKey('address'))}
                   placeholder="0x00"
+                  className={errors?.address ? 'border-red-500' : ''}
                 />
+                {touched.has(getFieldKey('address')) && errors?.address && (
+                  <p className="text-sm text-red-500">{errors.address}</p>
+                )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="width">Width (bits)</Label>
+                <Label htmlFor={`${register.id}-width`}>Width (bits)</Label>
                 <Select
                   value={register.width.toString()}
-                  onValueChange={(value) =>
-                    onChange({ ...register, width: parseInt(value) })
-                  }
+                  onValueChange={(value) => {
+                    onChange({ ...register, width: parseInt(value) });
+                    onBlur(getFieldKey('width'));
+                  }}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger 
+                    className={errors?.width ? 'border-red-500' : ''}
+                  >
                     <SelectValue placeholder="Select width" />
                   </SelectTrigger>
                   <SelectContent>
@@ -133,16 +160,20 @@ export function RegisterEditor({
                     ))}
                   </SelectContent>
                 </Select>
+                {touched.has(getFieldKey('width')) && errors?.width && (
+                  <p className="text-sm text-red-500">{errors.width}</p>
+                )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor={`${register.id}-description`}>Description</Label>
                 <Input
-                  id="description"
+                  id={`${register.id}-description`}
                   value={register.description}
                   onChange={(e) =>
                     onChange({ ...register, description: e.target.value })
                   }
+                  onBlur={() => onBlur(getFieldKey('description'))}
                 />
               </div>
             </div>
@@ -158,6 +189,9 @@ export function RegisterEditor({
                     handleFieldChange(index, updatedField)
                   }
                   onDelete={() => handleFieldDelete(index)}
+                  errors={errors?.fields ? errors.fields[index] : undefined}
+                  touched={touched}
+                  onBlur={(fieldName) => onBlur(getFieldKey(`fields.${index}.${fieldName}`))}
                 />
               ))}
 
@@ -200,3 +234,4 @@ export function RegisterEditor({
     </div>
   );
 }
+

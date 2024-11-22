@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Accordion } from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
-import { RegisterEditor } from "./RegisterEditor";
+//import { RegisterEditor } from "./RegisterEditor";
 import { Register, Field } from "@prisma/client";
 import { Plus, RotateCw } from "lucide-react";
 import { FormData, FormErrors } from "@/types/validation";
@@ -66,8 +66,10 @@ export function DeviceEditForm() {
     }
     
     // Validate description length if provided
-    if (formData.description && formData.description.length > 500) {
-      newErrors.description = "Description must be less than 500 characters";
+    if (!formData.description.trim()){
+      newErrors.description = "Device description is required";
+    } else if (formData.description && formData.description.length > 1000) {
+      newErrors.description = "Description must be less than 1000 characters";
     }
     
     // Validate base address
@@ -231,7 +233,7 @@ export function DeviceEditForm() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Basic Information</CardTitle>
+          <CardTitle>Device Information</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -294,31 +296,6 @@ export function DeviceEditForm() {
           <CardTitle>Registers</CardTitle>
         </CardHeader>
         <CardContent>
-          <Accordion type="single" collapsible className="w-full">
-            {formData.registers.map((register, index) => (
-              <RegisterEditor
-                key={register.id || index}
-                register={register}
-                errors={errors.registers?.[register.id || `new_${index}`]}
-                touched={touched}
-                onBlur={(field: string) => 
-                  handleBlur(`registers.${register.id || `new_${index}`}.${field}`)
-                }
-                onChange={(updatedRegister) => {
-                  const newRegisters = [...formData.registers];
-                  newRegisters[index] = updatedRegister;
-                  setFormData({ ...formData, registers: newRegisters });
-                  validateForm();
-                }}
-                onDelete={() => {
-                  const newRegisters = formData.registers.filter(
-                    (_, i) => i !== index
-                  );
-                  setFormData({ ...formData, registers: newRegisters });
-                }}
-              />
-            ))}
-          </Accordion>
 
           <Button
             variant="outline"

@@ -1,6 +1,6 @@
 // src/app/devices/edit/page.tsx
 import { DeviceProvider } from "@/DeviceContext";
-import { DeviceEditForm } from "@/components/EditComponents/DeviceEditForm";
+import { DeviceEditForm } from "@/components/DeviceEditForm";
 
 export default function EditDevicePage() {
   return (
