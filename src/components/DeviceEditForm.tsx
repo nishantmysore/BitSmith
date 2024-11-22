@@ -12,6 +12,8 @@ import { Accordion } from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
 import { RegisterEditor } from "./RegisterEditor";
 import { Register } from "@prisma/client";
+import { Plus, RotateCw } from "lucide-react";
+
 import {
   Select,
   SelectContent,
@@ -237,6 +239,7 @@ export function DeviceEditForm() {
               });
             }}
           >
+          <Plus/>
             Add Register
           </Button>
         </CardContent>
@@ -255,6 +258,7 @@ export function DeviceEditForm() {
             })
           }
         >
+          <RotateCw/>
           Reset
         </Button>
         <Button onClick={handleSubmit} disabled={isSubmitting}>
