@@ -83,13 +83,18 @@ export function FieldEditor({ field, onChange, onDelete }: FieldEditorProps) {
             <Input
               id="fieldDescription"
               value={field.description}
-              onChange={(e) => onChange({ ...field, description: e.target.value })}
+              onChange={(e) =>
+                onChange({ ...field, description: e.target.value })
+              }
             />
           </div>
         </div>
 
         <div className="flex justify-end mt-4">
-          <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <AlertDialog
+            open={isDeleteDialogOpen}
+            onOpenChange={setIsDeleteDialogOpen}
+          >
             <AlertDialogTrigger asChild>
               <Button variant="ghost" size="icon">
                 <Trash2 className="h-4 w-4 text-destructive" />
@@ -99,7 +104,8 @@ export function FieldEditor({ field, onChange, onDelete }: FieldEditorProps) {
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete Field</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Are you sure you want to delete this field? This action cannot be undone.
+                  Are you sure you want to delete this field? This action cannot
+                  be undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -113,4 +119,3 @@ export function FieldEditor({ field, onChange, onDelete }: FieldEditorProps) {
     </Card>
   );
 }
-

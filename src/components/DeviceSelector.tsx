@@ -25,7 +25,10 @@ const formatHexInput = (value: string): string => {
   if (!value.startsWith("0x")) {
     cleaned = `0x${cleaned}`;
   } else {
-    cleaned = `0x${value.slice(2).replace(/[^0-9A-Fa-f]/g, "").toUpperCase()}`;
+    cleaned = `0x${value
+      .slice(2)
+      .replace(/[^0-9A-Fa-f]/g, "")
+      .toUpperCase()}`;
   }
   return cleaned;
 };
@@ -53,7 +56,9 @@ export const DeviceSelector = () => {
   return (
     <Card className="mb-4">
       <CardHeader>
-        <CardTitle className="text-lg font-semibold">Device Selection</CardTitle>
+        <CardTitle className="text-lg font-semibold">
+          Device Selection
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Device Selection Section */}
@@ -121,4 +126,3 @@ export const DeviceSelector = () => {
     </Card>
   );
 };
-

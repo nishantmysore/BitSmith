@@ -29,23 +29,17 @@ interface FormData {
 }
 
 export function DeviceEditForm() {
-  const {
-    selectedDevice,
-    setSelectedDevice,
-    devices,
-  } = useDevice();
+  const { selectedDevice, setSelectedDevice, devices } = useDevice();
   const { toast } = useToast();
-  
+
   const [formData, setFormData] = useState<FormData>({
     name: "",
     description: "",
     base_address: "",
     isPublic: false,
-    registers: []
+    registers: [],
   });
-  
-  
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -55,26 +49,26 @@ export function DeviceEditForm() {
         description: selectedDevice.description,
         base_address: selectedDevice.base_address,
         isPublic: selectedDevice.isPublic,
-        registers: selectedDevice.registers
+        registers: selectedDevice.registers,
       });
     }
   }, [selectedDevice]);
 
   const handleSubmit = async () => {
     if (!selectedDevice?.id) return;
-    
+
     setIsSubmitting(true);
     try {
       const response = await fetch(`/api/devices/${selectedDevice.id}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update device');
+        throw new Error("Failed to update device");
       }
 
       const updatedDevice = await response.json();
@@ -88,7 +82,8 @@ export function DeviceEditForm() {
       toast({
         variant: "destructive",
         title: "Error",
-        description: error instanceof Error ? error.message : 'An error occurred',
+        description:
+          error instanceof Error ? error.message : "An error occurred",
       });
     } finally {
       setIsSubmitting(false);
@@ -97,15 +92,15 @@ export function DeviceEditForm() {
 
   // Create a new register with required fields
   const createNewRegister = (): Register => ({
-    id: '', // Will be t by the server
+    id: "", // Will be t by the server
     name: "",
     address: "",
     width: 32,
     description: "",
-    deviceId: selectedDevice?.id ?? '',
+    deviceId: selectedDevice?.id ?? "",
     fields: [],
     createdAt: new Date(),
-    updatedAt: new Date()
+    updatedAt: new Date(),
   });
 
   if (!selectedDevice) {
@@ -125,37 +120,37 @@ export function DeviceEditForm() {
 
   return (
     <div className="space-y-6">
-            
-    <Card className="mb-4">
-      <CardHeader>
-        <CardTitle className="text-lg font-semibold">Device Selection</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Device Selection Section */}
-        <div className="space-y-3">
-          <Select
-            value={selectedDevice?.id}
-            onValueChange={(deviceId) => {
-              const device = devices.find((d) => d.id === deviceId);
-              if (device) setSelectedDevice(device);
-            }}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select device" />
-            </SelectTrigger>
-            <SelectContent>
-              {devices.map((device) => (
-                <SelectItem key={device.id} value={device.id}>
-                  {device.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </CardContent>
-    </Card>
-      
-      
+      <Card className="mb-4">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold">
+            Device Selection
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Device Selection Section */}
+          <div className="space-y-3">
+            <Select
+              value={selectedDevice?.id}
+              onValueChange={(deviceId) => {
+                const device = devices.find((d) => d.id === deviceId);
+                if (device) setSelectedDevice(device);
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select device" />
+              </SelectTrigger>
+              <SelectContent>
+                {devices.map((device) => (
+                  <SelectItem key={device.id} value={device.id}>
+                    {device.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>Basic Information</CardTitle>
@@ -166,7 +161,9 @@ export function DeviceEditForm() {
             <Input
               id="name"
               value={formData.name}
-              onChange={(e) => setFormData({...formData, name: e.target.value})}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
             />
           </div>
 
@@ -175,7 +172,9 @@ export function DeviceEditForm() {
             <Input
               id="description"
               value={formData.description}
-              onChange={(e) => setFormData({...formData, description: e.target.value})}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
             />
           </div>
 
@@ -184,7 +183,9 @@ export function DeviceEditForm() {
             <Input
               id="base_address"
               value={formData.base_address}
-              onChange={(e) => setFormData({...formData, base_address: e.target.value})}
+              onChange={(e) =>
+                setFormData({ ...formData, base_address: e.target.value })
+              }
             />
           </div>
 
@@ -192,7 +193,9 @@ export function DeviceEditForm() {
             <Switch
               id="public"
               checked={formData.isPublic}
-              onCheckedChange={(checked) => setFormData({...formData, isPublic: checked})}
+              onCheckedChange={(checked) =>
+                setFormData({ ...formData, isPublic: checked })
+              }
             />
             <Label htmlFor="public">Public Device</Label>
           </div>
@@ -212,23 +215,25 @@ export function DeviceEditForm() {
                 onChange={(updatedRegister) => {
                   const newRegisters = [...formData.registers];
                   newRegisters[index] = updatedRegister;
-                  setFormData({...formData, registers: newRegisters});
+                  setFormData({ ...formData, registers: newRegisters });
                 }}
                 onDelete={() => {
-                  const newRegisters = formData.registers.filter((_, i) => i !== index);
-                  setFormData({...formData, registers: newRegisters});
+                  const newRegisters = formData.registers.filter(
+                    (_, i) => i !== index,
+                  );
+                  setFormData({ ...formData, registers: newRegisters });
                 }}
               />
             ))}
           </Accordion>
-          
+
           <Button
             variant="outline"
             className="mt-4"
             onClick={() => {
               setFormData({
                 ...formData,
-                registers: [...formData.registers, createNewRegister()]
+                registers: [...formData.registers, createNewRegister()],
               });
             }}
           >
@@ -240,24 +245,22 @@ export function DeviceEditForm() {
       <div className="flex justify-end space-x-4">
         <Button
           variant="outline"
-          onClick={() => setFormData({
-            name: selectedDevice.name,
-            description: selectedDevice.description,
-            base_address: selectedDevice.base_address,
-            isPublic: selectedDevice.isPublic,
-            registers: selectedDevice.registers
-          })}
+          onClick={() =>
+            setFormData({
+              name: selectedDevice.name,
+              description: selectedDevice.description,
+              base_address: selectedDevice.base_address,
+              isPublic: selectedDevice.isPublic,
+              registers: selectedDevice.registers,
+            })
+          }
         >
           Reset
         </Button>
-        <Button 
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-        >
+        <Button onClick={handleSubmit} disabled={isSubmitting}>
           {isSubmitting ? "Saving..." : "Save Changes"}
         </Button>
       </div>
     </div>
   );
 }
-

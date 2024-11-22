@@ -175,7 +175,9 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
                         {field.name}
                       </TableCell>
                       <TableCell>{field.bits}</TableCell>
-                      <TableCell><AccessBadge access={field.access}/></TableCell>
+                      <TableCell>
+                        <AccessBadge access={field.access} />
+                      </TableCell>
                       <TableCell>{field.description}</TableCell>
                     </TableRow>
                   ))}

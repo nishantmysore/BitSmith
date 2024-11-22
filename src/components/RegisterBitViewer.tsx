@@ -30,14 +30,16 @@ const RegisterBitViewer: React.FC<RegisterBitViewerProps> = () => {
   const [selectedRegister, setSelectedRegister] = React.useState<string>("");
   const [value, setValue] = React.useState<string>("");
   const [inputFormat, setInputFormat] = React.useState<InputFormat>("hex");
-  
+
   // Get current register width or default to 32
   const currentRegister = selectedRegister
     ? selectedDevice?.registers.find((r) => r.id === selectedRegister)
     : null;
   const registerWidth = currentRegister?.width || 32;
-  
-  const [binaryValue, setBinaryValue] = React.useState<string>(() => "0".repeat(registerWidth));
+
+  const [binaryValue, setBinaryValue] = React.useState<string>(() =>
+    "0".repeat(registerWidth),
+  );
 
   if (!selectedDevice) {
     return (
@@ -54,7 +56,11 @@ const RegisterBitViewer: React.FC<RegisterBitViewerProps> = () => {
     );
   }
 
-  const parseValue = (input: string, format: InputFormat, width: number): string => {
+  const parseValue = (
+    input: string,
+    format: InputFormat,
+    width: number,
+  ): string => {
     if (!input.trim()) return "0".repeat(width);
 
     try {
@@ -77,7 +83,7 @@ const RegisterBitViewer: React.FC<RegisterBitViewerProps> = () => {
 
       const maxValue = (BigInt(1) << BigInt(width)) - BigInt(1);
       if (num < 0 || num > maxValue) throw new Error();
-      
+
       return num.toString(2).padStart(width, "0");
     } catch {
       return "0".repeat(width);
@@ -85,11 +91,17 @@ const RegisterBitViewer: React.FC<RegisterBitViewerProps> = () => {
   };
 
   const getFieldValue = (msb: number, lsb: number): FieldValue => {
-    const fieldBits = binaryValue.slice(registerWidth - 1 - msb, registerWidth - lsb);
+    const fieldBits = binaryValue.slice(
+      registerWidth - 1 - msb,
+      registerWidth - lsb,
+    );
     const fieldValue = BigInt(`0b${fieldBits || "0"}`);
 
     return {
-      hex: fieldValue.toString(16).toUpperCase().padStart(Math.ceil((msb - lsb + 1) / 4), "0"),
+      hex: fieldValue
+        .toString(16)
+        .toUpperCase()
+        .padStart(Math.ceil((msb - lsb + 1) / 4), "0"),
       decimal: fieldValue,
       binary: fieldBits || "0",
     };
@@ -104,14 +116,15 @@ const RegisterBitViewer: React.FC<RegisterBitViewerProps> = () => {
     const newNum = BigInt(`0b${newBinaryString}`);
     setValue(
       newNum.toString(
-        inputFormat === "hex" ? 16 : inputFormat === "decimal" ? 10 : 2
-      )
+        inputFormat === "hex" ? 16 : inputFormat === "decimal" ? 10 : 2,
+      ),
     );
   };
 
   const handleRegisterChange = (registerId: string) => {
     setSelectedRegister(registerId);
-    const newWidth = selectedDevice.registers.find(r => r.id === registerId)?.width || 32;
+    const newWidth =
+      selectedDevice.registers.find((r) => r.id === registerId)?.width || 32;
     setBinaryValue("0".repeat(newWidth));
     setValue("");
   };
@@ -166,7 +179,9 @@ const RegisterBitViewer: React.FC<RegisterBitViewerProps> = () => {
             value={value}
             onChange={(e) => {
               setValue(e.target.value);
-              setBinaryValue(parseValue(e.target.value, inputFormat, registerWidth));
+              setBinaryValue(
+                parseValue(e.target.value, inputFormat, registerWidth),
+              );
             }}
           />
         </div>
@@ -183,7 +198,9 @@ const RegisterBitViewer: React.FC<RegisterBitViewerProps> = () => {
                   hover:bg-secondary/80 active:bg-secondary/60 transition-colors"
                 onClick={() => handleBitClick(index)}
               >
-                <div className={`font-mono ${bit === "1" ? "text-red-500" : ""}`}>
+                <div
+                  className={`font-mono ${bit === "1" ? "text-red-500" : ""}`}
+                >
                   {bit}
                 </div>
                 <div className="text-[10px] text-muted-foreground">

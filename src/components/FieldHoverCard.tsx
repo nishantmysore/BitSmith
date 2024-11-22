@@ -1,5 +1,5 @@
 import { type AccessType } from "@prisma/client";
-import {getAccessDescription} from "@/lib/access_colors";
+import { getAccessDescription } from "@/lib/access_colors";
 import AccessBadge from "./AccessBadge";
 
 interface FieldInfo {
@@ -30,7 +30,7 @@ const FieldHoverCard = ({ field, fieldValue }: FieldHoverCardProps) => {
           <h4 className="font-semibold">{field.name}</h4>
           <p className="text-sm text-muted-foreground">Bits [{field.bits}]</p>
         </div>
-        <AccessBadge access={field.access}/>
+        <AccessBadge access={field.access} />
       </div>
 
       <div className="space-y-1">
