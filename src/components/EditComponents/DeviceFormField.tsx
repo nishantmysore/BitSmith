@@ -12,13 +12,11 @@ const DeviceFormField: React.FC<DeviceFormFieldProps> = ({
   register,
   error,
   valueAsNumber,
-  defaultValue,
 }) => (
   <>
     <Input
       type={type}
       placeholder={placeholder}
-      defaultValue={defaultValue}
       {...register(name, { valueAsNumber })}
     />
     {error && <Alert variant="destructive">

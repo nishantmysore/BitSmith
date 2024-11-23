@@ -10,6 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import DeviceFormField from "./DeviceFormField";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { useEffect } from 'react';
 
 import {
   Select,
@@ -23,22 +24,35 @@ export function DeviceEditForm() {
   const { selectedDevice, setSelectedDevice, devices } = useDevice();
   const { data: session } = useSession();
 
-  const defaultValues = {
-    name: selectedDevice?.name || "",
-    description: selectedDevice?.description || "",
-    base_address: selectedDevice?.base_address || "",
-    isPublic: selectedDevice?.isPublic || false,
-  };
-
   const {
     register,
     handleSubmit,
     watch,
     setValue,
+    reset,
     formState: { errors },
     setError,
-  } = useForm<DeviceFormData>({resolver: zodResolver(DeviceValidateSchema), defaultValues
+  } = useForm<DeviceFormData>({
+    resolver: zodResolver(DeviceValidateSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      base_address: "",
+      isPublic: false,
+    }
   });
+
+  // Reset form when selectedDevice changes
+  useEffect(() => {
+    if (selectedDevice) {
+      reset({
+        name: selectedDevice.name,
+        description: selectedDevice.description,
+        base_address: selectedDevice.base_address,
+        isPublic: selectedDevice.isPublic,
+      });
+    }
+  }, [selectedDevice, reset]);
 
   const onSubmit = async (data: DeviceFormData) => {
     console.log("SUCCESS", data);
@@ -87,25 +101,23 @@ export function DeviceEditForm() {
             <form onSubmit={handleSubmit(onSubmit)}>
               <div className="grid gap-6 mb-4">
                 <div className="space-y-2">
-                  <Label htmlFor="base_address">Device Name</Label>
+                  <Label htmlFor="name">Device Name</Label>
                   <DeviceFormField
                     type="text"
                     placeholder="Device Name"
                     name="name"
                     register={register}
                     error={errors.name}
-                    defaultValue={defaultValues.name}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="base_address">Device Description</Label>
+                  <Label htmlFor="description">Device Description</Label>
                   <DeviceFormField
                     type="text"
                     placeholder="Device Description"
                     name="description"
                     register={register}
                     error={errors.description}
-                    defaultValue={defaultValues.description}
                   />
                 </div>
                 <div className="space-y-2">
@@ -116,7 +128,6 @@ export function DeviceEditForm() {
                     name="base_address"
                     register={register}
                     error={errors.base_address}
-                    defaultValue={defaultValues.base_address}
                   />
                 </div>
                 <div className="flex items-center space-x-2">
@@ -135,7 +146,7 @@ export function DeviceEditForm() {
                 </div>
               </div>
               <div className="flex justify-center">
-                <Button type="submit"> Update Device </Button>
+                <Button type="submit">Update Device</Button>
               </div>
             </form>
           </div>

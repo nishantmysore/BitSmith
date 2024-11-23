@@ -15,7 +15,6 @@ export type DeviceFormFieldProps = {
   register: UseFormRegister<DeviceFormData>;
   error: FieldError | undefined;
   valueAsNumber?: boolean;
-  defaultValue?: string;
 }
 
 export type ValidDeviceFieldNames =
