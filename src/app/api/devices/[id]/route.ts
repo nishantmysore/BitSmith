@@ -32,24 +32,42 @@ const isValidBitRange = (bits: string): boolean => {
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
+    // Get the ID from params - await the entire params object
+    const { id } = await context.params;
+
     // Get session and verify authentication
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    console.log('Session user ID:', session.user.id);
+
     // Get device and verify ownership
     const device = await prisma.device.findUnique({
-      where: { id: params.id },
-      include: { owner: true },
+      where: { id },
+      include: {
+        owner: true,
+        registers: {
+          include: {
+            fields: true
+          }
+        }
+      },
     });
 
     if (!device) {
       return NextResponse.json({ error: "Device not found" }, { status: 404 });
     }
+
+    console.log('Device owner ID:', device.ownerId);
+    console.log('Types:', {
+      sessionIdType: typeof session.user.id,
+      ownerIdType: typeof device.ownerId
+    });
 
     if (device.ownerId !== session.user.id) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -142,66 +160,72 @@ export async function PUT(
       }
     }
 
-    // Update device using transaction
+    // Update device using transaction with proper typing
     const updatedDevice = await prisma.$transaction(async (tx) => {
       // Update basic device info
-      const device = await tx.device.update({
-        where: { id: params.id },
+      const updatedDevice = await tx.device.update({
+        where: { id },
         data: {
           name: data.name,
           description: data.description,
           base_address: data.base_address,
           isPublic: data.isPublic,
         },
+        include: {
+          registers: {
+            include: {
+              fields: true
+            }
+          }
+        }
       });
 
-      // Delete existing registers and fields
-      await tx.field.deleteMany({
-        where: {
-          register: {
-            deviceId: params.id,
-          },
-        },
-      });
-
+      // Delete existing registers and their fields
       await tx.register.deleteMany({
         where: {
-          deviceId: params.id,
+          deviceId: id,
         },
       });
 
       // Create new registers and fields
       for (const register of data.registers) {
-        const newRegister = await tx.register.create({
+        await tx.register.create({
           data: {
-            deviceId: params.id,
+            deviceId: id,
             name: register.name,
-            description: register.description,
+            description: register.description || "",
             address: register.address,
             width: register.width,
+            fields: {
+              create: register.fields.map((field: any) => ({
+                name: field.name,
+                bits: field.bits,
+                access: field.access,
+                description: field.description || "",
+              })),
+            },
           },
-        });
-
-        // Create fields for this register
-        await tx.field.createMany({
-          data: register.fields.map((field: any) => ({
-            registerId: newRegister.id,
-            name: field.name,
-            bits: field.bits,
-            access: field.access,
-            description: field.description,
-          })),
+          include: {
+            fields: true
+          }
         });
       }
 
-      return device;
+      return updatedDevice;
     });
 
-    return NextResponse.json(updatedDevice);
+    return NextResponse.json({
+      message: "Device updated successfully",
+      device: updatedDevice
+    });
+
   } catch (error) {
     console.error("Error updating device:", error);
     return NextResponse.json(
-      { error: "Failed to update device" },
+      { 
+        error: "Failed to update device",
+        details: error instanceof Error ? error.message : "Unknown error"
+      },
       { status: 500 }
     );
   }

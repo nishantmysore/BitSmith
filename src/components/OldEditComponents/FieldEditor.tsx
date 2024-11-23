@@ -71,7 +71,9 @@ export function FieldEditor({ field, onChange, onDelete }: FieldEditorProps) {
             <Label htmlFor="access">Access Type</Label>
             <Select
               value={field.access}
-              onValueChange={(value) => onChange({ ...field, access: value as AccessType })}
+              onValueChange={(value) =>
+                onChange({ ...field, access: value as AccessType })
+              }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select access type" />

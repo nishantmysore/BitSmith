@@ -229,7 +229,8 @@ Example format:
 {
   "reg1": {
     "name": "Control Register",
-    "address": "0x00",
+    "address": "0x000000",
+    "description": "This register is a control register",
     "fields": [
       {
         "name": "Enable",

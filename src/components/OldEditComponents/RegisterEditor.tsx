@@ -32,11 +32,11 @@ import {
 import { FieldEditor } from "./FieldEditor";
 import { Trash2 } from "lucide-react";
 import { Register, Field, AccessType } from "@prisma/client";
-import { RegisterError} from "@/types/validation";
+import { RegisterError } from "@/types/validation";
 const acceptedWidths = [1, 2, 4, 8, 16, 24, 32, 64, 128, 256];
 
 interface RegisterEditorProps {
-  register: (Register & { fields: Field[] });
+  register: Register & { fields: Field[] };
   errors: RegisterError;
   touched: Set<string>;
   onBlur: (field: string) => void;
@@ -57,7 +57,7 @@ export function RegisterEditor({
   const handleFieldChange = (fieldIndex: number, updatedField: Field) => {
     const newFields = [...register.fields];
     newFields[fieldIndex] = updatedField;
-    onChange({ 
+    onChange({
       ...register,
       fields: undefined,
     } as Register);
@@ -79,9 +79,9 @@ export function RegisterEditor({
       description: "",
       registerId: register.id,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
-    
+
     onChange({
       ...register,
       fields: undefined,
@@ -114,10 +114,10 @@ export function RegisterEditor({
                   onChange={(e) =>
                     onChange({ ...register, name: e.target.value })
                   }
-                  onBlur={() => onBlur(getFieldKey('name'))}
-                  className={errors?.name ? 'border-red-500' : ''}
+                  onBlur={() => onBlur(getFieldKey("name"))}
+                  className={errors?.name ? "border-red-500" : ""}
                 />
-                {touched.has(getFieldKey('name')) && errors?.name && (
+                {touched.has(getFieldKey("name")) && errors?.name && (
                   <p className="text-sm text-red-500">{errors.name}</p>
                 )}
               </div>
@@ -130,11 +130,11 @@ export function RegisterEditor({
                   onChange={(e) =>
                     onChange({ ...register, address: e.target.value })
                   }
-                  onBlur={() => onBlur(getFieldKey('address'))}
+                  onBlur={() => onBlur(getFieldKey("address"))}
                   placeholder="0x00"
-                  className={errors?.address ? 'border-red-500' : ''}
+                  className={errors?.address ? "border-red-500" : ""}
                 />
-                {touched.has(getFieldKey('address')) && errors?.address && (
+                {touched.has(getFieldKey("address")) && errors?.address && (
                   <p className="text-sm text-red-500">{errors.address}</p>
                 )}
               </div>
@@ -145,11 +145,11 @@ export function RegisterEditor({
                   value={register.width.toString()}
                   onValueChange={(value) => {
                     onChange({ ...register, width: parseInt(value) });
-                    onBlur(getFieldKey('width'));
+                    onBlur(getFieldKey("width"));
                   }}
                 >
-                  <SelectTrigger 
-                    className={errors?.width ? 'border-red-500' : ''}
+                  <SelectTrigger
+                    className={errors?.width ? "border-red-500" : ""}
                   >
                     <SelectValue placeholder="Select width" />
                   </SelectTrigger>
@@ -161,20 +161,22 @@ export function RegisterEditor({
                     ))}
                   </SelectContent>
                 </Select>
-                {touched.has(getFieldKey('width')) && errors?.width && (
+                {touched.has(getFieldKey("width")) && errors?.width && (
                   <p className="text-sm text-red-500">{errors.width}</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor={`${register.id}-description`}>Description</Label>
+                <Label htmlFor={`${register.id}-description`}>
+                  Description
+                </Label>
                 <Input
                   id={`${register.id}-description`}
                   value={register.description}
                   onChange={(e) =>
                     onChange({ ...register, description: e.target.value })
                   }
-                  onBlur={() => onBlur(getFieldKey('description'))}
+                  onBlur={() => onBlur(getFieldKey("description"))}
                 />
               </div>
             </div>
@@ -192,7 +194,9 @@ export function RegisterEditor({
                   onDelete={() => handleFieldDelete(index)}
                   errors={errors?.fields ? errors.fields[index] : undefined}
                   touched={touched}
-                  onBlur={(fieldName) => onBlur(getFieldKey(`fields.${index}.${fieldName}`))}
+                  onBlur={(fieldName) =>
+                    onBlur(getFieldKey(`fields.${index}.${fieldName}`))
+                  }
                 />
               ))}
 
@@ -235,4 +239,3 @@ export function RegisterEditor({
     </div>
   );
 }
-
