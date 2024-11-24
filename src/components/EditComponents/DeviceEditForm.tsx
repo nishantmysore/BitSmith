@@ -55,7 +55,28 @@ export function DeviceEditForm() {
   }, [selectedDevice, reset]);
 
   const onSubmit = async (data: DeviceFormData) => {
-    console.log("SUCCESS", data);
+    try {
+      const response = await fetch(`/api/devices/${selectedDevice?.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update device');
+      }
+
+      const updatedDevice = await response.json();
+      // Update your local state/context with the updated device
+      setSelectedDevice(updatedDevice);
+      // You might want to refresh your devices list here as well
+    } catch (error) {
+      console.error('Error updating device:', error);
+      // Handle error appropriately (e.g., show error message to user)
+    }
   };
 
   return (

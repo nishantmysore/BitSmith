@@ -90,7 +90,6 @@ export const DeviceValidateSchema: ZodType<DeviceFormData> = z.object({
     description: z.string({required_error: "Device description is required"}).min(1, {message: "Device description is too short"}).max(500, {message: "Device description is too long"}),
     base_address: z.string().regex(/[0-9A-Fa-f]+/g, "Device base address be a valid hex value"),
     isPublic: z.boolean({required_error: "isPublic is required",}),
-    registers: z.array(RegisterValidateSchema),
   });
 
 
