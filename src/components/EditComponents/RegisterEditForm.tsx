@@ -62,8 +62,12 @@ const RegisterEditForm = ({
     onRemove();
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onChanged();
+  };
+
   return (
-    <div onChange={onChanged}>
+    <div>
       <Accordion
         type="single"
         collapsible
@@ -93,8 +97,11 @@ const RegisterEditForm = ({
                   <Input
                     id={`registers.${index}.name`}
                     {...register(`registers.${index}.name`)}
+                    onChange={(e) => {
+                      register(`registers.${index}.name`).onChange(e);
+                      handleInputChange(e);
+                    }}
                   />
-
                   {errors?.name && (
                     <Alert variant="destructive">
                       <AlertDescription>{errors.name.message}</AlertDescription>
@@ -108,6 +115,10 @@ const RegisterEditForm = ({
                   <Input
                     id={`registers.${index}.description`}
                     {...register(`registers.${index}.description`)}
+                    onChange={(e) => {
+                      register(`registers.${index}.description`).onChange(e);
+                      handleInputChange(e);
+                    }}
                   />
                   {errors?.description && (
                     <Alert variant="destructive">
@@ -124,6 +135,10 @@ const RegisterEditForm = ({
                   <Input
                     id={`registers.${index}.address`}
                     {...register(`registers.${index}.address`)}
+                    onChange={(e) => {
+                      register(`registers.${index}.address`).onChange(e);
+                      handleInputChange(e);
+                    }}
                   />
                   {errors?.address && (
                     <Alert variant="destructive">
@@ -135,25 +150,24 @@ const RegisterEditForm = ({
                 </div>
                 <div className="flex-1 space-y-2">
                   <Label htmlFor={`registers.${index}.width`}>Width</Label>
-                    <Select
-                      {...register(`registers.${index}.width`)}
-                      value={watch(`registers.${index}.width`)}
-                      onValueChange={(value) => {
-                        setValue(`registers.${index}.width`, value);
-                        onChanged();
-                      }}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select width" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {acceptedWidthsStr.map((width) => (
-                          <SelectItem key={width} value={width}>
-                            {width}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  
+                  <Select
+                    {...register(`registers.${index}.width`)}
+                    value={watch(`registers.${index}.width`)}
+                    onValueChange={(value) => {
+                      setValue(`registers.${index}.width`, value);
+                      onChanged();
+                    }}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select width" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {acceptedWidthsStr.map((width) => (
+                        <SelectItem key={width} value={width}>
+                          {width}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   {errors?.width && (
                     <Alert variant="destructive">
                       <AlertDescription>
