@@ -35,7 +35,7 @@ export type RegisterFormData = {
   width: string;
   address: string;
   status: Status; 
-  fields?: FieldFormData;
+  fields?: FieldFormData[];
 };
 
 export type RegisterFormFieldProps = {
@@ -57,6 +57,7 @@ export type FieldFormData = {
   name: string;
   description: string;
   bits: string;
+  status: Status; 
   access: AccessType;
 };
 

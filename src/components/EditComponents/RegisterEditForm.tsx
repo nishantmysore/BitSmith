@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Trash2 } from "lucide-react";
-import { DeviceFormData } from '@/types/validation';
-import { UseFormRegister } from 'react-hook-form';
+import { DeviceFormData, RegisterFormData } from "@/types/validation";
+import { UseFormRegister, UseFormWatch, UseFormSetValue} from "react-hook-form";
+import { FieldErrors } from "react-hook-form";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 import {
   Select,
@@ -28,23 +30,29 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { acceptedWidthsStr } from '@/types/validation';
+import { acceptedWidthsStr } from "@/types/validation";
 
 const RegisterEditForm = ({
   index,
   register,
+  watch,
+  setValue,
   onChanged,
   onRemove,
-} : {
+  errors,
+}: {
   index: number;
   register: UseFormRegister<DeviceFormData>;
+  watch: UseFormWatch<DeviceFormData>; 
+  setValue: UseFormSetValue<DeviceFormData>; 
   onChanged: () => void;
   onRemove: () => void;
+  errors?: FieldErrors<RegisterFormData>;
 }) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
 
-  const handleDelete = (e: any ) => {
+  const handleDelete = (e: any) => {
     e.stopPropagation();
     setIsDeleteDialogOpen(true);
   };
@@ -68,8 +76,8 @@ const RegisterEditForm = ({
             <AccordionTrigger className="flex-1">
               <span>New Register</span>
             </AccordionTrigger>
-            
-            <div 
+
+            <div
               onClick={handleDelete}
               className="p-2 hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer"
             >
@@ -86,13 +94,28 @@ const RegisterEditForm = ({
                     id={`registers.${index}.name`}
                     {...register(`registers.${index}.name`)}
                   />
+
+                  {errors?.name && (
+                    <Alert variant="destructive">
+                      <AlertDescription>{errors.name.message}</AlertDescription>
+                    </Alert>
+                  )}
                 </div>
                 <div className="flex-1 space-y-2">
-                  <Label htmlFor={`registers.${index}.description`}>Description</Label>
+                  <Label htmlFor={`registers.${index}.description`}>
+                    Description
+                  </Label>
                   <Input
                     id={`registers.${index}.description`}
                     {...register(`registers.${index}.description`)}
                   />
+                  {errors?.description && (
+                    <Alert variant="destructive">
+                      <AlertDescription>
+                        {errors.description.message}
+                      </AlertDescription>
+                    </Alert>
+                  )}
                 </div>
               </div>
               <div className="flex gap-4">
@@ -102,26 +125,42 @@ const RegisterEditForm = ({
                     id={`registers.${index}.address`}
                     {...register(`registers.${index}.address`)}
                   />
+                  {errors?.address && (
+                    <Alert variant="destructive">
+                      <AlertDescription>
+                        {errors.address.message}
+                      </AlertDescription>
+                    </Alert>
+                  )}
                 </div>
                 <div className="flex-1 space-y-2">
                   <Label htmlFor={`registers.${index}.width`}>Width</Label>
-                  <Select
-                    onValueChange={(value) => {
-                      register(`registers.${index}.width`).onChange({ target: { value } });
-                      onChanged();
-                    }}
-                  >
-                    <SelectTrigger id={`registers.${index}.width`}>
-                      <SelectValue placeholder="Select width" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {acceptedWidthsStr.map((width) => (
-                        <SelectItem key={width} value={width}>
-                          {width}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    <Select
+                      {...register(`registers.${index}.width`)}
+                      value={watch(`registers.${index}.width`)}
+                      onValueChange={(value) => {
+                        setValue(`registers.${index}.width`, value);
+                        onChanged();
+                      }}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select width" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {acceptedWidthsStr.map((width) => (
+                          <SelectItem key={width} value={width}>
+                            {width}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  
+                  {errors?.width && (
+                    <Alert variant="destructive">
+                      <AlertDescription>
+                        {errors.width.message}
+                      </AlertDescription>
+                    </Alert>
+                  )}
                 </div>
               </div>
             </div>
@@ -137,7 +176,8 @@ const RegisterEditForm = ({
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Register</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this register? This action cannot be undone.
+              Are you sure you want to delete this register? This action cannot
+              be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
