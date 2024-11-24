@@ -3,7 +3,6 @@
 import { useDevice } from "@/DeviceContext";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useSession } from "next-auth/react";
 import {
   DeviceFormData,
   DeviceValidateSchema,
@@ -16,7 +15,6 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useEffect } from "react";
 import RegisterEditForm from "./RegisterEditForm";
-import { Trash2 } from "lucide-react";
 
 import {
   Select,
@@ -28,7 +26,6 @@ import {
 
 export function DeviceEditForm() {
   const { selectedDevice, setSelectedDevice, devices } = useDevice();
-  const { data: session } = useSession();
 
   const {
     register,
@@ -38,7 +35,6 @@ export function DeviceEditForm() {
     setValue,
     reset,
     formState: { errors },
-    setError,
   } = useForm<DeviceFormData>({
     resolver: zodResolver(DeviceValidateSchema),
     defaultValues: {
@@ -95,7 +91,12 @@ export function DeviceEditForm() {
     }
   }, [selectedDevice, reset]);
 
+  const onError = (errors: any) => {
+    console.log("Submit Error:", errors);
+  };
+
   const onSubmit = async (data: DeviceFormData) => {
+    console.log(data)
     try {
       const response = await fetch(`/api/devices/${selectedDevice?.id}`, {
         method: "PUT",
@@ -160,7 +161,7 @@ export function DeviceEditForm() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-3">
-            <form onSubmit={handleSubmit(onSubmit)}>
+            <form onSubmit={handleSubmit(onSubmit,onError)}>
               <div className="grid gap-6 mb-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Device Name</Label>
