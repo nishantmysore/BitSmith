@@ -10,7 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import DeviceFormField from "./DeviceFormField";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { useEffect } from 'react';
+import { useEffect } from "react";
 
 import {
   Select,
@@ -39,7 +39,7 @@ export function DeviceEditForm() {
       description: "",
       base_address: "",
       isPublic: false,
-    }
+    },
   });
 
   // Reset form when selectedDevice changes
@@ -131,16 +131,13 @@ export function DeviceEditForm() {
                   />
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Label
-                    htmlFor="isPublic"
-                    className="text-sm font-medium"
-                  >
+                  <Label htmlFor="isPublic" className="text-sm font-medium">
                     Public
                   </Label>
                   <Switch
                     id="isPublic"
                     {...register("isPublic")}
-                    checked={watch("isPublic")} 
+                    checked={watch("isPublic")}
                     onCheckedChange={(checked) => setValue("isPublic", checked)}
                   />
                 </div>
