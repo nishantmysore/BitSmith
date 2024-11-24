@@ -6,9 +6,11 @@ import { DeviceValidateSchema } from "@/types/validation";
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: any } }
 ) {
   try {
+    const {id} = await params;
+
     // Get the session and verify authentication
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -23,13 +25,14 @@ export async function PUT(
       where: { id: session.user.id },
     });
 
+    console.log(id)
     if (!user) { 
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Get the device and verify ownership
     const existingDevice = await prisma.device.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: { owner: true },
     });
 
@@ -57,7 +60,7 @@ export async function PUT(
 
     // Update the device
     const updatedDevice = await prisma.device.update({
-      where: { id: params.id },
+      where: { id: id },
       data: {
         name: validatedData.data.name,
         description: validatedData.data.description,
@@ -83,7 +86,7 @@ export async function DELETE(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
+    if (!session?.user?.id) {
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
@@ -91,7 +94,7 @@ export async function DELETE(
     }
 
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
+      where: { id: session.user.id },
     });
 
     if (!user) {
