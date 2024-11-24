@@ -24,4 +24,3 @@ const RegisterFormField: React.FC<RegisterFormFieldProps> = ({
   </>
 );
 export default RegisterFormField;
-

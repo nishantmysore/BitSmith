@@ -3,12 +3,15 @@ import { FieldError, UseFormRegister} from "react-hook-form"
 import { z, ZodType } from "zod"; 
 
 export const acceptedWidthsStr = ["1","2","4","8","16","32","64","128"] as const;
+const STATUS_VALUES = ["unchanged", "added", "modified", "deleted"] as const;
+export type Status = typeof STATUS_VALUES[number];
 
 export type DeviceFormData = {
   name: string;
   description: string;
   base_address: string;
   isPublic: boolean;
+  registers: RegisterFormData[];
 };
 
 export type DeviceFormFieldProps = {
@@ -31,6 +34,7 @@ export type RegisterFormData = {
   description: string;
   width: string;
   address: string;
+  status: Status; 
 };
 
 export type RegisterFormFieldProps = {
@@ -83,13 +87,14 @@ export const RegisterValidateSchema: ZodType<RegisterFormData> = z.object({
     address: z.string().regex(/[0-9A-Fa-f]+/g, "Register Address must be a valid hex value"),
     width: z.enum(acceptedWidthsStr), 
     fields: z.array(FieldValidateSchema),
+    status: z.enum(STATUS_VALUES),
 });
 
-export const DeviceValidateSchema: ZodType<DeviceFormData> = z.object({
+export const DeviceValidateSchema: ZodType<Omit<DeviceFormData, 'registers'>> = z.object({
     name: z.string({required_error: "Device name is required"}).min(1, {message: "Device name is too short"}).max(30, {message: "Device name is too long"}),
     description: z.string({required_error: "Device description is required"}).min(1, {message: "Device description is too short"}).max(500, {message: "Device description is too long"}),
     base_address: z.string().regex(/[0-9A-Fa-f]+/g, "Device base address be a valid hex value"),
     isPublic: z.boolean({required_error: "isPublic is required",}),
-  });
+});
 
 

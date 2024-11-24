@@ -4,13 +4,19 @@ import { useDevice } from "@/DeviceContext";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useSession } from "next-auth/react";
-import { DeviceFormData, DeviceValidateSchema } from "@/types/validation";
-import { useForm } from "react-hook-form";
+import {
+  DeviceFormData,
+  DeviceValidateSchema,
+  Status,
+} from "@/types/validation";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import DeviceFormField from "./DeviceFormField";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useEffect } from "react";
+import RegisterEditForm from "./RegisterEditForm";
+import { Trash2 } from "lucide-react";
 
 import {
   Select,
@@ -28,6 +34,7 @@ export function DeviceEditForm() {
     register,
     handleSubmit,
     watch,
+    control,
     setValue,
     reset,
     formState: { errors },
@@ -39,8 +46,42 @@ export function DeviceEditForm() {
       description: "",
       base_address: "",
       isPublic: false,
+      registers: [],
     },
   });
+
+  const { fields, append, remove, update } = useFieldArray({
+    control,
+    name: "registers",
+  });
+
+  const handleRegisterChange = (index: number) => {
+    const register = fields[index];
+    if (register.status === "unchanged") {
+      update(index, { ...register, status: "modified" as Status });
+    }
+  };
+
+  const handleRegisterRemove = (index: number) => {
+    const register = fields[index];
+    if (register.id) {
+      // If it exists in database, mark as deleted instead of removing
+      update(index, { ...register, status: "deleted" as Status });
+    } else {
+      // If it's new, just remove it
+      remove(index);
+    }
+  };
+
+  const handleRegisterAdd = () => {
+    append({
+      name: "",
+      description: "",
+      width: "32",
+      address: "",
+      status: "added" as Status,
+    });
+  };
 
   // Reset form when selectedDevice changes
   useEffect(() => {
@@ -57,16 +98,16 @@ export function DeviceEditForm() {
   const onSubmit = async (data: DeviceFormData) => {
     try {
       const response = await fetch(`/api/devices/${selectedDevice?.id}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to update device');
+        throw new Error(errorData.error || "Failed to update device");
       }
 
       const updatedDevice = await response.json();
@@ -74,7 +115,7 @@ export function DeviceEditForm() {
       setSelectedDevice(updatedDevice);
       // You might want to refresh your devices list here as well
     } catch (error) {
-      console.error('Error updating device:', error);
+      console.error("Error updating device:", error);
       // Handle error appropriately (e.g., show error message to user)
     }
   };
@@ -163,6 +204,32 @@ export function DeviceEditForm() {
                   />
                 </div>
               </div>
+
+              <Card className="mb-4">
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold">
+                    Registers
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {fields.map(
+                    (field: any, index: number) =>
+                      field.status !== "deleted" && (
+                        <RegisterEditForm
+                          key={field.id || index}
+                          index={index}
+                          register={register}
+                          onChanged={() => handleRegisterChange(index)}
+                          onRemove={() => handleRegisterRemove(index)}
+                        />
+                      ),
+                  )}
+
+                  <Button type="button" onClick={handleRegisterAdd}>
+                    Add Register
+                  </Button>
+                </CardContent>
+              </Card>
               <div className="flex justify-center">
                 <Button type="submit">Update Device</Button>
               </div>
