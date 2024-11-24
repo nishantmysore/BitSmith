@@ -1,7 +1,7 @@
+import React, { useState } from 'react';
 import { UseFormRegister } from "react-hook-form";
-import { DeviceFormData, acceptedWidthsStr } from "@/types/validation";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Trash2 } from "lucide-react";
 import {
   Select,
@@ -10,39 +10,41 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-
 import {
   AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
-  AlertDialogCancel,
-  AlertDialogAction,
 } from "@/components/ui/alert-dialog";
-import { useState } from "react";
 
 const RegisterEditForm = ({
   index,
   register,
   onChanged,
   onRemove,
-}: {
-  index: number;
-  register: UseFormRegister<DeviceFormData>;
-  onChanged: () => void;
-  onRemove: () => void;
 }) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isAccordionOpen, setIsAccordionOpen] = useState(false);
+
+  const handleDelete = (e) => {
+    e.stopPropagation();
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    setIsDeleteDialogOpen(false);
+    onRemove();
+  };
 
   return (
     <div onChange={onChanged}>
@@ -50,44 +52,23 @@ const RegisterEditForm = ({
         type="single"
         collapsible
         className="w-full border rounded-lg mb-4"
+        value={isAccordionOpen ? "basic-info" : ""}
+        onValueChange={(value) => setIsAccordionOpen(value === "basic-info")}
       >
         <AccordionItem value="basic-info">
-          <AccordionTrigger className="px-4">
-            <div className="flex items-center justify-between w-full">
-              <span>{"New Register"}</span>
-
-              <AlertDialog
-                open={isDeleteDialogOpen}
-                onOpenChange={setIsDeleteDialogOpen}
-              >
-                <AlertDialogTrigger asChild>
-                  <div className="">
-                    <div
-                      className="p-2 hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <Trash2 className=" text-destructive" />
-                    </div>
-                  </div>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Delete Register</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Are you sure you want to delete this register? This action
-                      cannot be undone.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={onRemove}>
-                      Delete
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+          <div className="flex items-center justify-between px-4">
+            <AccordionTrigger className="flex-1">
+              <span>New Register</span>
+            </AccordionTrigger>
+            
+            <div 
+              onClick={handleDelete}
+              className="p-2 hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer"
+            >
+              <Trash2 className="text-destructive" />
             </div>
-          </AccordionTrigger>
+          </div>
+
           <AccordionContent>
             <div className="space-y-6 p-4">
               <div className="flex gap-4">
@@ -99,17 +80,13 @@ const RegisterEditForm = ({
                   />
                 </div>
                 <div className="flex-1 space-y-2">
-                  <Label htmlFor={`registers.${index}.description`}>
-                    Description
-                  </Label>
+                  <Label htmlFor={`registers.${index}.description`}>Description</Label>
                   <Input
                     id={`registers.${index}.description`}
                     {...register(`registers.${index}.description`)}
                   />
                 </div>
               </div>
-            </div>
-            <div className="space-y-6 p-4">
               <div className="flex gap-4">
                 <div className="flex-1 space-y-2">
                   <Label htmlFor={`registers.${index}.address`}>Address</Label>
@@ -122,10 +99,7 @@ const RegisterEditForm = ({
                   <Label htmlFor={`registers.${index}.width`}>Width</Label>
                   <Select
                     onValueChange={(value) => {
-                      const event = {
-                        target: { value },
-                      };
-                      register(`registers.${index}.width`).onChange(event);
+                      register(`registers.${index}.width`).onChange({ target: { value } });
                       onChanged();
                     }}
                   >
@@ -133,7 +107,7 @@ const RegisterEditForm = ({
                       <SelectValue placeholder="Select width" />
                     </SelectTrigger>
                     <SelectContent>
-                      {acceptedWidthsStr.map((width) => (
+                      {["8", "16", "32"].map((width) => (
                         <SelectItem key={width} value={width}>
                           {width}
                         </SelectItem>
@@ -146,6 +120,26 @@ const RegisterEditForm = ({
           </AccordionContent>
         </AccordionItem>
       </Accordion>
+
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Register</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this register? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
