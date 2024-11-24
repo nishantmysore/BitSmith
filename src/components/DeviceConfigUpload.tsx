@@ -167,9 +167,9 @@ export default function DeviceConfigUpload() {
   };
 
   return (
-    <Card className="w-full max-w-4xl mx-auto">
+    <Card className="w-full">
       <CardHeader>
-        <CardTitle>Upload New Device Configuration</CardTitle>
+        <CardTitle >Upload New Device Configuration</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-4">

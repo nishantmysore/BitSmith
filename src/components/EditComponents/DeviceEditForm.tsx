@@ -84,7 +84,7 @@ export function DeviceEditForm() {
       <Card className="mb-4">
         <CardHeader>
           <CardTitle className="text-lg font-semibold">
-            Device Selection
+            Select a Device
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
