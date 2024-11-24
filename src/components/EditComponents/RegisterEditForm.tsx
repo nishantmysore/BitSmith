@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { UseFormRegister } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Trash2 } from "lucide-react";
+import { DeviceFormData } from '@/types/validation';
+import { UseFormRegister } from 'react-hook-form';
+
 import {
   Select,
   SelectContent,
@@ -26,17 +28,23 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { acceptedWidthsStr } from '@/types/validation';
 
 const RegisterEditForm = ({
   index,
   register,
   onChanged,
   onRemove,
+} : {
+  index: number;
+  register: UseFormRegister<DeviceFormData>;
+  onChanged: () => void;
+  onRemove: () => void;
 }) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
 
-  const handleDelete = (e) => {
+  const handleDelete = (e: any ) => {
     e.stopPropagation();
     setIsDeleteDialogOpen(true);
   };
@@ -107,7 +115,7 @@ const RegisterEditForm = ({
                       <SelectValue placeholder="Select width" />
                     </SelectTrigger>
                     <SelectContent>
-                      {["8", "16", "32"].map((width) => (
+                      {acceptedWidthsStr.map((width) => (
                         <SelectItem key={width} value={width}>
                           {width}
                         </SelectItem>
