@@ -87,20 +87,20 @@ export function DeviceEditForm() {
         description: selectedDevice.description,
         base_address: selectedDevice.base_address,
         isPublic: selectedDevice.isPublic,
-        registers: selectedDevice.registers.map(reg => ({
+        registers: selectedDevice.registers.map((reg) => ({
           name: reg.name,
           description: reg.description,
           width: reg.width.toString(),
           address: reg.address,
-          status: 'unchanged' as Status,
-          fields: reg.fields.map(field => ({
+          status: "unchanged" as Status,
+          fields: reg.fields.map((field) => ({
             name: field.name,
             description: field.description,
             bits: field.bits,
             access: field.access,
-            status: 'unchanged' as Status,
-          }))
-      }))
+            status: "unchanged" as Status,
+          })),
+        })),
       });
     }
   }, [selectedDevice, reset]);
@@ -126,7 +126,7 @@ export function DeviceEditForm() {
       }
 
       const updatedDevice = await response.json();
-      console.log(updatedDevice)
+      console.log(updatedDevice);
       // You might want to refresh your devices list here as well
     } catch (error) {
       console.error("Error updating device:", error);

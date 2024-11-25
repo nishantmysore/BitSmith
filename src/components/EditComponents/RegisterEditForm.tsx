@@ -3,7 +3,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Trash2 } from "lucide-react";
 import { DeviceFormData, RegisterFormData } from "@/types/validation";
-import { UseFormRegister, UseFormWatch, UseFormSetValue} from "react-hook-form";
+import {
+  UseFormRegister,
+  UseFormWatch,
+  UseFormSetValue,
+} from "react-hook-form";
 import { FieldErrors } from "react-hook-form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
@@ -43,8 +47,8 @@ const RegisterEditForm = ({
 }: {
   index: number;
   register: UseFormRegister<DeviceFormData>;
-  watch: UseFormWatch<DeviceFormData>; 
-  setValue: UseFormSetValue<DeviceFormData>; 
+  watch: UseFormWatch<DeviceFormData>;
+  setValue: UseFormSetValue<DeviceFormData>;
   onChanged: () => void;
   onRemove: () => void;
   errors?: FieldErrors<RegisterFormData>;
@@ -156,7 +160,8 @@ const RegisterEditForm = ({
                     onValueChange={(value) => {
                       setValue(`registers.${index}.width`, value);
                       onChanged();
-                    }}>
+                    }}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select width" />
                     </SelectTrigger>
