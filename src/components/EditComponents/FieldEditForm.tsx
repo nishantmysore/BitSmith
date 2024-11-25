@@ -66,7 +66,10 @@ const FieldEdit = ({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   return (
-    <div className="border rounded-lg p-4 mb-4">
+    <div
+      className="border rounded-lg p-4 mb-4"
+      onClick={(e) => e.stopPropagation()}
+    >
       <div className="flex justify-between items-center p-4">
         <h4 className="text-sm font-medium">
           <span>
@@ -95,6 +98,7 @@ const FieldEdit = ({
               {...register(
                 `registers.${registerIndex}.fields.${fieldIndex}.name`,
               )}
+              onClick={(e) => e.stopPropagation()}
               onChange={(e) => {
                 register(
                   `registers.${registerIndex}.fields.${fieldIndex}.name`,
@@ -121,6 +125,7 @@ const FieldEdit = ({
                 `registers.${registerIndex}.fields.${fieldIndex}.bits`,
               )}
               placeholder="e.g., 31:24 or 7"
+              onClick={(e) => e.stopPropagation()}
               onChange={(e) => {
                 register(
                   `registers.${registerIndex}.fields.${fieldIndex}.bits`,
@@ -148,6 +153,7 @@ const FieldEdit = ({
               {...register(
                 `registers.${registerIndex}.fields.${fieldIndex}.description`,
               )}
+              onClick={(e) => e.stopPropagation()}
               onChange={(e) => {
                 register(
                   `registers.${registerIndex}.fields.${fieldIndex}.description`,
@@ -182,7 +188,7 @@ const FieldEdit = ({
                 onChanged();
               }}
             >
-              <SelectTrigger>
+              <SelectTrigger onClick={(e) => e.stopPropagation()}>
                 <SelectValue placeholder="Select access type" />
               </SelectTrigger>
               <SelectContent>
@@ -210,8 +216,8 @@ const FieldEdit = ({
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Register</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this field? This action cannot
-              be undone.
+              Are you sure you want to delete this field? This action cannot be
+              undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -15,7 +15,6 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useEffect } from "react";
 import RegisterEditForm from "./RegisterEditForm";
-
 import {
   Select,
   SelectContent,
@@ -23,9 +22,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useState, MouseEvent } from "react";
 
 export function DeviceEditForm() {
   const { selectedDevice, setSelectedDevice, devices } = useDevice();
+  const [registerToDelete, setRegisterToDelete] = useState<number | null>(null);
 
   const {
     register,
@@ -45,6 +63,18 @@ export function DeviceEditForm() {
       registers: [],
     },
   });
+
+  const handleDelete = (e: MouseEvent, index: number) => {
+    e.stopPropagation();
+    setRegisterToDelete(index);
+  };
+
+  const handleConfirmDelete = () => {
+    if (registerToDelete !== null) {
+      handleRegisterRemove(registerToDelete);
+      setRegisterToDelete(null);
+    }
+  };
 
   const { fields, append, remove, update } = useFieldArray({
     control,
@@ -226,22 +256,45 @@ export function DeviceEditForm() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {fields.map(
-                    (field: any, index: number) =>
-                      field.status !== "deleted" && (
-                        <RegisterEditForm
+                  <Accordion
+                    type="single"
+                    collapsible
+                    className="w-full border rounded-lg p-4"
+                  >
+                    {fields
+                      .filter((field) => field.status !== "deleted")
+                      .map((field, index) => (
+                        <AccordionItem
                           key={field.id || index}
-                          index={index}
-                          register={register}
-                          onChanged={() => handleRegisterChange(index)}
-                          onRemove={() => handleRegisterRemove(index)}
-                          errors={errors.registers?.[index]}
-                          watch={watch}
-                          setValue={setValue}
-                        />
-                      ),
-                  )}
-
+                          value={`register-${index}`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <AccordionTrigger className="flex-1">
+                              {watch(`registers.${index}.name`) ||
+                                "New Register"}
+                            </AccordionTrigger>
+                            <button
+                              type="button"
+                              onClick={(e) => handleDelete(e, index)}
+                              className="p-2 hover:bg-accent hover:text-accent-foreground rounded-md"
+                            >
+                              <Trash2 className="text-destructive" />
+                            </button>
+                          </div>
+                          <AccordionContent>
+                            <RegisterEditForm
+                              key={field.id || index}
+                              index={index}
+                              register={register}
+                              onChanged={() => handleRegisterChange(index)}
+                              errors={errors.registers?.[index]}
+                              watch={watch}
+                              setValue={setValue}
+                            />
+                          </AccordionContent>
+                        </AccordionItem>
+                      ))}
+                  </Accordion>
                   <Button type="button" onClick={handleRegisterAdd}>
                     Add Register
                   </Button>
@@ -254,6 +307,29 @@ export function DeviceEditForm() {
           </div>
         </CardContent>
       </Card>
+
+      <AlertDialog
+        open={registerToDelete !== null}
+        onOpenChange={(open) => {
+          if (!open) setRegisterToDelete(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Register</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this register? This action cannot
+              be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
