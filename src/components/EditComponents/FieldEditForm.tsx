@@ -4,6 +4,17 @@ import { Label } from "@/components/ui/label";
 import { Trash2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { DeviceFormData, FieldFormData } from "@/types/validation";
+import { useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   UseFormWatch,
   UseFormRegister,
@@ -42,6 +53,18 @@ const FieldEdit = ({
     onChanged();
   };
 
+  const handleConfirmDelete = () => {
+    setIsDeleteDialogOpen(false);
+    onRemove();
+  };
+
+  const handleDelete = (e: any) => {
+    e.stopPropagation();
+    setIsDeleteDialogOpen(true);
+  };
+
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
   return (
     <div className="border rounded-lg p-4 mb-4">
       <div className="flex justify-between items-center p-4">
@@ -52,7 +75,7 @@ const FieldEdit = ({
           </span>
         </h4>
         <div
-          onClick={onRemove}
+          onClick={handleDelete}
           className="p-2 hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer"
         >
           <Trash2 className="h-4 w-4 text-destructive" />
@@ -76,7 +99,7 @@ const FieldEdit = ({
                 register(
                   `registers.${registerIndex}.fields.${fieldIndex}.name`,
                 ).onChange(e);
-                handleInputChange(e);
+                handleInputChange();
               }}
             />
             {errors?.name && (
@@ -102,7 +125,7 @@ const FieldEdit = ({
                 register(
                   `registers.${registerIndex}.fields.${fieldIndex}.bits`,
                 ).onChange(e);
-                handleInputChange(e);
+                handleInputChange();
               }}
             />
             {errors?.bits && (
@@ -129,7 +152,7 @@ const FieldEdit = ({
                 register(
                   `registers.${registerIndex}.fields.${fieldIndex}.description`,
                 ).onChange(e);
-                handleInputChange(e);
+                handleInputChange();
               }}
             />
             {errors?.description && (
@@ -178,6 +201,27 @@ const FieldEdit = ({
           </div>
         </div>
       </div>
+
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Register</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this field? This action cannot
+              be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
