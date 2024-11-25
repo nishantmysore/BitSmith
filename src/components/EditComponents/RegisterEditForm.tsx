@@ -3,12 +3,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Trash2 } from "lucide-react";
 import { DeviceFormData, RegisterFormData } from "@/types/validation";
+import { Button } from "@/components/ui/button";
 import {
   UseFormRegister,
   UseFormWatch,
   UseFormSetValue,
+  FieldErrors,
 } from "react-hook-form";
-import { FieldErrors } from "react-hook-form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 import {
@@ -35,6 +36,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { acceptedWidthsStr } from "@/types/validation";
+import { Plus } from "lucide-react";
+import FieldEdit from "./FieldEditForm";
+import { AccessType } from "@prisma/client";
 
 const RegisterEditForm = ({
   index,
@@ -69,6 +73,47 @@ const RegisterEditForm = ({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChanged();
   };
+ 
+  // Added function to handle adding a new field
+  const handleAddField = () => {
+    const currentFields = watch(`registers.${index}.fields`) || [];
+    setValue(`registers.${index}.fields`, [
+      ...currentFields,
+      {
+        name: "",
+        description: "",
+        bits: "",
+        access: "RW" as AccessType,
+        status: "added",
+      },
+    ]);
+    onChanged();
+  };
+
+  // Added function to handle field changes
+  const handleFieldChange = () => {
+    onChanged();
+  };
+
+  // Added function to handle field removal
+  const handleFieldRemove = (fieldIndex: number) => {
+    const currentFields = watch(`registers.${index}.fields`) || [];
+    const field = currentFields[fieldIndex];
+    
+    if (field.status === "unchanged") {
+      // Mark existing field as deleted
+      const updatedFields = [...currentFields];
+      updatedFields[fieldIndex] = { ...field, status: "deleted" };
+      setValue(`registers.${index}.fields`, updatedFields);
+    } else {
+      // Remove new field entirely
+      const updatedFields = currentFields.filter((_, i) => i !== fieldIndex);
+      setValue(`registers.${index}.fields`, updatedFields);
+    }
+    onChanged();
+  };
+
+  const fields = watch(`registers.${index}.fields`) || [];
 
   return (
     <div>
@@ -82,7 +127,9 @@ const RegisterEditForm = ({
         <AccordionItem value="basic-info">
           <div className="flex items-center justify-between px-4">
             <AccordionTrigger className="flex-1">
-              <span>New Register</span>
+              <span>
+                {watch(`registers.${index}.name`) || "New Register"}
+              </span>
             </AccordionTrigger>
 
             <div
@@ -183,6 +230,36 @@ const RegisterEditForm = ({
                 </div>
               </div>
             </div>
+          <div className="space-y-4 p-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold">Fields</h3>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleAddField}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Field
+              </Button>
+            </div>
+
+            {fields.map((field, fieldIndex) => 
+              field.status !== "deleted" && (
+                <FieldEdit
+                  key={fieldIndex}
+                  registerIndex={index}
+                  fieldIndex={fieldIndex}
+                  register={register}
+                  watch={watch}
+                  setValue={setValue}
+                  onChanged={handleFieldChange}
+                  onRemove={() => handleFieldRemove(fieldIndex)}
+                  errors={errors?.fields?.[fieldIndex]}
+                />
+              )
+            )}
+          </div>
           </AccordionContent>
         </AccordionItem>
       </Accordion>
