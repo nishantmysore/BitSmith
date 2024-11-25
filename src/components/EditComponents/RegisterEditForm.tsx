@@ -70,10 +70,10 @@ const RegisterEditForm = ({
     onRemove();
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = () => {
     onChanged();
   };
- 
+
   // Added function to handle adding a new field
   const handleAddField = () => {
     const currentFields = watch(`registers.${index}.fields`) || [];
@@ -99,7 +99,7 @@ const RegisterEditForm = ({
   const handleFieldRemove = (fieldIndex: number) => {
     const currentFields = watch(`registers.${index}.fields`) || [];
     const field = currentFields[fieldIndex];
-    
+
     if (field.status === "unchanged") {
       // Mark existing field as deleted
       const updatedFields = [...currentFields];
@@ -118,6 +118,7 @@ const RegisterEditForm = ({
   return (
     <div>
       <Accordion
+        key={`register-${index}`}
         type="single"
         collapsible
         className="w-full border rounded-lg mb-4"
@@ -127,9 +128,7 @@ const RegisterEditForm = ({
         <AccordionItem value="basic-info">
           <div className="flex items-center justify-between px-4">
             <AccordionTrigger className="flex-1">
-              <span>
-                {watch(`registers.${index}.name`) || "New Register"}
-              </span>
+              <span>{watch(`registers.${index}.name`) || "New Register"}</span>
             </AccordionTrigger>
 
             <div
@@ -150,7 +149,7 @@ const RegisterEditForm = ({
                     {...register(`registers.${index}.name`)}
                     onChange={(e) => {
                       register(`registers.${index}.name`).onChange(e);
-                      handleInputChange(e);
+                      handleInputChange();
                     }}
                   />
                   {errors?.name && (
@@ -168,7 +167,7 @@ const RegisterEditForm = ({
                     {...register(`registers.${index}.description`)}
                     onChange={(e) => {
                       register(`registers.${index}.description`).onChange(e);
-                      handleInputChange(e);
+                      handleInputChange();
                     }}
                   />
                   {errors?.description && (
@@ -188,7 +187,7 @@ const RegisterEditForm = ({
                     {...register(`registers.${index}.address`)}
                     onChange={(e) => {
                       register(`registers.${index}.address`).onChange(e);
-                      handleInputChange(e);
+                      handleInputChange();
                     }}
                   />
                   {errors?.address && (
@@ -230,36 +229,37 @@ const RegisterEditForm = ({
                 </div>
               </div>
             </div>
-          <div className="space-y-4 p-4">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold">Fields</h3>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleAddField}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Field
-              </Button>
-            </div>
+            <div className="space-y-4 p-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">Fields</h3>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAddField}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Field
+                </Button>
+              </div>
 
-            {fields.map((field, fieldIndex) => 
-              field.status !== "deleted" && (
-                <FieldEdit
-                  key={fieldIndex}
-                  registerIndex={index}
-                  fieldIndex={fieldIndex}
-                  register={register}
-                  watch={watch}
-                  setValue={setValue}
-                  onChanged={handleFieldChange}
-                  onRemove={() => handleFieldRemove(fieldIndex)}
-                  errors={errors?.fields?.[fieldIndex]}
-                />
-              )
-            )}
-          </div>
+              {fields.map(
+                (field, fieldIndex) =>
+                  field.status !== "deleted" && (
+                    <FieldEdit
+                      key={fieldIndex}
+                      registerIndex={index}
+                      fieldIndex={fieldIndex}
+                      register={register}
+                      watch={watch}
+                      setValue={setValue}
+                      onChanged={handleFieldChange}
+                      onRemove={() => handleFieldRemove(fieldIndex)}
+                      errors={errors?.fields?.[fieldIndex]}
+                    />
+                  ),
+              )}
+            </div>
           </AccordionContent>
         </AccordionItem>
       </Accordion>

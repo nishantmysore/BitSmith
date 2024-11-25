@@ -3,8 +3,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Trash2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { DeviceFormData, FieldFormData, RegisterFormData } from "@/types/validation";
-import { UseFormWatch, UseFormRegister, UseFormSetValue, FieldErrors} from "react-hook-form";
+import { DeviceFormData, FieldFormData } from "@/types/validation";
+import {
+  UseFormWatch,
+  UseFormRegister,
+  UseFormSetValue,
+  FieldErrors,
+} from "react-hook-form";
 import {
   Select,
   SelectContent,
@@ -26,15 +31,14 @@ const FieldEdit = ({
 }: {
   registerIndex: number;
   fieldIndex: number;
-  register:  UseFormRegister<DeviceFormData>;
+  register: UseFormRegister<DeviceFormData>;
   watch: UseFormWatch<DeviceFormData>;
   setValue: UseFormSetValue<DeviceFormData>;
   onChanged: () => void;
   onRemove: () => void;
   errors?: FieldErrors<FieldFormData>;
-
 }) => {
-  const handleInputChange = (e) => {
+  const handleInputChange = () => {
     onChanged();
   };
 
@@ -42,9 +46,10 @@ const FieldEdit = ({
     <div className="border rounded-lg p-4 mb-4">
       <div className="flex justify-between items-center p-4">
         <h4 className="text-sm font-medium">
-        <span>
-          {watch(`registers.${registerIndex}.fields.${fieldIndex}.name`) || "New Field"}
-        </span>
+          <span>
+            {watch(`registers.${registerIndex}.fields.${fieldIndex}.name`) ||
+              "New Field"}
+          </span>
         </h4>
         <div
           onClick={onRemove}
@@ -57,14 +62,20 @@ const FieldEdit = ({
       <div className="space-y-4 p-4">
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor={`registers.${registerIndex}.fields.${fieldIndex}.name`}>
+            <Label
+              htmlFor={`registers.${registerIndex}.fields.${fieldIndex}.name`}
+            >
               Name
             </Label>
             <Input
               id={`registers.${registerIndex}.fields.${fieldIndex}.name`}
-              {...register(`registers.${registerIndex}.fields.${fieldIndex}.name`)}
+              {...register(
+                `registers.${registerIndex}.fields.${fieldIndex}.name`,
+              )}
               onChange={(e) => {
-                register(`registers.${registerIndex}.fields.${fieldIndex}.name`).onChange(e);
+                register(
+                  `registers.${registerIndex}.fields.${fieldIndex}.name`,
+                ).onChange(e);
                 handleInputChange(e);
               }}
             />
@@ -76,15 +87,21 @@ const FieldEdit = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor={`registers.${registerIndex}.fields.${fieldIndex}.bits`}>
+            <Label
+              htmlFor={`registers.${registerIndex}.fields.${fieldIndex}.bits`}
+            >
               Bits
             </Label>
             <Input
               id={`registers.${registerIndex}.fields.${fieldIndex}.bits`}
-              {...register(`registers.${registerIndex}.fields.${fieldIndex}.bits`)}
+              {...register(
+                `registers.${registerIndex}.fields.${fieldIndex}.bits`,
+              )}
               placeholder="e.g., 31:24 or 7"
               onChange={(e) => {
-                register(`registers.${registerIndex}.fields.${fieldIndex}.bits`).onChange(e);
+                register(
+                  `registers.${registerIndex}.fields.${fieldIndex}.bits`,
+                ).onChange(e);
                 handleInputChange(e);
               }}
             />
@@ -98,32 +115,47 @@ const FieldEdit = ({
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor={`registers.${registerIndex}.fields.${fieldIndex}.description`}>
+            <Label
+              htmlFor={`registers.${registerIndex}.fields.${fieldIndex}.description`}
+            >
               Description
             </Label>
             <Input
               id={`registers.${registerIndex}.fields.${fieldIndex}.description`}
-              {...register(`registers.${registerIndex}.fields.${fieldIndex}.description`)}
+              {...register(
+                `registers.${registerIndex}.fields.${fieldIndex}.description`,
+              )}
               onChange={(e) => {
-                register(`registers.${registerIndex}.fields.${fieldIndex}.description`).onChange(e);
+                register(
+                  `registers.${registerIndex}.fields.${fieldIndex}.description`,
+                ).onChange(e);
                 handleInputChange(e);
               }}
             />
             {errors?.description && (
               <Alert variant="destructive">
-                <AlertDescription>{errors.description.message}</AlertDescription>
+                <AlertDescription>
+                  {errors.description.message}
+                </AlertDescription>
               </Alert>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor={`registers.${registerIndex}.fields.${fieldIndex}.access`}>
+            <Label
+              htmlFor={`registers.${registerIndex}.fields.${fieldIndex}.access`}
+            >
               Access
             </Label>
             <Select
-              value={watch(`registers.${registerIndex}.fields.${fieldIndex}.access`)}
+              value={watch(
+                `registers.${registerIndex}.fields.${fieldIndex}.access`,
+              )}
               onValueChange={(value) => {
-                setValue(`registers.${registerIndex}.fields.${fieldIndex}.access`, value as AccessType);
+                setValue(
+                  `registers.${registerIndex}.fields.${fieldIndex}.access`,
+                  value as AccessType,
+                );
                 onChanged();
               }}
             >
