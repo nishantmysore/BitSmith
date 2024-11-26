@@ -49,10 +49,6 @@ const FieldEdit = ({
   onRemove: () => void;
   errors?: FieldErrors<FieldFormData>;
 }) => {
-  const handleInputChange = () => {
-    onChanged();
-  };
-
   const handleConfirmDelete = () => {
     setIsDeleteDialogOpen(false);
     onRemove();
@@ -66,10 +62,7 @@ const FieldEdit = ({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   return (
-    <div
-      className="border rounded-lg p-4 mb-4"
-      onClick={(e) => e.stopPropagation()}
-    >
+    <div className="border rounded-lg p-4 mb-4">
       <div className="flex justify-between items-center p-4">
         <h4 className="text-sm font-medium">
           <span>
@@ -93,18 +86,13 @@ const FieldEdit = ({
             >
               Name
             </Label>
+
             <Input
               id={`registers.${registerIndex}.fields.${fieldIndex}.name`}
               {...register(
                 `registers.${registerIndex}.fields.${fieldIndex}.name`,
               )}
               onClick={(e) => e.stopPropagation()}
-              onChange={(e) => {
-                register(
-                  `registers.${registerIndex}.fields.${fieldIndex}.name`,
-                ).onChange(e);
-                handleInputChange();
-              }}
             />
             {errors?.name && (
               <Alert variant="destructive">
@@ -119,19 +107,13 @@ const FieldEdit = ({
             >
               Bits
             </Label>
+
             <Input
               id={`registers.${registerIndex}.fields.${fieldIndex}.bits`}
               {...register(
                 `registers.${registerIndex}.fields.${fieldIndex}.bits`,
               )}
-              placeholder="e.g., 31:24 or 7"
               onClick={(e) => e.stopPropagation()}
-              onChange={(e) => {
-                register(
-                  `registers.${registerIndex}.fields.${fieldIndex}.bits`,
-                ).onChange(e);
-                handleInputChange();
-              }}
             />
             {errors?.bits && (
               <Alert variant="destructive">
@@ -148,18 +130,13 @@ const FieldEdit = ({
             >
               Description
             </Label>
+
             <Input
               id={`registers.${registerIndex}.fields.${fieldIndex}.description`}
               {...register(
                 `registers.${registerIndex}.fields.${fieldIndex}.description`,
               )}
               onClick={(e) => e.stopPropagation()}
-              onChange={(e) => {
-                register(
-                  `registers.${registerIndex}.fields.${fieldIndex}.description`,
-                ).onChange(e);
-                handleInputChange();
-              }}
             />
             {errors?.description && (
               <Alert variant="destructive">
@@ -216,8 +193,7 @@ const FieldEdit = ({
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Register</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this field? This action cannot be
-              undone.
+              Are you sure you want to delete this field?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

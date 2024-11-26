@@ -107,17 +107,6 @@ export function DeviceEditForm() {
     }
   };
 
-  const handleRegisterRemove = (index: number) => {
-    const register = fields[index];
-    if (register.id) {
-      // If it exists in database, mark as deleted instead of removing
-      update(index, { ...register, status: "deleted" as Status });
-    } else {
-      // If it's new, just remove it
-      remove(index);
-    }
-  };
-
   const handleRegisterAdd = () => {
     append({
       name: "",
@@ -137,12 +126,14 @@ export function DeviceEditForm() {
         base_address: selectedDevice.base_address,
         isPublic: selectedDevice.isPublic,
         registers: selectedDevice.registers.map((reg) => ({
+          id: reg.id,
           name: reg.name,
           description: reg.description,
           width: reg.width.toString(),
           address: reg.address,
           status: "unchanged" as Status,
           fields: reg.fields.map((field) => ({
+            id: field.id,
             name: field.name,
             description: field.description,
             bits: field.bits,
@@ -339,8 +330,7 @@ export function DeviceEditForm() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Register</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this field? This action cannot be
-              undone.
+              Are you sure you want to delete this field?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -30,6 +30,7 @@ export type ValidDeviceFieldNames =
   | "isPublic";
 
 export type RegisterFormData = {
+  id?: string;
   name: string;
   description: string;
   width: string;
@@ -39,6 +40,7 @@ export type RegisterFormData = {
 };
 
 export type RegisterFormFieldProps = {
+  id: string;
   type: string;
   placeholder: string;
   name: ValidDeviceFieldNames;
@@ -54,6 +56,7 @@ export type ValidRegisterFieldNames =
   | "address";
 
 export type FieldFormData = {
+  id?: string;
   name: string;
   description: string;
   bits: string;
@@ -77,6 +80,7 @@ export type ValidFieldFieldNames =
   | "access";
 
 export const FieldValidateSchema: ZodType<FieldFormData> = z.object({
+    id: z.string().optional(),
     name: z.string({required_error: "Field is required"}).min(1, {message: "Field name is too short"}).max(30, {message: "Field name is too long"}),
     description: z.string({required_error: "Field description is required"}).min(1, {message: "Field description is too short"}).max(500, {message: "Field description is too long"}),
     bits: z.string().regex(/[0-9A-Fa-f]+/g, "Field bits must be a range"),
@@ -85,6 +89,7 @@ export const FieldValidateSchema: ZodType<FieldFormData> = z.object({
 });
 
 export const RegisterValidateSchema: ZodType<RegisterFormData> = z.object({
+    id: z.string().optional(),
     name: z.string({required_error: "Register is required"}).min(1, {message: "Register name is too short"}).max(30, {message: "Register name is too long"}),
     description: z.string({required_error: "Register description is required"}).min(1, {message: "Register description is too short"}).max(500, {message: "Register description is too long"}),
     address: z.string().regex(/[0-9A-Fa-f]+/g, "Register Address must be a valid hex value"),

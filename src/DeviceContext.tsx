@@ -6,6 +6,7 @@ import type { Device, Register, AccessType } from "@prisma/client";
 type DeviceWithRelations = Device & {
   registers: (Register & {
     fields: {
+      id: string;
       name: string;
       bits: string;
       access: AccessType;

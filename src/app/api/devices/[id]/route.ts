@@ -51,6 +51,7 @@ export async function PUT(
     const body = await request.json();
     const validatedData = DeviceValidateSchema.safeParse(body);
 
+    //console.log(validatedData.data)
     if (!validatedData.success) {
       return NextResponse.json(
         { error: "Invalid data", details: validatedData.error.errors },
@@ -69,6 +70,57 @@ export async function PUT(
       },
     });
 
+    //Find deleted, added, and modified registers
+    const deletedRegisters = validatedData.data.registers?.filter(register => register.status === 'deleted')
+    const modifiedRegisters = validatedData.data.registers?.filter(register => (register.status === 'modified' && register.fields?.every(field => field.status === 'unchanged')))
+    const addedRegisters = validatedData.data.registers?.filter(register => register.status === 'added')
+
+    console.log("deleted: ", deletedRegisters)
+    console.log("modified: ", modifiedRegisters)
+    console.log("added: ", addedRegisters)
+
+    // Delete all existing registers
+    const deleteRegisters = await prisma.register.deleteMany({
+      where: {
+        id: {
+          in: deletedRegisters?.map(reg => reg.id).filter((id): id is string => id !== undefined) ?? []
+        },
+        deviceId: id
+      }
+    });
+
+    const addRegisters = await prisma.register.createMany({
+      data: (addedRegisters ?? []).map(reg => ({
+        name: reg.name,
+        description: reg.description,
+        address: reg.address,
+        width: parseInt(reg.width, 10),
+        deviceId: id  
+      }))
+    });
+
+    const newlyCreatedRegisters = await prisma.register.findMany({
+      where: {
+        deviceId: id,
+        OR: addedRegisters?.map(reg => ({
+          AND: {
+            name: reg.name,
+            address: reg.address
+          }
+        }))
+      },
+      select: {
+        id: true,
+        name: true,
+        address: true
+      }
+    });
+
+    console.log("newlyCreated: ", newlyCreatedRegisters)
+
+
+
+
     return NextResponse.json(updatedDevice);
   } catch (error) {
     console.error("Error updating device:", error);
@@ -76,6 +128,8 @@ export async function PUT(
       { error: "Error updating device" },
       { status: 500 }
     );
+
+
   }
 }
 
