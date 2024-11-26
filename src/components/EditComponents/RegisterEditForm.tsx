@@ -38,7 +38,6 @@ const RegisterEditForm = ({
   onChanged: () => void;
   errors?: FieldErrors<RegisterFormData>;
 }) => {
-
   const handleAddField = () => {
     const currentFields = watch(`registers.${index}.fields`) || [];
     setValue(`registers.${index}.fields`, [

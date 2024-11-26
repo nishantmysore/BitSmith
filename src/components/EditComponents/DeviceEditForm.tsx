@@ -82,7 +82,7 @@ export function DeviceEditForm() {
     }
 
     // If register has an ID, it exists in database
-    if (register.id) {
+    if (register.db_id) {
       update(registerIndex, {
         ...register,
         status: "deleted" as Status,
@@ -154,37 +154,39 @@ export function DeviceEditForm() {
 
   const onSubmit = async (data: DeviceFormData) => {
     const transformedData = {
-    ...data,
-    registers: data.registers?.map((register, index) => {
-      // If register is already marked as added or deleted, keep that status
-      if (register.status === 'added' || register.status === 'deleted') {
-        return register;
-      }
-      
-      // Check if this register or any of its fields were modified
-      const registerPath = `registers.${index}` as const;
-      const isModified = Object.keys(dirtyFields.registers?.[index] || {}).length > 0;
-      
-      return {
-        ...register,
-        status: isModified ? 'modified' : 'unchanged',
-        fields: register.fields?.map((field, fieldIndex) => {
-          // If field is already marked as added or deleted, keep that status
-          if (field.status === 'added' || field.status === 'deleted') {
-            return field;
-          }
-          
-          // Check if this field was modified
-          const isFieldModified = dirtyFields.registers?.[index]?.fields?.[fieldIndex];
-          
-          return {
-            ...field,
-            status: isFieldModified ? 'modified' : 'unchanged'
-          };
-        })
-      };
-    })
-  };
+      ...data,
+      registers: data.registers?.map((register, index) => {
+        // If register is already marked as added or deleted, keep that status
+        if (register.status === "added" || register.status === "deleted") {
+          return register;
+        }
+
+        // Check if this register or any of its fields were modified
+        const registerPath = `registers.${index}` as const;
+        const isModified =
+          Object.keys(dirtyFields.registers?.[index] || {}).length > 0;
+
+        return {
+          ...register,
+          status: isModified ? "modified" : "unchanged",
+          fields: register.fields?.map((field, fieldIndex) => {
+            // If field is already marked as added or deleted, keep that status
+            if (field.status === "added" || field.status === "deleted") {
+              return field;
+            }
+
+            // Check if this field was modified
+            const isFieldModified =
+              dirtyFields.registers?.[index]?.fields?.[fieldIndex];
+
+            return {
+              ...field,
+              status: isFieldModified ? "modified" : "unchanged",
+            };
+          }),
+        };
+      }),
+    };
 
     console.log(transformedData);
     try {
@@ -307,39 +309,40 @@ export function DeviceEditForm() {
                     collapsible
                     className="w-full border rounded-lg p-4"
                   >
-                    {fields
-                      .filter((field) => field.status !== "deleted")
-                      .map((field, index) => (
-                        <AccordionItem
-                          key={field.id || index}
-                          value={`register-${index}`}
-                        >
-                          <div className="flex items-center justify-between">
-                            <AccordionTrigger className="flex-1 text-xl">
-                              {watch(`registers.${index}.name`) ||
-                                "New Register"}
-                            </AccordionTrigger>
-                            <button
-                              type="button"
-                              onClick={(e) => handleDelete(e, index)}
-                              className="p-2 hover:bg-accent hover:text-accent-foreground rounded-md"
-                            >
-                              <Trash2 className="text-destructive" />
-                            </button>
-                          </div>
-                          <AccordionContent>
-                            <RegisterEditForm
-                              key={field.id || index}
-                              index={index}
-                              register={register}
-                              onChanged={() => handleRegisterChange(index)}
-                              errors={errors.registers?.[index]}
-                              watch={watch}
-                              setValue={setValue}
-                            />
-                          </AccordionContent>
-                        </AccordionItem>
-                      ))}
+                    {fields.map(
+                      (field, index) =>
+                        field.status !== "deleted" && (
+                          <AccordionItem
+                            key={field.id || index}
+                            value={`register-${index}`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <AccordionTrigger className="flex-1 text-xl">
+                                {watch(`registers.${index}.name`) ||
+                                  "New Register"}
+                              </AccordionTrigger>
+                              <button
+                                type="button"
+                                onClick={(e) => handleDelete(e, index)}
+                                className="p-2 hover:bg-accent hover:text-accent-foreground rounded-md"
+                              >
+                                <Trash2 className="text-destructive" />
+                              </button>
+                            </div>
+                            <AccordionContent>
+                              <RegisterEditForm
+                                key={field.id || index}
+                                index={index}
+                                register={register}
+                                onChanged={() => handleRegisterChange(index)}
+                                errors={errors.registers?.[index]}
+                                watch={watch}
+                                setValue={setValue}
+                              />
+                            </AccordionContent>
+                          </AccordionItem>
+                        ),
+                    )}
                   </Accordion>
                   <div className="flex justify-end">
                     <Button type="button" onClick={handleRegisterAdd}>

@@ -83,7 +83,7 @@ export async function PUT(
     const deleteRegisters = await prisma.register.deleteMany({
       where: {
         id: {
-          in: deletedRegisters?.map(reg => reg.id).filter((id): id is string => id !== undefined) ?? []
+          in: deletedRegisters?.map(reg => reg.db_id).filter((db_id): db_id is string => db_id !== undefined) ?? []
         },
         deviceId: id
       }
