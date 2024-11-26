@@ -52,7 +52,7 @@ export function DeviceEditForm() {
     control,
     setValue,
     reset,
-    formState: { errors, isSubmitting, dirtyFields },
+    formState: { errors, isSubmitting},
   } = useForm<DeviceFormData>({
     resolver: zodResolver(DeviceValidateSchema),
     defaultValues: {
@@ -114,6 +114,7 @@ export function DeviceEditForm() {
       width: "32",
       address: "",
       status: "added" as Status,
+      fields: []
     });
   };
 
@@ -155,37 +156,53 @@ export function DeviceEditForm() {
   const onSubmit = async (data: DeviceFormData) => {
     const transformedData = {
       ...data,
-      registers: data.registers?.map((register, index) => {
-        // If register is already marked as added or deleted, keep that status
-        if (register.status === "added" || register.status === "deleted") {
+      registers: data.registers?.map((register) => {
+        // Keep existing status for added/deleted registers
+        if (register.status === 'added' || register.status === 'deleted') {
           return register;
         }
 
-        // Check if this register or any of its fields were modified
-        const registerPath = `registers.${index}` as const;
-        const isModified =
-          Object.keys(dirtyFields.registers?.[index] || {}).length > 0;
+        // Find the original register from selectedDevice
+        const originalRegister = selectedDevice?.registers.find(
+          r => r.id === register.db_id
+        );
+
+        // Check if register was actually modified
+        const isModified = register.db_id && (
+          register.name !== originalRegister?.name ||
+          register.description !== originalRegister?.description ||
+          register.width !== originalRegister?.width.toString() ||
+          register.address !== originalRegister?.address
+        );
 
         return {
           ...register,
-          status: isModified ? "modified" : "unchanged",
-          fields: register.fields?.map((field, fieldIndex) => {
-            // If field is already marked as added or deleted, keep that status
-            if (field.status === "added" || field.status === "deleted") {
+          status: isModified ? 'modified' : 'unchanged',
+          fields: register.fields?.map((field) => {
+            if (field.status === 'added' || field.status === 'deleted') {
               return field;
             }
 
-            // Check if this field was modified
-            const isFieldModified =
-              dirtyFields.registers?.[index]?.fields?.[fieldIndex];
+            // Find original field
+            const originalField = originalRegister?.fields.find(
+              f => f.id === field.db_id
+            );
+
+            // Check if field was modified
+            const isFieldModified = field.db_id && (
+              field.name !== originalField?.name ||
+              field.description !== originalField?.description ||
+              field.bits !== originalField?.bits ||
+              field.access !== originalField?.access
+            );
 
             return {
               ...field,
-              status: isFieldModified ? "modified" : "unchanged",
+              status: isFieldModified ? 'modified' : 'unchanged'
             };
-          }),
+          })
         };
-      }),
+      })
     };
 
     console.log(transformedData);
