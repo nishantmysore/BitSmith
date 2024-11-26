@@ -39,7 +39,6 @@ const RegisterEditForm = ({
   errors?: FieldErrors<RegisterFormData>;
 }) => {
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    e.stopPropagation();
     onChanged();
   };
 
@@ -88,10 +87,7 @@ const RegisterEditForm = ({
             <Input
               id={`registers.${index}.name`}
               {...register(`registers.${index}.name`)}
-              onChange={(e) => {
-                register(`registers.${index}.name`).onChange(e);
-                handleInputChange(e);
-              }}
+              onBlur={handleInputChange}
               onClick={(e) => e.stopPropagation()}
             />
             {errors?.name && (
@@ -107,10 +103,7 @@ const RegisterEditForm = ({
             <Input
               id={`registers.${index}.description`}
               {...register(`registers.${index}.description`)}
-              onChange={(e) => {
-                register(`registers.${index}.description`).onChange(e);
-                handleInputChange(e);
-              }}
+              onBlur={handleInputChange}
               onClick={(e) => e.stopPropagation()}
             />
             {errors?.description && (
@@ -128,10 +121,7 @@ const RegisterEditForm = ({
             <Input
               id={`registers.${index}.address`}
               {...register(`registers.${index}.address`)}
-              onChange={(e) => {
-                register(`registers.${index}.address`).onChange(e);
-                handleInputChange(e);
-              }}
+              onBlur={handleInputChange}
               onClick={(e) => e.stopPropagation()}
             />
             {errors?.address && (
@@ -172,15 +162,6 @@ const RegisterEditForm = ({
       <div className="space-y-4 p-4">
         <div className="flex justify-between items-center">
           <h3 className="text-lg font-semibold">Fields</h3>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleAddField}
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Field
-          </Button>
         </div>
 
         {fields.map(
@@ -199,6 +180,17 @@ const RegisterEditForm = ({
               />
             ),
         )}
+        <div className="flex justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            size="lg"
+            onClick={handleAddField}
+          >
+            Add Field
+            <Plus className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </div>
   );

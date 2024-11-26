@@ -70,10 +70,29 @@ export function DeviceEditForm() {
   };
 
   const handleConfirmDelete = () => {
-    if (registerToDelete !== null) {
-      handleRegisterRemove(registerToDelete);
+    if (registerToDelete === null) return;
+
+    const registerIndex = registerToDelete;
+    const register = fields[registerIndex];
+
+    if (!register) {
+      console.error("Register not found");
       setRegisterToDelete(null);
+      return;
     }
+
+    // If register has an ID, it exists in database
+    if (register.id) {
+      update(registerIndex, {
+        ...register,
+        status: "deleted" as Status,
+      });
+    } else {
+      // For new registers, remove them completely
+      remove(registerIndex);
+    }
+
+    setRegisterToDelete(null);
   };
 
   const { fields, append, remove, update } = useFieldArray({
@@ -269,7 +288,7 @@ export function DeviceEditForm() {
                           value={`register-${index}`}
                         >
                           <div className="flex items-center justify-between">
-                            <AccordionTrigger className="flex-1">
+                            <AccordionTrigger className="flex-1 text-xl">
                               {watch(`registers.${index}.name`) ||
                                 "New Register"}
                             </AccordionTrigger>
@@ -295,9 +314,11 @@ export function DeviceEditForm() {
                         </AccordionItem>
                       ))}
                   </Accordion>
-                  <Button type="button" onClick={handleRegisterAdd}>
-                    Add Register
-                  </Button>
+                  <div className="flex justify-end">
+                    <Button type="button" onClick={handleRegisterAdd}>
+                      Add Register
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
               <div className="flex justify-center">
@@ -318,8 +339,8 @@ export function DeviceEditForm() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Register</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this register? This action cannot
-              be undone.
+              Are you sure you want to delete this field? This action cannot be
+              undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
