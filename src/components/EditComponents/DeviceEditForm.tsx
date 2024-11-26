@@ -119,7 +119,7 @@ export function DeviceEditForm() {
 
   // Reset form when selectedDevice changes
   useEffect(() => {
-    console.log("Resetting: ", isSubmitting)
+    console.log("Resetting: ", isSubmitting);
     if (selectedDevice && !isSubmitting) {
       const formData = {
         name: selectedDevice.name,
@@ -127,14 +127,14 @@ export function DeviceEditForm() {
         base_address: selectedDevice.base_address,
         isPublic: selectedDevice.isPublic,
         registers: selectedDevice.registers.map((reg) => ({
-          id: reg.id,
+          db_id: reg.id,
           name: reg.name,
           description: reg.description,
           width: reg.width.toString(),
           address: reg.address,
           status: "unchanged" as Status,
           fields: reg.fields.map((field) => ({
-            id: field.id,
+            db_id: field.id,
             name: field.name,
             description: field.description,
             bits: field.bits,

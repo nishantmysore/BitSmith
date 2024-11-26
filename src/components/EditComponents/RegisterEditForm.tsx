@@ -38,7 +38,8 @@ const RegisterEditForm = ({
   onChanged: () => void;
   errors?: FieldErrors<RegisterFormData>;
 }) => {
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: any) => {
+    e.stopPropagation();
     onChanged();
   };
 
