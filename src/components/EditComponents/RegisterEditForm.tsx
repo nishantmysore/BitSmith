@@ -87,7 +87,6 @@ const RegisterEditForm = ({
             <Input
               id={`registers.${index}.name`}
               {...register(`registers.${index}.name`)}
-              onBlur={handleInputChange}
               onClick={(e) => e.stopPropagation()}
             />
             {errors?.name && (
@@ -103,7 +102,6 @@ const RegisterEditForm = ({
             <Input
               id={`registers.${index}.description`}
               {...register(`registers.${index}.description`)}
-              onBlur={handleInputChange}
               onClick={(e) => e.stopPropagation()}
             />
             {errors?.description && (
@@ -121,7 +119,6 @@ const RegisterEditForm = ({
             <Input
               id={`registers.${index}.address`}
               {...register(`registers.${index}.address`)}
-              onBlur={handleInputChange}
               onClick={(e) => e.stopPropagation()}
             />
             {errors?.address && (

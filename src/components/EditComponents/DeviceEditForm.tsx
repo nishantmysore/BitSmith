@@ -52,7 +52,7 @@ export function DeviceEditForm() {
     control,
     setValue,
     reset,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<DeviceFormData>({
     resolver: zodResolver(DeviceValidateSchema),
     defaultValues: {
@@ -119,8 +119,9 @@ export function DeviceEditForm() {
 
   // Reset form when selectedDevice changes
   useEffect(() => {
-    if (selectedDevice) {
-      reset({
+    console.log("Resetting: ", isSubmitting)
+    if (selectedDevice && !isSubmitting) {
+      const formData = {
         name: selectedDevice.name,
         description: selectedDevice.description,
         base_address: selectedDevice.base_address,
@@ -141,7 +142,9 @@ export function DeviceEditForm() {
             status: "unchanged" as Status,
           })),
         })),
-      });
+      };
+
+      reset(formData);
     }
   }, [selectedDevice, reset]);
 
