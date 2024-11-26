@@ -52,7 +52,7 @@ export function DeviceEditForm() {
     control,
     setValue,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, dirtyFields },
   } = useForm<DeviceFormData>({
     resolver: zodResolver(DeviceValidateSchema),
     defaultValues: {
@@ -153,7 +153,40 @@ export function DeviceEditForm() {
   };
 
   const onSubmit = async (data: DeviceFormData) => {
-    console.log(data);
+    const transformedData = {
+    ...data,
+    registers: data.registers?.map((register, index) => {
+      // If register is already marked as added or deleted, keep that status
+      if (register.status === 'added' || register.status === 'deleted') {
+        return register;
+      }
+      
+      // Check if this register or any of its fields were modified
+      const registerPath = `registers.${index}` as const;
+      const isModified = Object.keys(dirtyFields.registers?.[index] || {}).length > 0;
+      
+      return {
+        ...register,
+        status: isModified ? 'modified' : 'unchanged',
+        fields: register.fields?.map((field, fieldIndex) => {
+          // If field is already marked as added or deleted, keep that status
+          if (field.status === 'added' || field.status === 'deleted') {
+            return field;
+          }
+          
+          // Check if this field was modified
+          const isFieldModified = dirtyFields.registers?.[index]?.fields?.[fieldIndex];
+          
+          return {
+            ...field,
+            status: isFieldModified ? 'modified' : 'unchanged'
+          };
+        })
+      };
+    })
+  };
+
+    console.log(transformedData);
     try {
       const response = await fetch(`/api/devices/${selectedDevice?.id}`, {
         method: "PUT",
