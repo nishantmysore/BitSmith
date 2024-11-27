@@ -5,6 +5,7 @@ import { Trash2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { DeviceFormData, FieldFormData } from "@/types/validation";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -70,12 +71,13 @@ const FieldEdit = ({
               "New Field"}
           </span>
         </h4>
-        <div
+        <Button type="button" variant="outline"
+            
           onClick={handleDelete}
           className="p-2 hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer"
         >
           <Trash2 className="h-4 w-4 text-destructive" />
-        </div>
+        </Button>
       </div>
 
       <div className="space-y-4 p-4">

@@ -338,13 +338,14 @@ export function DeviceEditForm() {
                                 {watch(`registers.${index}.name`) ||
                                   "New Register"}
                               </AccordionTrigger>
-                              <button
+                              <Button
                                 type="button"
+                                variant="outline"
                                 onClick={(e) => handleDelete(e, index)}
                                 className="p-2 hover:bg-accent hover:text-accent-foreground rounded-md"
                               >
                                 <Trash2 className="text-destructive" />
-                              </button>
+                              </Button>
                             </div>
                             <AccordionContent>
                               <RegisterEditForm
