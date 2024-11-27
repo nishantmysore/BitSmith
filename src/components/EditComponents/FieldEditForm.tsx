@@ -21,6 +21,7 @@ import {
   UseFormRegister,
   UseFormSetValue,
   FieldErrors,
+  Control,
 } from "react-hook-form";
 import {
   Select,
@@ -44,6 +45,7 @@ const FieldEdit = ({
   registerIndex: number;
   fieldIndex: number;
   register: UseFormRegister<DeviceFormData>;
+  control: Control<DeviceFormData>
   watch: UseFormWatch<DeviceFormData>;
   setValue: UseFormSetValue<DeviceFormData>;
   onChanged: () => void;
@@ -51,11 +53,14 @@ const FieldEdit = ({
   errors?: FieldErrors<FieldFormData>;
 }) => {
   const handleConfirmDelete = () => {
-    setIsDeleteDialogOpen(false);
+    console.log("reached handleConfirm")
     onRemove();
+    console.log("removed")
+    setIsDeleteDialogOpen(false);
   };
 
   const handleDelete = (e: any) => {
+    console.log("Event", e)
     e.stopPropagation();
     setIsDeleteDialogOpen(true);
   };

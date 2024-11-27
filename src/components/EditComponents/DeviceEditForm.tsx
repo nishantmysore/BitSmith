@@ -101,6 +101,7 @@ export function DeviceEditForm() {
   });
 
   const handleRegisterChange = (index: number) => {
+    console.log("Handling register Change: ", fields[index])
     const register = fields[index];
     if (register.status === "unchanged") {
       update(index, { ...register, status: "modified" as Status });
@@ -352,6 +353,7 @@ export function DeviceEditForm() {
                                 key={field.id || index}
                                 index={index}
                                 register={register}
+                                control={control}
                                 onChanged={() => handleRegisterChange(index)}
                                 errors={errors.registers?.[index]}
                                 watch={watch}
