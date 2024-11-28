@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { DeviceValidateSchema } from "@/types/validation";
+import { DeviceValidateSchema} from "@/types/validation";
+
 
 export async function PUT(
   request: Request,
@@ -72,12 +73,31 @@ export async function PUT(
 
     //Find deleted, added, and modified registers
     const deletedRegisters = validatedData.data.registers?.filter(register => register.status === 'deleted')
-    const modifiedRegisters = validatedData.data.registers?.filter(register => (register.status === 'modified' && register.fields?.every(field => field.status === 'unchanged')))
+    const modifiedRegisters = validatedData.data.registers?.filter(register => (register.status === 'modified'))
     const addedRegisters = validatedData.data.registers?.filter(register => register.status === 'added')
 
-    console.log("deleted: ", deletedRegisters)
-    console.log("modified: ", modifiedRegisters)
-    console.log("added: ", addedRegisters)
+    console.log("Deleted Registers:", deletedRegisters)
+    console.log("Modified Registers: ", modifiedRegisters)
+    console.log("Added Registers: ", addedRegisters)
+
+
+    const deletedFields = validatedData.data.registers?.flatMap(register => 
+      register.fields?.filter(field => field.status === 'deleted') || []
+    );
+
+    const modifiedFields = validatedData.data.registers?.flatMap(register =>
+      register.fields?.filter(field => field.status === 'modified') || []
+    );
+
+     const addedFields = validatedData.data.registers?.flatMap(register => 
+      (register.status !== 'added' &&  register.fields?.filter(field => field.status === 'added') || [])
+        .map(field => ({ db_id: register.db_id || '', field }))
+      );   
+
+
+    console.log("Deleted Fields: ", deletedFields)
+    console.log("Modified Fields: ", modifiedFields)
+    console.log("Added Fields: ", addedFields)
 
     // Delete all existing registers
     const deleteRegisters = await prisma.register.deleteMany({
@@ -89,35 +109,84 @@ export async function PUT(
       }
     });
 
-    const addRegisters = await prisma.register.createMany({
-      data: (addedRegisters ?? []).map(reg => ({
-        name: reg.name,
-        description: reg.description,
-        address: reg.address,
-        width: parseInt(reg.width, 10),
-        deviceId: id  
-      }))
-    });
 
-    const newlyCreatedRegisters = await prisma.register.findMany({
-      where: {
-        deviceId: id,
-        OR: addedRegisters?.map(reg => ({
-          AND: {
+    const addRegistersDB = await Promise.all(
+      (addedRegisters ?? []).map(reg => 
+        prisma.register.create({
+          data: {
             name: reg.name,
-            address: reg.address
+            description: reg.description,
+            address: reg.address,
+            width: parseInt(reg.width, 10),
+            deviceId: id,
+            fields: {
+              create: reg.fields?.map(field => ({
+                name: field.name,
+                description: field.description,
+                bits: field.bits,
+                access: field.access
+              }))
+            }
           }
-        }))
-      },
-      select: {
-        id: true,
-        name: true,
-        address: true
-      }
-    });
+        })
+      )
+    );
 
-    console.log("newlyCreated: ", newlyCreatedRegisters)
+    const modifyRegistersDB = await Promise.all(
+      (modifiedRegisters ?? []).map(data => 
+        prisma.register.updateMany({
+          where: {
+            id: data.db_id
+          },
+          data: {
+            name: data.name,
+            description: data.description,
+            width: parseInt(data.width, 10),
+            address: data.address
+          }
+        })
+      )
+    )
 
+    
+      const deleteFieldsDB = await prisma.field.deleteMany({ where: {
+          id: {
+            in: deletedFields?.map(field => field.db_id).filter((db_id): db_id is string => db_id !== undefined) ?? []
+          },
+        }
+      });
+
+
+      const addFieldsDB = await Promise.all(
+        (addedFields ?? []).map(addedReg => 
+          prisma.field.create({
+            data: {
+              name: addedReg.field.name,
+              description: addedReg.field.description,
+              bits: addedReg.field.bits,
+              access: addedReg.field.access,
+              registerId: addedReg.db_id,
+            }
+        
+          })
+      )
+      );
+
+    const modifyFieldsDB = await Promise.all(
+      (modifiedFields ?? []).map(field => 
+        prisma.field.updateMany({
+          where: {
+            id: field.db_id
+          },
+          data: {
+            name: field.name,
+            description: field.description,
+            bits: field.bits,
+            access: field.access
+          }
+        })
+      )
+    );
 
 
 

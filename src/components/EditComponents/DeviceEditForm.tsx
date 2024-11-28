@@ -52,7 +52,7 @@ export function DeviceEditForm() {
     control,
     setValue,
     reset,
-    formState: { errors, isSubmitting},
+    formState: { errors, isSubmitting },
   } = useForm<DeviceFormData>({
     resolver: zodResolver(DeviceValidateSchema),
     defaultValues: {
@@ -101,7 +101,7 @@ export function DeviceEditForm() {
   });
 
   const handleRegisterChange = (index: number) => {
-    console.log("Handling register Change: ", fields[index])
+    console.log("Handling register Change: ", fields[index]);
     const register = fields[index];
     if (register.status === "unchanged") {
       update(index, { ...register, status: "modified" as Status });
@@ -115,7 +115,7 @@ export function DeviceEditForm() {
       width: "32",
       address: "",
       status: "added" as Status,
-      fields: []
+      fields: [],
     });
   };
 
@@ -159,51 +159,51 @@ export function DeviceEditForm() {
       ...data,
       registers: data.registers?.map((register) => {
         // Keep existing status for added/deleted registers
-        if (register.status === 'added' || register.status === 'deleted') {
+        if (register.status === "added" || register.status === "deleted") {
           return register;
         }
 
         // Find the original register from selectedDevice
         const originalRegister = selectedDevice?.registers.find(
-          r => r.id === register.db_id
+          (r) => r.id === register.db_id,
         );
 
         // Check if register was actually modified
-        const isModified = register.db_id && (
-          register.name !== originalRegister?.name ||
-          register.description !== originalRegister?.description ||
-          register.width !== originalRegister?.width.toString() ||
-          register.address !== originalRegister?.address
-        );
+        const isModified =
+          register.db_id &&
+          (register.name !== originalRegister?.name ||
+            register.description !== originalRegister?.description ||
+            register.width !== originalRegister?.width.toString() ||
+            register.address !== originalRegister?.address);
 
         return {
           ...register,
-          status: isModified ? 'modified' : 'unchanged',
+          status: isModified ? "modified" : "unchanged",
           fields: register.fields?.map((field) => {
-            if (field.status === 'added' || field.status === 'deleted') {
+            if (field.status === "added" || field.status === "deleted") {
               return field;
             }
 
             // Find original field
             const originalField = originalRegister?.fields.find(
-              f => f.id === field.db_id
+              (f) => f.id === field.db_id,
             );
 
             // Check if field was modified
-            const isFieldModified = field.db_id && (
-              field.name !== originalField?.name ||
-              field.description !== originalField?.description ||
-              field.bits !== originalField?.bits ||
-              field.access !== originalField?.access
-            );
+            const isFieldModified =
+              field.db_id &&
+              (field.name !== originalField?.name ||
+                field.description !== originalField?.description ||
+                field.bits !== originalField?.bits ||
+                field.access !== originalField?.access);
 
             return {
               ...field,
-              status: isFieldModified ? 'modified' : 'unchanged'
+              status: isFieldModified ? "modified" : "unchanged",
             };
-          })
+          }),
         };
-      })
+      }),
     };
 
     console.log(transformedData);
@@ -213,7 +213,7 @@ export function DeviceEditForm() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(transformedData),
       });
 
       if (!response.ok) {

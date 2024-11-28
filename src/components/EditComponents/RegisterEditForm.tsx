@@ -1,6 +1,10 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { DeviceFormData, FieldFormData, RegisterFormData } from "@/types/validation";
+import {
+  DeviceFormData,
+  FieldFormData,
+  RegisterFormData,
+} from "@/types/validation";
 import { Button } from "@/components/ui/button";
 import {
   UseFormRegister,
@@ -8,7 +12,7 @@ import {
   UseFormSetValue,
   FieldErrors,
   Control,
-  useFieldArray
+  useFieldArray,
 } from "react-hook-form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
@@ -35,13 +39,18 @@ const RegisterEditForm = ({
 }: {
   index: number;
   register: UseFormRegister<DeviceFormData>;
-  control: Control <DeviceFormData>;
+  control: Control<DeviceFormData>;
   watch: UseFormWatch<DeviceFormData>;
   setValue: UseFormSetValue<DeviceFormData>;
   onChanged: () => void;
   errors?: FieldErrors<RegisterFormData>;
 }) => {
-  const { fields: registerFields, remove, append, update } = useFieldArray({
+  const {
+    fields: registerFields,
+    remove,
+    append,
+    update,
+  } = useFieldArray({
     control,
     name: `registers.${index}.fields`,
   });
@@ -59,7 +68,7 @@ const RegisterEditForm = ({
   const handleFieldChange = () => {
     onChanged();
   };
-  
+
   const handleFieldRemove = (fieldIndex: number) => {
     const field = registerFields[fieldIndex];
     console.log("Removing Field: ", field);
@@ -67,7 +76,7 @@ const RegisterEditForm = ({
     if (field.status === "unchanged") {
       const updatedField: FieldFormData = {
         ...field,
-        status: "deleted"
+        status: "deleted",
       };
       update(fieldIndex, updatedField);
       //onChanged(); // Notify parent of the change

@@ -45,7 +45,7 @@ const FieldEdit = ({
   registerIndex: number;
   fieldIndex: number;
   register: UseFormRegister<DeviceFormData>;
-  control: Control<DeviceFormData>
+  control: Control<DeviceFormData>;
   watch: UseFormWatch<DeviceFormData>;
   setValue: UseFormSetValue<DeviceFormData>;
   onChanged: () => void;
@@ -53,14 +53,14 @@ const FieldEdit = ({
   errors?: FieldErrors<FieldFormData>;
 }) => {
   const handleConfirmDelete = () => {
-    console.log("reached handleConfirm")
+    console.log("reached handleConfirm");
     onRemove();
-    console.log("removed")
+    console.log("removed");
     setIsDeleteDialogOpen(false);
   };
 
   const handleDelete = (e: any) => {
-    console.log("Event", e)
+    console.log("Event", e);
     e.stopPropagation();
     setIsDeleteDialogOpen(true);
   };
@@ -76,8 +76,9 @@ const FieldEdit = ({
               "New Field"}
           </span>
         </h4>
-        <Button type="button" variant="outline"
-            
+        <Button
+          type="button"
+          variant="outline"
           onClick={handleDelete}
           className="p-2 hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer"
         >
