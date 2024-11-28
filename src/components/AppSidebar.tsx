@@ -1,7 +1,9 @@
+"use client";
 import { Home, Pencil, Upload } from "lucide-react";
 import Link from "next/link";
 import {
   Sidebar,
+  SidebarHeader,
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
@@ -10,7 +12,12 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
+  SidebarFooter,
 } from "@/components/ui/sidebar";
+import { useSession,signOut } from "next-auth/react";
+import { ChevronUp } from "lucide-react";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuItem, DropdownMenuContent} from "@/components/ui/dropdown-menu";
+import { ModeToggle } from "@/components/ModeToggle";
 
 const appitems = [
   {
@@ -34,8 +41,10 @@ const deviceitems = [
 ];
 
 export function AppSidebar() {
+  const { data: session } = useSession();
   return (
     <Sidebar variant="sidebar">
+    <SidebarHeader className="text-xl font-semibold"><div className="flex justify-between"> BitSmith <ModeToggle/></div></SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Application</SidebarGroupLabel>
@@ -74,6 +83,28 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      {session?.user && 
+        <SidebarFooter>
+        <SidebarMenu>
+            <SidebarMenuItem>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <SidebarMenuButton> 
+                  {session.user.email}
+                    <ChevronUp className="ml-auto" />
+                  </SidebarMenuButton>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  side="top"
+                  className="w-[--radix-popper-anchor-width]"
+                >
+                  <DropdownMenuItem onSelect={() => signOut({callbackUrl: "/login"})}><span>Sign out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarFooter>}
     </Sidebar>
   );
 }
