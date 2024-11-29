@@ -3,7 +3,7 @@
 import { useDevice } from "@/DeviceContext";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import FileUpload from "@/components/FileUpload"
+import FileUpload from "@/components/FileUpload";
 import {
   DeviceFormData,
   DeviceValidateSchema,
@@ -261,7 +261,7 @@ export function DeviceEditForm() {
               </SelectContent>
             </Select>
           </div>
-      <FileUpload/>
+          <FileUpload />
         </CardContent>
       </Card>
 

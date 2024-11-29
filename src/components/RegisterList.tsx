@@ -4,6 +4,7 @@ import RegisterVisualizer from "./RegisterVisualizer";
 import { useDevice } from "@/DeviceContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Device, Register, Field } from "@prisma/client";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 // Type for the device with its relations
 type DeviceWithRegisters = Device & {
@@ -38,14 +39,18 @@ const RegisterList = () => {
 
   return (
     <div className="space-y-4">
-      {selectedDevice.registers.map((register) => (
-        <RegisterVisualizer
-          key={register.id} // Using id instead of address for key is generally better
-          register={register}
-          baseAddr={baseAddr}
-          offsetBaseAddr={offsetBaseAddr}
-        />
-      ))}
+      <ScrollArea>
+        {" "}
+        {/* Add this line */}
+        {selectedDevice.registers.map((register) => (
+          <RegisterVisualizer
+            key={register.id} // Using id instead of address for key is generally better
+            register={register}
+            baseAddr={baseAddr}
+            offsetBaseAddr={offsetBaseAddr}
+          />
+        ))}
+      </ScrollArea>
     </div>
   );
 };
