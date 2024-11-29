@@ -112,7 +112,7 @@ export const DeviceSelector = () => {
                   checked={offsetBaseAddr}
                   onCheckedChange={setOffsetBaseAddr}
                 />
-                <Label htmlFor="offset-base-addr">Offset Registers</Label>
+                <Label htmlFor="offset-base-addr">Offset Registers by Base Address</Label>
               </div>
             </div>
             {!isValid && (

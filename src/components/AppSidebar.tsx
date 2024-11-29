@@ -29,7 +29,7 @@ const appitems = [
 
 const deviceitems = [
   {
-    title: "Edit/View Device Configurations",
+    title: "Edit Device Configurations",
     url: "/edit",
     icon: Pencil,
   },
