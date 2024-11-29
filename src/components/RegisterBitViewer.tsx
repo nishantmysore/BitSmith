@@ -18,30 +18,23 @@ interface FieldValue {
 }
 
 interface RegisterBitViewerProps {
-  device?: Device & {
-    registers: (Register & {
-      fields: Field[];
-    })[];
+  register: Register & {
+    fields: Field[];
   };
 }
 
-const RegisterBitViewer: React.FC<RegisterBitViewerProps> = () => {
-  const { selectedDevice } = useDevice();
-  const [selectedRegister, setSelectedRegister] = React.useState<string>("");
+const RegisterBitViewer: React.FC<RegisterBitViewerProps> = ({register}) => {
   const [value, setValue] = React.useState<string>("");
   const [inputFormat, setInputFormat] = React.useState<InputFormat>("hex");
 
   // Get current register width or default to 32
-  const currentRegister = selectedRegister
-    ? selectedDevice?.registers.find((r) => r.id === selectedRegister)
-    : null;
-  const registerWidth = currentRegister?.width || 32;
+  const registerWidth = register?.width || 32;
 
   const [binaryValue, setBinaryValue] = React.useState<string>(() =>
     "0".repeat(registerWidth),
   );
 
-  if (!selectedDevice) {
+  if (!register) {
     return (
       <Card className="w-full">
         <CardHeader>
@@ -49,7 +42,7 @@ const RegisterBitViewer: React.FC<RegisterBitViewerProps> = () => {
         </CardHeader>
         <CardContent>
           <p className="text-center text-muted-foreground">
-            No device selected
+            No device/register selected
           </p>
         </CardContent>
       </Card>
@@ -121,133 +114,101 @@ const RegisterBitViewer: React.FC<RegisterBitViewerProps> = () => {
     );
   };
 
-  const handleRegisterChange = (registerId: string) => {
-    setSelectedRegister(registerId);
-    const newWidth =
-      selectedDevice.registers.find((r) => r.id === registerId)?.width || 32;
-    setBinaryValue("0".repeat(newWidth));
-    setValue("");
-  };
-
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Register Value Viewer</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="register-select">Select Register</Label>
-          <select
-            id="register-select"
-            className="w-full p-2 border rounded-md bg-background"
-            value={selectedRegister}
-            onChange={(e) => handleRegisterChange(e.target.value)}
-          >
-            <option value="">Select a register...</option>
-            {selectedDevice.registers.map((reg) => (
-              <option key={reg.id} value={reg.id}>
-                {reg.name} ({reg.address}) - {reg.width} bits
-              </option>
-            ))}
-          </select>
-        </div>
+    <div className="w-full max-w-xl p-4">
+      <div className="space-y-2">
+        <Label>Input Format</Label>
+        <Tabs
+          defaultValue={inputFormat}
+          onValueChange={(value: string) => {
+            setInputFormat(value as InputFormat);
+            setValue("");
+            setBinaryValue("0".repeat(registerWidth));
+          }}
+          className="w-[400px]"
+        >
+          <TabsList>
+            <TabsTrigger value="hex">Hex</TabsTrigger>
+            <TabsTrigger value="decimal">Decimal</TabsTrigger>
+            <TabsTrigger value="binary">Binary</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
 
-        <div className="space-y-2">
-          <Label>Input Format</Label>
-          <Tabs
-            defaultValue={inputFormat}
-            onValueChange={(value: string) => {
-              setInputFormat(value as InputFormat);
-              setValue("");
-              setBinaryValue("0".repeat(registerWidth));
-            }}
-            className="w-[400px]"
-          >
-            <TabsList>
-              <TabsTrigger value="hex">Hex</TabsTrigger>
-              <TabsTrigger value="decimal">Decimal</TabsTrigger>
-              <TabsTrigger value="binary">Binary</TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
+      <div className="space-y-2">
+        <Label htmlFor="value-input">Enter Value</Label>
+        <Input
+          id="value-input"
+          placeholder={`Enter ${inputFormat} value`}
+          value={value}
+          onChange={(e) => {
+            setValue(e.target.value);
+            setBinaryValue(
+              parseValue(e.target.value, inputFormat, registerWidth),
+            );
+          }}
+        />
+      </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="value-input">Enter Value</Label>
-          <Input
-            id="value-input"
-            placeholder={`Enter ${inputFormat} value`}
-            value={value}
-            onChange={(e) => {
-              setValue(e.target.value);
-              setBinaryValue(
-                parseValue(e.target.value, inputFormat, registerWidth),
-              );
-            }}
-          />
-        </div>
+      <ValueFormatActions binaryValue={binaryValue} />
 
-        <ValueFormatActions binaryValue={binaryValue} />
-
-        <div className="space-y-2">
-          <Label>Binary Value</Label>
-          <div className="grid grid-cols-8 gap-1 text-center">
-            {binaryValue.split("").map((bit, index) => (
-              <div
-                key={registerWidth - 1 - index}
-                className="p-1 border rounded bg-secondary text-xs cursor-pointer 
+      <div className="space-y-2">
+        <Label>Binary Value</Label>
+        <div className="grid grid-cols-8 gap-1 text-center">
+          {binaryValue.split("").map((bit, index) => (
+            <div
+              key={registerWidth - 1 - index}
+              className="p-1 border rounded bg-secondary text-xs cursor-pointer 
                   hover:bg-secondary/80 active:bg-secondary/60 transition-colors"
-                onClick={() => handleBitClick(index)}
-              >
-                <div
-                  className={`font-mono ${bit === "1" ? "text-red-500" : ""}`}
-                >
-                  {bit}
-                </div>
-                <div className="text-[10px] text-muted-foreground">
-                  {registerWidth - 1 - index}
-                </div>
+              onClick={() => handleBitClick(index)}
+            >
+              <div className={`font-mono ${bit === "1" ? "text-red-500" : ""}`}>
+                {bit}
               </div>
-            ))}
-          </div>
+              <div className="text-[10px] text-muted-foreground">
+                {registerWidth - 1 - index}
+              </div>
+            </div>
+          ))}
         </div>
+      </div>
 
-        {currentRegister && (
-          <div className="space-y-2">
-            <Label>Field Values</Label>
-            <div className="space-y-1">
-              {currentRegister.fields.map((field) => {
-                const [msb, lsb] = field.bits.includes(":")
-                  ? field.bits.split(":").map(Number)
-                  : [Number(field.bits), Number(field.bits)];
+      {register && (
+        <div className="space-y-2">
+          <Label>Field Values</Label>
+          <div className="space-y-1">
+            {register.fields.map((field) => {
+              const [msb, lsb] = field.bits.includes(":")
+                ? field.bits.split(":").map(Number)
+                : [Number(field.bits), Number(field.bits)];
 
-                const fieldValue = getFieldValue(msb, lsb);
+              const fieldValue = getFieldValue(msb, lsb);
 
-                return (
-                  <div
-                    key={field.name}
-                    className={`relative group flex justify-between items-center p-2 
+              return (
+                <div
+                  key={field.name}
+                  className={`relative group flex justify-between items-center p-2 
                       rounded transition-colors cursor-pointer
                       ${getAccessColor(field.access)}`}
-                  >
-                    <span className="font-medium">{field.name}</span>
-                    <div className="space-x-2 text-sm">
-                      <span className="text-muted-foreground">
-                        [{field.bits}]
-                      </span>
-                      <span>0x{fieldValue.hex}</span>
-                      <span className="text-muted-foreground">
-                        ({fieldValue.decimal.toString()})
-                      </span>
-                    </div>
-                    <FieldHoverCard field={field} fieldValue={fieldValue} />
+                >
+                  <span className="font-medium">{field.name}</span>
+                  <div className="space-x-2 text-sm">
+                    <span className="text-muted-foreground">
+                      [{field.bits}]
+                    </span>
+                    <span>0x{fieldValue.hex}</span>
+                    <span className="text-muted-foreground">
+                      ({fieldValue.decimal.toString()})
+                    </span>
                   </div>
-                );
-              })}
-            </div>
+                  <FieldHoverCard field={field} fieldValue={fieldValue} />
+                </div>
+              );
+            })}
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </div>
+      )}
+    </div>
   );
 };
 

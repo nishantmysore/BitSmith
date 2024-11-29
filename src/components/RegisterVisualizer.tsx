@@ -21,6 +21,8 @@ import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Register, Field } from "@prisma/client";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import RegisterBitViewer from "./RegisterBitViewer";
+import { Separator } from "@/components/ui/separator";
 
 interface RegisterVisualizerProps {
   offsetBaseAddr: boolean;
@@ -65,6 +67,7 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
 }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [isCopied, setIsCopied] = React.useState(false);
+  const [showBitViewer, setShowBitViewer] = React.useState(false);
 
   // Default to 32 if width is not specified
   const registerWidth = register.width || 32;
@@ -83,7 +86,7 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
   };
 
   return (
-    <Card className="w-full max-w-4xl">
+    <Card className="w-full">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild className="w-full">
           <CardHeader className="border-b hover:bg-secondary/50 transition-colors">
@@ -121,70 +124,97 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
         </CollapsibleTrigger>
 
         <CollapsibleContent>
-          <CardContent className="p-6">
-            <Alert className="mb-6">
-              <AlertTitle className="text-base font-semibold">
-                Description
-              </AlertTitle>
-              <AlertDescription className="text-base mt-2 text-muted-foreground">
-                {register.description}
-              </AlertDescription>
-            </Alert>
-            <div className="space-y-6">
-              <div className="w-full h-12 bg-secondary relative rounded-md">
-                {register.fields.map((field) => {
-                  const { width, left } = calculateFieldDimensions(
-                    field,
-                    registerWidth,
-                  );
-
-                  return (
-                    <div
-                      key={field.name}
-                      className="absolute h-full flex flex-col justify-center items-center text-xs border-r border-border"
-                      style={{
-                        left: `${left}%`,
-                        width: `${width}%`,
-                        backgroundColor:
-                          field.name === "RESERVED"
-                            ? "hsl(var(--secondary))"
-                            : "hsl(var(--primary)/0.8)",
-                      }}
-                    >
-                      <div className="font-medium truncate w-full text-center text-foreground">
-                        {field.name}
-                      </div>
-                      <div className="text-muted-foreground">{field.bits}</div>
+          <div className="flex w-full justify-between">
+            <div
+              className={`transition-all duration-300 ease-in-out ${showBitViewer ? "w-2/3" : "w-full"}`}
+            >
+              <CardContent className="p-6">
+                <Alert className="mb-6">
+                  <AlertTitle className="text-base font-semibold">
+                    <div className="flex justify-between">
+                      Description
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowBitViewer(!showBitViewer)}
+                      >
+                        {showBitViewer ? "Hide Bit Viewer" : "Show Bit Viewer"}
+                      </Button>
                     </div>
-                  );
-                })}
-              </div>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Field</TableHead>
-                    <TableHead>Bits</TableHead>
-                    <TableHead>Access</TableHead>
-                    <TableHead>Description</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {register.fields.map((field) => (
-                    <TableRow key={field.name}>
-                      <TableCell className="font-medium">
-                        {field.name}
-                      </TableCell>
-                      <TableCell>{field.bits}</TableCell>
-                      <TableCell>
-                        <AccessBadge access={field.access} />
-                      </TableCell>
-                      <TableCell>{field.description}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </AlertTitle>
+                  <AlertDescription className="text-base mt-2 text-muted-foreground">
+                    {register.description}
+                  </AlertDescription>
+                </Alert>
+                <div className="space-y-6">
+                  <div className="w-full h-12 bg-secondary relative rounded-md">
+                    {register.fields.map((field) => {
+                      const { width, left } = calculateFieldDimensions(
+                        field,
+                        registerWidth,
+                      );
+
+                      return (
+                        <div
+                          key={field.name}
+                          className="absolute h-full flex flex-col justify-center items-center text-xs border-l border-border"
+                          style={{
+                            left: `${left}%`,
+                            width: `${width}%`,
+                            borderColor: "hsl(var(--primary)/0.8)",
+                          }}
+                        >
+                          <div className="font-medium truncate w-full text-center text-foreground">
+                            {field.name}
+                          </div>
+                          <div className="text-muted-foreground">
+                            {field.bits}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Field</TableHead>
+                        <TableHead>Bits</TableHead>
+                        <TableHead>Access</TableHead>
+                        <TableHead>Description</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {register.fields.map((field) => (
+                        <TableRow key={field.name}>
+                          <TableCell className="font-medium">
+                            {field.name}
+                          </TableCell>
+                          <TableCell>{field.bits}</TableCell>
+                          <TableCell>
+                            <AccessBadge access={field.access} />
+                          </TableCell>
+                          <TableCell>{field.description}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
             </div>
-          </CardContent>
+            {showBitViewer && (
+              <Separator
+                orientation="vertical"
+                className={`h-auto my-4 transition-opacity duration-300 ${
+                  showBitViewer ? "opacity-100" : "opacity-0"
+                }`}
+              />
+            )}
+            <div
+              className={`transition-all duration-300 ... ${showBitViewer ? "opacity-100 translate-x-0 w-1/3" : "opacity-0 translate-x-full w-0 overflow-hidden"}`}
+            >
+              {showBitViewer && <RegisterBitViewer register={register}/>}
+            </div>
+          </div>
         </CollapsibleContent>
       </Collapsible>
     </Card>

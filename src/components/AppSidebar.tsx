@@ -14,9 +14,14 @@ import {
   SidebarSeparator,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { useSession,signOut } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { ChevronUp } from "lucide-react";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuItem, DropdownMenuContent} from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuItem,
+  DropdownMenuContent,
+} from "@/components/ui/dropdown-menu";
 import { ModeToggle } from "@/components/ModeToggle";
 
 const appitems = [
@@ -44,12 +49,12 @@ export function AppSidebar() {
   const { data: session } = useSession();
   return (
     <Sidebar variant="sidebar">
-    <SidebarHeader className="text-xl font-semibold">
-      <div className="flex w-full justify-between items-center">
-        BitSmith
-        <ModeToggle/>
-      </div>
-    </SidebarHeader>
+      <SidebarHeader className="text-xl font-semibold">
+        <div className="flex w-full justify-between items-center">
+          BitSmith
+          <ModeToggle />
+        </div>
+      </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Application</SidebarGroupLabel>
@@ -88,14 +93,14 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      {session?.user && 
+      {session?.user && (
         <SidebarFooter>
-        <SidebarMenu>
+          <SidebarMenu>
             <SidebarMenuItem>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <SidebarMenuButton> 
-                  {session.user.email}
+                  <SidebarMenuButton>
+                    {session.user.email}
                     <ChevronUp className="ml-auto" />
                   </SidebarMenuButton>
                 </DropdownMenuTrigger>
@@ -103,13 +108,17 @@ export function AppSidebar() {
                   side="top"
                   className="w-[--radix-popper-anchor-width]"
                 >
-                  <DropdownMenuItem onSelect={() => signOut({callbackUrl: "/login"})}><span>Sign out</span>
+                  <DropdownMenuItem
+                    onSelect={() => signOut({ callbackUrl: "/login" })}
+                  >
+                    <span>Sign out</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </SidebarMenuItem>
           </SidebarMenu>
-        </SidebarFooter>}
+        </SidebarFooter>
+      )}
     </Sidebar>
   );
 }

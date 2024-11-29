@@ -166,66 +166,68 @@ export default function DeviceConfigUpload() {
     }
   };
 
-return (
-  <div className="space-y-6">
-    <Card className="mb-4">
-      <CardHeader>
-        <CardTitle className="text-lg font-semibold">
-          Upload New Device Configuration
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="space-y-3">
-          <form>
-            <div className="grid gap-6 mb-4">
-              <div className="space-y-2">
-                <Label htmlFor="base-addr">Base Address (Hex)</Label>
-                <Input
-                  id="base-addr"
-                  value={baseAddr}
-                  onChange={(e) => setBaseAddr(e.target.value)}
-                  placeholder="e.g., 0x20000000"
-                />
-              </div>
+  return (
+    <div className="space-y-6">
+      <Card className="mb-4">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold">
+            Upload New Device Configuration
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-3">
+            <form>
+              <div className="grid gap-6 mb-4">
+                <div className="space-y-2">
+                  <Label htmlFor="base-addr">Base Address (Hex)</Label>
+                  <Input
+                    id="base-addr"
+                    value={baseAddr}
+                    onChange={(e) => setBaseAddr(e.target.value)}
+                    placeholder="e.g., 0x20000000"
+                  />
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="device-name">Device Name</Label>
-                <Input
-                  id="device-name"
-                  value={deviceName}
-                  onChange={(e) => setDeviceName(e.target.value)}
-                  placeholder="e.g., ADC Controller"
-                />
-              </div>
+                <div className="space-y-2">
+                  <Label htmlFor="device-name">Device Name</Label>
+                  <Input
+                    id="device-name"
+                    value={deviceName}
+                    onChange={(e) => setDeviceName(e.target.value)}
+                    placeholder="e.g., ADC Controller"
+                  />
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="device-description">Device Description</Label>
-                <Input
-                  id="device-description"
-                  value={deviceDescription}
-                  onChange={(e) => setDeviceDescription(e.target.value)}
-                  placeholder="e.g., 12-bit ADC with DMA capabilities"
-                />
-              </div>
+                <div className="space-y-2">
+                  <Label htmlFor="device-description">Device Description</Label>
+                  <Input
+                    id="device-description"
+                    value={deviceDescription}
+                    onChange={(e) => setDeviceDescription(e.target.value)}
+                    placeholder="e.g., 12-bit ADC with DMA capabilities"
+                  />
+                </div>
 
-              <div className="flex items-center space-x-2">
-                <Label htmlFor="isPublic" className="text-sm font-medium">
-                  Make this device public
-                </Label>
-                <Switch
-                  id="isPublic"
-                  checked={isPublic}
-                  onCheckedChange={(checked) => setIsPublic(checked)}
-                />
-              </div>
+                <div className="flex items-center space-x-2">
+                  <Label htmlFor="isPublic" className="text-sm font-medium">
+                    Make this device public
+                  </Label>
+                  <Switch
+                    id="isPublic"
+                    checked={isPublic}
+                    onCheckedChange={(checked) => setIsPublic(checked)}
+                  />
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="registers-json">Registers Configuration</Label>
-                <Textarea
-                  id="registers-json"
-                  value={registersJson}
-                  onChange={(e) => setRegistersJson(e.target.value)}
-                  placeholder={`Paste registers JSON here...
+                <div className="space-y-2">
+                  <Label htmlFor="registers-json">
+                    Registers Configuration
+                  </Label>
+                  <Textarea
+                    id="registers-json"
+                    value={registersJson}
+                    onChange={(e) => setRegistersJson(e.target.value)}
+                    placeholder={`Paste registers JSON here...
 Example format:
 {
   "reg1": {
@@ -242,32 +244,29 @@ Example format:
     ]
   }
 }`}
-                  className="font-mono min-h-[400px]"
-                />
+                    className="font-mono min-h-[400px]"
+                  />
+                </div>
+
+                {error && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Error</AlertTitle>
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
               </div>
 
-              {error && (
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>Error</AlertTitle>
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-            </div>
-
-            <div className="flex justify-center">
-              <Button
-                onClick={handleSubmit}
-                disabled={isUploading}
-              >
-                {isUploading ? "Uploading..." : "Upload Configuration"}
-              </Button>
-              <Toaster />
-            </div>
-          </form>
-        </div>
-      </CardContent>
-    </Card>
-  </div>
-);
+              <div className="flex justify-center">
+                <Button onClick={handleSubmit} disabled={isUploading}>
+                  {isUploading ? "Uploading..." : "Upload Configuration"}
+                </Button>
+                <Toaster />
+              </div>
+            </form>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
 }
