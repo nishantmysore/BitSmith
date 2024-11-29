@@ -125,7 +125,9 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
 
         <CollapsibleContent>
           <div className="flex w-full justify-between">
-            <div className={showBitViewer ? "w-2/3" : "w-full"}>
+            <div
+              className={`transition-all duration-300 ease-in-out ${showBitViewer ? "w-2/3" : "w-full"}`}
+            >
               <CardContent className="p-6">
                 <Alert className="mb-6">
                   <AlertTitle className="text-base font-semibold">
@@ -199,15 +201,19 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
                 </div>
               </CardContent>
             </div>
-
             {showBitViewer && (
-              <>
-                <Separator orientation="vertical" className="h-auto my-4" />
-                <div className="w-1/3">
-                  <RegisterBitViewer />
-                </div>
-              </>
+              <Separator
+                orientation="vertical"
+                className={`h-auto my-4 transition-opacity duration-300 ${
+                  showBitViewer ? "opacity-100" : "opacity-0"
+                }`}
+              />
             )}
+            <div
+              className={`transition-all duration-300 ... ${showBitViewer ? "opacity-100 translate-x-0 w-1/3" : "opacity-0 translate-x-full w-0 overflow-hidden"}`}
+            >
+              {showBitViewer && <RegisterBitViewer />}
+            </div>
           </div>
         </CollapsibleContent>
       </Collapsible>
