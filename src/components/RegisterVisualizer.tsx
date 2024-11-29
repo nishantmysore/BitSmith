@@ -212,7 +212,7 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
             <div
               className={`transition-all duration-300 ... ${showBitViewer ? "opacity-100 translate-x-0 w-1/3" : "opacity-0 translate-x-full w-0 overflow-hidden"}`}
             >
-              {showBitViewer && <RegisterBitViewer />}
+              {showBitViewer && <RegisterBitViewer register={register}/>}
             </div>
           </div>
         </CollapsibleContent>

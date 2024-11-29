@@ -18,30 +18,23 @@ interface FieldValue {
 }
 
 interface RegisterBitViewerProps {
-  device?: Device & {
-    registers: (Register & {
-      fields: Field[];
-    })[];
+  register: Register & {
+    fields: Field[];
   };
 }
 
-const RegisterBitViewer: React.FC<RegisterBitViewerProps> = () => {
-  const { selectedDevice } = useDevice();
-  const [selectedRegister, setSelectedRegister] = React.useState<string>("");
+const RegisterBitViewer: React.FC<RegisterBitViewerProps> = ({register}) => {
   const [value, setValue] = React.useState<string>("");
   const [inputFormat, setInputFormat] = React.useState<InputFormat>("hex");
 
   // Get current register width or default to 32
-  const currentRegister = selectedRegister
-    ? selectedDevice?.registers.find((r) => r.id === selectedRegister)
-    : null;
-  const registerWidth = currentRegister?.width || 32;
+  const registerWidth = register?.width || 32;
 
   const [binaryValue, setBinaryValue] = React.useState<string>(() =>
     "0".repeat(registerWidth),
   );
 
-  if (!selectedDevice) {
+  if (!register) {
     return (
       <Card className="w-full">
         <CardHeader>
@@ -49,7 +42,7 @@ const RegisterBitViewer: React.FC<RegisterBitViewerProps> = () => {
         </CardHeader>
         <CardContent>
           <p className="text-center text-muted-foreground">
-            No device selected
+            No device/register selected
           </p>
         </CardContent>
       </Card>
@@ -121,33 +114,8 @@ const RegisterBitViewer: React.FC<RegisterBitViewerProps> = () => {
     );
   };
 
-  const handleRegisterChange = (registerId: string) => {
-    setSelectedRegister(registerId);
-    const newWidth =
-      selectedDevice.registers.find((r) => r.id === registerId)?.width || 32;
-    setBinaryValue("0".repeat(newWidth));
-    setValue("");
-  };
-
   return (
     <div className="w-full max-w-xl p-4">
-      <div className="space-y-2">
-        <Label htmlFor="register-select">Select Register</Label>
-        <select
-          id="register-select"
-          className="w-full p-2 border rounded-md bg-background"
-          value={selectedRegister}
-          onChange={(e) => handleRegisterChange(e.target.value)}
-        >
-          <option value="">Select a register...</option>
-          {selectedDevice.registers.map((reg) => (
-            <option key={reg.id} value={reg.id}>
-              {reg.name} ({reg.address}) - {reg.width} bits
-            </option>
-          ))}
-        </select>
-      </div>
-
       <div className="space-y-2">
         <Label>Input Format</Label>
         <Tabs
@@ -205,11 +173,11 @@ const RegisterBitViewer: React.FC<RegisterBitViewerProps> = () => {
         </div>
       </div>
 
-      {currentRegister && (
+      {register && (
         <div className="space-y-2">
           <Label>Field Values</Label>
           <div className="space-y-1">
-            {currentRegister.fields.map((field) => {
+            {register.fields.map((field) => {
               const [msb, lsb] = field.bits.includes(":")
                 ? field.bits.split(":").map(Number)
                 : [Number(field.bits), Number(field.bits)];
