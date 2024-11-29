@@ -85,6 +85,41 @@ export const DeviceValidateSchema: ZodType<DeviceFormData> = z.object({
     base_address: z.string().regex(/[0-9A-Fa-f]+/g, "Device base address be a valid hex value"),
     isPublic: z.boolean({required_error: "isPublic is required",}),
     registers: z.array(RegisterValidateSchema).optional()
+}).superRefine((data, ctx) => {
+    // Skip validation if there are no registers
+    if (!data.registers || data.registers.length === 0) return;
+
+    // Create a map to track register names
+    const registerNames = new Map<string, number>();
+    const registerAddresses = new Map<string, number>();
+    
+    // Check for duplicate names
+    data.registers.forEach((register, index) => {
+        if (registerNames.has(register.name)) {
+            // Add error for duplicate name
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: `Duplicate register name "${register.name}" found at positions ${registerNames.get(register.name)} and ${index}`,
+                path: ['registers', index, 'name']
+            });
+        } else {
+            registerNames.set(register.name, index);
+        }
+        if (registerAddresses.has(register.address)) {
+            // Add error for duplicate name
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: `Duplicate register address "${register.address}" found at positions ${registerAddresses.get(register.address)} and ${index}`,
+                path: ['registers', index, 'address']
+            });
+        } else {
+            registerAddresses.set(register.address, index);
+        }
+    });
 });
+
+
+;
+
 
 

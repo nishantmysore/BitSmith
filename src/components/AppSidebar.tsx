@@ -44,7 +44,12 @@ export function AppSidebar() {
   const { data: session } = useSession();
   return (
     <Sidebar variant="sidebar">
-    <SidebarHeader className="text-xl font-semibold"><div className="flex justify-between"> BitSmith <ModeToggle/></div></SidebarHeader>
+    <SidebarHeader className="text-xl font-semibold">
+      <div className="flex w-full justify-between items-center">
+        BitSmith
+        <ModeToggle/>
+      </div>
+    </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Application</SidebarGroupLabel>

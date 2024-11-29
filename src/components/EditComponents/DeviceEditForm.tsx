@@ -40,6 +40,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useState, MouseEvent } from "react";
+import FormErrors from "./FormErrors"; //
 
 export function DeviceEditForm() {
   const { selectedDevice, setSelectedDevice, devices } = useDevice();
@@ -270,6 +271,7 @@ export function DeviceEditForm() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-3">
+            <FormErrors errors={errors} />
             <form onSubmit={handleSubmit(onSubmit, onError)}>
               <div className="grid gap-6 mb-4">
                 <div className="space-y-2">
@@ -336,6 +338,7 @@ export function DeviceEditForm() {
                           >
                             <div className="flex items-center justify-between">
                               <AccordionTrigger className="flex-1 text-xl">
+                                {index + 1}.{" "}
                                 {watch(`registers.${index}.name`) ||
                                   "New Register"}
                               </AccordionTrigger>
