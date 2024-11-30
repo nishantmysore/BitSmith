@@ -9,6 +9,7 @@ import {
   getSortedRowModel,
   getFilteredRowModel,
   useReactTable,
+  getPaginationRowModel,
 } from "@tanstack/react-table"
 
 import {
@@ -19,12 +20,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { Button } from "@/components/ui/button"
 import * as React from "react"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
 }
+import { ChevronRight, ChevronLeft } from "lucide-react"
 
 import { Input } from "@/components/ui/input"
 
@@ -37,6 +40,7 @@ export function DataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   )
+  const [globalFilter, setGlobalFilter] = React.useState('')
   const table = useReactTable({
     data,
     columns,
@@ -45,21 +49,28 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+
+     initialState: {
+        pagination: {
+          pageSize: 50,
+        },
+      },
     state: {
       sorting,
       columnFilters,
+      globalFilter,
     },
+    onGlobalFilterChange: setGlobalFilter,
   });
 
   return (
     <div>
     <div className="flex items-center py-2">
       <Input
-        placeholder="Filter registers..."
-        value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-        onChange={(event) =>
-          table.getColumn("name")?.setFilterValue(event.target.value)
-        }
+        placeholder="Search"
+        value={globalFilter}
+        onChange={(event) => setGlobalFilter(event.target.value)}
         className="max-w-sm"
       />
     </div>
@@ -107,6 +118,25 @@ export function DataTable<TData, TValue>({
         </TableBody>
       </Table>
     </div>
+    <div className="flex items-center justify-end py-4">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}
+        >
+
+         <ChevronLeft/> 
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+        >
+         <ChevronRight/> 
+        </Button>
+      </div>
     </div>
   )
 }
