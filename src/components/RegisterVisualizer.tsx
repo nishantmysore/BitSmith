@@ -65,7 +65,7 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
   baseAddr,
   offsetBaseAddr,
 }) => {
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isOpen, setIsOpen] = React.useState(true);
   const [isCopied, setIsCopied] = React.useState(false);
   const [showBitViewer, setShowBitViewer] = React.useState(false);
 
@@ -86,6 +86,7 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
   };
 
   return (
+    <div id={`register-${register.name}`} >
     <Card className="w-full">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild className="w-full">
@@ -218,6 +219,7 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
         </CollapsibleContent>
       </Collapsible>
     </Card>
+    </div>
   );
 };
 
