@@ -6,6 +6,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Device, Register, Field } from "@prisma/client";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+import {DataTable} from "@/components/Table/DataTable"
+import {columns } from "@/components/Table/TableColumns"
+
 // Type for the device with its relations
 type DeviceWithRegisters = Device & {
   registers: (Register & {
@@ -42,6 +45,11 @@ const RegisterList = () => {
       <ScrollArea>
         {" "}
         {/* Add this line */}
+
+
+          <div className="py-10 px-2">
+            <DataTable columns={columns} data={selectedDevice.registers.map(({name, description, width, address}) => ({name, description, width, address}))}/>
+          </div>
         {selectedDevice.registers.map((register) => (
           <RegisterVisualizer
             key={register.id} // Using id instead of address for key is generally better

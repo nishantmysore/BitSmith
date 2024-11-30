@@ -6,8 +6,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getAccessColor } from "@/utils/access_color";
 import FieldHoverCard from "@/components/FieldHoverCard";
 import ValueFormatActions from "./ValueFormatActions";
-import { useDevice } from "@/DeviceContext";
-import type { Device, Register, Field } from "@prisma/client";
+import type {Register, Field } from "@prisma/client";
 
 type InputFormat = "hex" | "decimal" | "binary";
 

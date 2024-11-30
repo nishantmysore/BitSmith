@@ -2,7 +2,6 @@
 import { DeviceProvider } from "@/DeviceContext";
 import { DeviceSelector } from "@/components/DeviceSelector";
 import RegisterList from "@/components/RegisterList";
-import RegisterBitViewer from "@/components/RegisterBitViewer";
 
 export function ClientContent() {
   return (
