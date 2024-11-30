@@ -150,7 +150,7 @@ export function DeviceEditForm() {
 
       reset(formData);
     }
-  }, [selectedDevice, reset]);
+  }, [selectedDevice, reset, isSubmitting]);
 
   const onError = (errors: any) => {
     console.log("Submit Error:", errors);

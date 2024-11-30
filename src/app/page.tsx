@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import { Header } from "@/components/header";
 import { ClientContent } from "./ClientContent";
 import { getCurrentUser } from "@/lib/session";
 

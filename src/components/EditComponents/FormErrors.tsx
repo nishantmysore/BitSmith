@@ -6,7 +6,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 interface FormErrorProps {
   errors: Record<string, any>;
   title?: string;
-  maxHeight?: string;
 }
 
 const getErrorPath = (path: string[]): string => {
@@ -79,7 +78,6 @@ const flattenErrors = (
 const FormErrors = ({
   errors,
   title = "Submission Errors",
-  maxHeight = "200px",
 }: FormErrorProps) => {
   const errorMessages = flattenErrors(errors);
 

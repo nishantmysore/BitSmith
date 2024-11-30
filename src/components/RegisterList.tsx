@@ -5,7 +5,8 @@ import { useDevice } from "@/DeviceContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Device, Register, Field } from "@prisma/client";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
+import { Separator } from "@/components/ui/separator"
+import { Label } from "@/components/ui/label"
 import {DataTable} from "@/components/Table/DataTable"
 import {columns } from "@/components/Table/TableColumns"
 
@@ -42,14 +43,16 @@ const RegisterList = () => {
 
   return (
     <div className="space-y-4">
+
+      <Separator/>
+      <Label>Register</Label>
       <ScrollArea>
-        {" "}
-        {/* Add this line */}
-
-
-          <div className="py-10 px-2">
+          <div className="px-2">
             <DataTable columns={columns} data={selectedDevice.registers.map(({name, description, width, address}) => ({name, description, width, address}))}/>
           </div>
+
+      </ScrollArea>
+      <Separator/>
         {selectedDevice.registers.map((register) => (
           <RegisterVisualizer
             key={register.id} // Using id instead of address for key is generally better
@@ -58,7 +61,6 @@ const RegisterList = () => {
             offsetBaseAddr={offsetBaseAddr}
           />
         ))}
-      </ScrollArea>
     </div>
   );
 };

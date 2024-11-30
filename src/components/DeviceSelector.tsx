@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useDevice } from "../DeviceContext";
+import { Button } from "@/components/ui/button"
 
 // Hex validation functions remain the same
 const isValidHex = (value: string): boolean => {
@@ -57,7 +58,10 @@ export const DeviceSelector = () => {
     <Card className="mb-4">
       <CardHeader>
         <CardTitle className="text-lg font-semibold">
+        <div className="flex justify-between">
           Device Selection
+              <Button > Export to JSON </Button>
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -95,6 +99,7 @@ export const DeviceSelector = () => {
           {/* Base Address Input */}
           <div className="flex flex-col space-y-2">
             <Label htmlFor="base-addr-input">Base Address</Label>
+            <div className="flex justify-between">
             <div className="flex items-center space-x-4">
               <Input
                 id="base-addr-input"
@@ -115,6 +120,7 @@ export const DeviceSelector = () => {
                 <Label htmlFor="offset-base-addr">
                   Offset Registers by Base Address
                 </Label>
+              </div>
               </div>
             </div>
             {!isValid && (
