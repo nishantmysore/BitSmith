@@ -50,7 +50,6 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({
           throw new Error("Failed to fetch devices");
         }
         const data = await response.json();
-        console.log(data);
         setDevices(data);
         // Set the first device as selected if we have devices and no device is selected
         if (data.length > 0 && !selectedDevice) {

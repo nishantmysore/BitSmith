@@ -13,6 +13,23 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useDevice } from "../DeviceContext";
 import { Button } from "@/components/ui/button";
+import { Register, Field, AccessType } from "@prisma/client";
+
+type FieldExport = {
+  name: string;
+  description: string;
+  bits: string;
+  access: AccessType;
+};
+
+type RegisterWithFields = Register & {
+  fields: {
+    name: string;
+    description: string;
+    bits: string;
+    access: AccessType;
+  }[];
+};
 
 // Hex validation functions remain the same
 const isValidHex = (value: string): boolean => {
@@ -54,13 +71,51 @@ export const DeviceSelector = () => {
     setBaseAddr(formattedValue);
   };
 
+  const exportDevice = (): void => {
+    if (selectedDevice) {
+      const exportedDeviceObject = {
+        name: selectedDevice.name,
+        description: selectedDevice.description,
+        base_address: selectedDevice.base_address,
+        isPublic: selectedDevice.isPublic,
+        registers: selectedDevice.registers.map(
+          (register: RegisterWithFields) => ({
+            name: register.name,
+            description: register.description,
+            address: register.address,
+            width: register.width,
+            fields: register.fields.map((field: FieldExport) => ({
+              name: field.name,
+              description: field.description,
+              bits: field.bits,
+              access: field.access,
+            })),
+          }),
+        ),
+      };
+
+      // Export the object
+      const jsonString = JSON.stringify(exportedDeviceObject, null, 2);
+      const blob = new Blob([jsonString], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.download = `${exportedDeviceObject.name.toLowerCase().replace(/\s+/g, "_")}_device.json`;
+      link.href = url;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      URL.revokeObjectURL(url);
+    }
+  };
+
   return (
     <Card className="mb-4 px-2">
       <CardHeader>
         <CardTitle className="text-lg font-semibold">
           <div className="flex justify-between">
             Device Selection
-            <Button> Export to JSON </Button>
+            <Button onClick={exportDevice}> Export to JSON </Button>
           </div>
         </CardTitle>
       </CardHeader>
