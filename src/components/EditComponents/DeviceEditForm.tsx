@@ -4,6 +4,7 @@ import { useDevice } from "@/DeviceContext";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import FileUpload from "@/components/FileUpload";
+import { FieldErrors } from "react-hook-form";
 import {
   DeviceFormData,
   DeviceValidateSchema,
@@ -152,7 +153,7 @@ export function DeviceEditForm() {
     }
   }, [selectedDevice, reset, isSubmitting]);
 
-  const onError = (errors: any) => {
+  const onError = (errors: FieldErrors<DeviceFormData>) => {
     console.log("Submit Error:", errors);
   };
 

@@ -59,7 +59,7 @@ const FieldEdit = ({
     setIsDeleteDialogOpen(false);
   };
 
-  const handleDelete = (e: any) => {
+  const handleDelete = (e: React.MouseEvent) => {
     console.log("Event", e);
     e.stopPropagation();
     setIsDeleteDialogOpen(true);

@@ -1,14 +1,13 @@
-import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { DeviceValidateSchema} from "@/types/validation";
-
+import {NextRequest, NextResponse} from 'next/server'
 
 export async function PUT(
-  request: Request,
-  { params }: { params: { id: any } }
-) {
+  request: NextRequest,
+  { params } : { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
   try {
     const {id} = await params;
 
@@ -100,7 +99,7 @@ export async function PUT(
     console.log("Added Fields: ", addedFields)
 
     // Delete all existing registers
-    const deleteRegisters = await prisma.register.deleteMany({
+    await prisma.register.deleteMany({
       where: {
         id: {
           in: deletedRegisters?.map(reg => reg.db_id).filter((db_id): db_id is string => db_id !== undefined) ?? []
@@ -110,7 +109,7 @@ export async function PUT(
     });
 
 
-    const addRegistersDB = await Promise.all(
+    await Promise.all(
       (addedRegisters ?? []).map(reg => 
         prisma.register.create({
           data: {
@@ -132,7 +131,7 @@ export async function PUT(
       )
     );
 
-    const modifyRegistersDB = await Promise.all(
+    await Promise.all(
       (modifiedRegisters ?? []).map(data => 
         prisma.register.updateMany({
           where: {
@@ -149,7 +148,7 @@ export async function PUT(
     )
 
     
-      const deleteFieldsDB = await prisma.field.deleteMany({ where: {
+      await prisma.field.deleteMany({ where: {
           id: {
             in: deletedFields?.map(field => field.db_id).filter((db_id): db_id is string => db_id !== undefined) ?? []
           },
@@ -157,7 +156,7 @@ export async function PUT(
       });
 
 
-      const addFieldsDB = await Promise.all(
+      await Promise.all(
         (addedFields ?? []).map(addedReg => 
           prisma.field.create({
             data: {
@@ -172,7 +171,7 @@ export async function PUT(
       )
       );
 
-    const modifyFieldsDB = await Promise.all(
+    await Promise.all(
       (modifiedFields ?? []).map(field => 
         prisma.field.updateMany({
           where: {
@@ -204,9 +203,11 @@ export async function PUT(
 
 // Optionally, add a DELETE method if you want to support device deletion
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+  request: NextRequest,
+  { params } : { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
+
+  const {id} = await params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -225,7 +226,7 @@ export async function DELETE(
     }
 
     const device = await prisma.device.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: { owner: true },
     });
 
@@ -241,7 +242,7 @@ export async function DELETE(
     }
 
     await prisma.device.delete({
-      where: { id: params.id },
+      where: { id: id },
     });
 
     return NextResponse.json({ message: "Device deleted successfully" });

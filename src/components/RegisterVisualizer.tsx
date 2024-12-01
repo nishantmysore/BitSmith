@@ -86,7 +86,7 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
   };
 
   return (
-    <div id={`register-${register.name}`} >
+    <div id={`register-${register.name}`} className="px-2" >
     <Card className="w-full">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild className="w-full">

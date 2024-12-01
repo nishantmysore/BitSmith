@@ -2,9 +2,11 @@ import React from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { FieldErrors } from "react-hook-form";
+import { DeviceFormData } from "@/types/validation";
 
 interface FormErrorProps {
-  errors: Record<string, any>;
+  errors: FieldErrors<DeviceFormData>;
   title?: string;
 }
 
@@ -35,7 +37,8 @@ const getErrorPath = (path: string[]): string => {
 };
 
 const flattenErrors = (
-  errors: Record<string, any>,
+  /* eslint-disable  @typescript-eslint/no-explicit-any */
+  errors: Record<string,any>,
   path: string[] = [],
 ): { message: string; path: string }[] => {
   let result: { message: string; path: string }[] = [];

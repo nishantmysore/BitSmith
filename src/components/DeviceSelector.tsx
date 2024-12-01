@@ -55,7 +55,7 @@ export const DeviceSelector = () => {
   };
 
   return (
-    <Card className="mb-4">
+    <Card className="mb-4 px-2">
       <CardHeader>
         <CardTitle className="text-lg font-semibold">
         <div className="flex justify-between">
