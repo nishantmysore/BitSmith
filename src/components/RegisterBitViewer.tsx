@@ -6,7 +6,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getAccessColor } from "@/utils/access_color";
 import FieldHoverCard from "@/components/FieldHoverCard";
 import ValueFormatActions from "./ValueFormatActions";
-import type {Register, Field } from "@prisma/client";
+import type { Register, Field } from "@prisma/client";
 
 type InputFormat = "hex" | "decimal" | "binary";
 
@@ -22,7 +22,7 @@ interface RegisterBitViewerProps {
   };
 }
 
-const RegisterBitViewer: React.FC<RegisterBitViewerProps> = ({register}) => {
+const RegisterBitViewer: React.FC<RegisterBitViewerProps> = ({ register }) => {
   const [value, setValue] = React.useState<string>("");
   const [inputFormat, setInputFormat] = React.useState<InputFormat>("hex");
 

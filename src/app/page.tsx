@@ -10,8 +10,8 @@ export default async function Home() {
   }
 
   return (
-      <main className="flex-1">
-        <ClientContent />
-      </main>
+    <main className="flex-1">
+      <ClientContent />
+    </main>
   );
 }

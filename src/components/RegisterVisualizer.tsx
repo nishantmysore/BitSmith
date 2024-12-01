@@ -86,139 +86,140 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
   };
 
   return (
-    <div id={`register-${register.name}`} className="px-2" >
-    <Card className="w-full">
-      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <CollapsibleTrigger asChild className="w-full">
-          <CardHeader className="border-b hover:bg-secondary/50 transition-colors">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <ChevronDown
-                  className={`h-4 w-4 transition-transform duration-200 ${
-                    isOpen ? "" : "-rotate-90"
+    <div id={`register-${register.name}`} className="px-2">
+      <Card className="w-full">
+        <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+          <CollapsibleTrigger asChild className="w-full">
+            <CardHeader className="border-b hover:bg-secondary/50 transition-colors">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform duration-200 ${
+                      isOpen ? "" : "-rotate-90"
+                    }`}
+                  />
+                  <CardTitle className="text-xl font-semibold">
+                    {register.name}
+                  </CardTitle>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xl font-mono">{finalAddress}</span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCopy();
+                    }}
+                  >
+                    {isCopied ? (
+                      <Check className="h-4 w-4" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+          </CollapsibleTrigger>
+
+          <CollapsibleContent>
+            <div className="flex w-full justify-between">
+              <div
+                className={`transition-all duration-300 ease-in-out ${showBitViewer ? "w-2/3" : "w-full"}`}
+              >
+                <CardContent className="p-6">
+                  <Alert className="mb-6">
+                    <AlertTitle className="text-base font-semibold">
+                      <div className="flex justify-between">
+                        Description
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowBitViewer(!showBitViewer)}
+                        >
+                          {showBitViewer
+                            ? "Hide Bit Viewer"
+                            : "Show Bit Viewer"}
+                        </Button>
+                      </div>
+                    </AlertTitle>
+                    <AlertDescription className="text-base mt-2 text-muted-foreground">
+                      {register.description}
+                    </AlertDescription>
+                  </Alert>
+                  <div className="space-y-6">
+                    <div className="w-full h-12 relative rounded-md">
+                      {register.fields.map((field) => {
+                        const { width, left } = calculateFieldDimensions(
+                          field,
+                          registerWidth,
+                        );
+
+                        return (
+                          <div
+                            key={field.name}
+                            className="absolute h-full flex flex-col justify-center items-center text-sm border border-border border-secondary/100 bg-gradient-to-b from-primary/100 to-primary/5"
+                            style={{
+                              left: `${left}%`,
+                              width: `${width}%`,
+                            }}
+                          >
+                            <div className="font-medium truncate w-full text-center text-foreground">
+                              {field.name}
+                            </div>
+                            <div className="text-muted-foreground text-xs opacity-75">
+                              {field.bits}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Field</TableHead>
+                          <TableHead>Bits</TableHead>
+                          <TableHead>Access</TableHead>
+                          <TableHead>Description</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {register.fields.map((field) => (
+                          <TableRow key={field.name}>
+                            <TableCell className="font-medium">
+                              {field.name}
+                            </TableCell>
+                            <TableCell>{field.bits}</TableCell>
+                            <TableCell>
+                              <AccessBadge access={field.access} />
+                            </TableCell>
+                            <TableCell>{field.description}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </div>
+              {showBitViewer && (
+                <Separator
+                  orientation="vertical"
+                  className={`h-auto my-4 transition-opacity duration-300 ${
+                    showBitViewer ? "opacity-100" : "opacity-0"
                   }`}
                 />
-                <CardTitle className="text-xl font-semibold">
-                  {register.name}
-                </CardTitle>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xl font-mono">{finalAddress}</span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-2"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleCopy();
-                  }}
-                >
-                  {isCopied ? (
-                    <Check className="h-4 w-4" />
-                  ) : (
-                    <Copy className="h-4 w-4" />
-                  )}
-                </Button>
+              )}
+              <div
+                className={`transition-all duration-300 ... ${showBitViewer ? "opacity-100 translate-x-0 w-1/3" : "opacity-0 translate-x-full w-0 overflow-hidden"}`}
+              >
+                {showBitViewer && <RegisterBitViewer register={register} />}
               </div>
             </div>
-          </CardHeader>
-        </CollapsibleTrigger>
-
-        <CollapsibleContent>
-          <div className="flex w-full justify-between">
-            <div
-              className={`transition-all duration-300 ease-in-out ${showBitViewer ? "w-2/3" : "w-full"}`}
-            >
-              <CardContent className="p-6">
-                <Alert className="mb-6">
-                  <AlertTitle className="text-base font-semibold">
-                    <div className="flex justify-between">
-                      Description
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setShowBitViewer(!showBitViewer)}
-                      >
-                        {showBitViewer ? "Hide Bit Viewer" : "Show Bit Viewer"}
-                      </Button>
-                    </div>
-                  </AlertTitle>
-                  <AlertDescription className="text-base mt-2 text-muted-foreground">
-                    {register.description}
-                  </AlertDescription>
-                </Alert>
-                <div className="space-y-6">
-                  <div className="w-full h-12 bg-secondary relative rounded-md">
-                    {register.fields.map((field) => {
-                      const { width, left } = calculateFieldDimensions(
-                        field,
-                        registerWidth,
-                      );
-
-                      return (
-                        <div
-                          key={field.name}
-                          className="absolute h-full flex flex-col justify-center items-center text-xs border-l border-border"
-                          style={{
-                            left: `${left}%`,
-                            width: `${width}%`,
-                            borderColor: "hsl(var(--primary)/0.8)",
-                          }}
-                        >
-                          <div className="font-medium truncate w-full text-center text-foreground">
-                            {field.name}
-                          </div>
-                          <div className="text-muted-foreground">
-                            {field.bits}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Field</TableHead>
-                        <TableHead>Bits</TableHead>
-                        <TableHead>Access</TableHead>
-                        <TableHead>Description</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {register.fields.map((field) => (
-                        <TableRow key={field.name}>
-                          <TableCell className="font-medium">
-                            {field.name}
-                          </TableCell>
-                          <TableCell>{field.bits}</TableCell>
-                          <TableCell>
-                            <AccessBadge access={field.access} />
-                          </TableCell>
-                          <TableCell>{field.description}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </div>
-            {showBitViewer && (
-              <Separator
-                orientation="vertical"
-                className={`h-auto my-4 transition-opacity duration-300 ${
-                  showBitViewer ? "opacity-100" : "opacity-0"
-                }`}
-              />
-            )}
-            <div
-              className={`transition-all duration-300 ... ${showBitViewer ? "opacity-100 translate-x-0 w-1/3" : "opacity-0 translate-x-full w-0 overflow-hidden"}`}
-            >
-              {showBitViewer && <RegisterBitViewer register={register}/>}
-            </div>
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
-    </Card>
+          </CollapsibleContent>
+        </Collapsible>
+      </Card>
     </div>
   );
 };

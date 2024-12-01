@@ -38,7 +38,7 @@ const getErrorPath = (path: string[]): string => {
 
 const flattenErrors = (
   /* eslint-disable  @typescript-eslint/no-explicit-any */
-  errors: Record<string,any>,
+  errors: Record<string, any>,
   path: string[] = [],
 ): { message: string; path: string }[] => {
   let result: { message: string; path: string }[] = [];

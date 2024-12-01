@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useDevice } from "../DeviceContext";
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 
 // Hex validation functions remain the same
 const isValidHex = (value: string): boolean => {
@@ -58,9 +58,9 @@ export const DeviceSelector = () => {
     <Card className="mb-4 px-2">
       <CardHeader>
         <CardTitle className="text-lg font-semibold">
-        <div className="flex justify-between">
-          Device Selection
-              <Button > Export to JSON </Button>
+          <div className="flex justify-between">
+            Device Selection
+            <Button> Export to JSON </Button>
           </div>
         </CardTitle>
       </CardHeader>
@@ -100,27 +100,27 @@ export const DeviceSelector = () => {
           <div className="flex flex-col space-y-2">
             <Label htmlFor="base-addr-input">Base Address</Label>
             <div className="flex justify-between">
-            <div className="flex items-center space-x-4">
-              <Input
-                id="base-addr-input"
-                className={`w-36 font-mono text-sm ${
-                  !isValid ? "border-red-500 focus-visible:ring-red-500" : ""
-                }`}
-                value={baseAddr}
-                onChange={(e) => handleBaseAddrChange(e.target.value)}
-                placeholder="0x00000000"
-              />
-              {/* Offset Registers Toggle */}
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="offset-base-addr"
-                  checked={offsetBaseAddr}
-                  onCheckedChange={setOffsetBaseAddr}
+              <div className="flex items-center space-x-4">
+                <Input
+                  id="base-addr-input"
+                  className={`w-36 font-mono text-sm ${
+                    !isValid ? "border-red-500 focus-visible:ring-red-500" : ""
+                  }`}
+                  value={baseAddr}
+                  onChange={(e) => handleBaseAddrChange(e.target.value)}
+                  placeholder="0x00000000"
                 />
-                <Label htmlFor="offset-base-addr">
-                  Offset Registers by Base Address
-                </Label>
-              </div>
+                {/* Offset Registers Toggle */}
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="offset-base-addr"
+                    checked={offsetBaseAddr}
+                    onCheckedChange={setOffsetBaseAddr}
+                  />
+                  <Label htmlFor="offset-base-addr">
+                    Offset Registers by Base Address
+                  </Label>
+                </div>
               </div>
             </div>
             {!isValid && (
