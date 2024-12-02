@@ -44,7 +44,11 @@ import {
 import { useState, MouseEvent } from "react";
 import FormErrors from "./FormErrors"; //
 
-export function DeviceEditForm() {
+interface DeviceEditFormProps {
+  newDevice?: boolean;
+}
+
+export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
   const { selectedDevice, setSelectedDevice, devices } = useDevice();
   const [registerToDelete, setRegisterToDelete] = useState<number | null>(null);
 
@@ -125,7 +129,15 @@ export function DeviceEditForm() {
   // Reset form when selectedDevice changes
   useEffect(() => {
     console.log("Resetting: ", isSubmitting);
-    if (selectedDevice && !isSubmitting) {
+    if (newDevice) {
+      reset({
+        name: "",
+        description: "",
+        base_address: "",
+        isPublic: false,
+        registers: [],
+      });
+    } else if (selectedDevice && !isSubmitting) {
       const formData = {
         name: selectedDevice.name,
         description: selectedDevice.description,
@@ -151,7 +163,7 @@ export function DeviceEditForm() {
 
       reset(formData);
     }
-  }, [selectedDevice, reset, isSubmitting]);
+  }, [selectedDevice, reset, isSubmitting, newDevice]);
 
   const onError = (errors: FieldErrors<DeviceFormData>) => {
     console.log("Submit Error:", errors);
@@ -211,13 +223,18 @@ export function DeviceEditForm() {
 
     console.log(transformedData);
     try {
-      const response = await fetch(`/api/devices/${selectedDevice?.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        newDevice
+          ? "/api/device-upload/"
+          : `/api/devices/${selectedDevice?.id}`,
+        {
+          method: newDevice ? "POST" : "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newDevice ? data : transformedData),
         },
-        body: JSON.stringify(transformedData),
-      });
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -235,37 +252,38 @@ export function DeviceEditForm() {
 
   return (
     <div className="space-y-6">
-      <Card className="mb-4">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold">
-            Select a Device
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-3">
-            <Select
-              value={selectedDevice?.id}
-              onValueChange={(deviceId) => {
-                const device = devices.find((d) => d.id === deviceId);
-                if (device) setSelectedDevice(device);
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select device" />
-              </SelectTrigger>
-              <SelectContent>
-                {devices.map((device) => (
-                  <SelectItem key={device.id} value={device.id}>
-                    {device.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <FileUpload />
-        </CardContent>
-      </Card>
-
+      {!newDevice && (
+        <Card className="mb-4">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold">
+              Select a Device
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-3">
+              <Select
+                value={selectedDevice?.id}
+                onValueChange={(deviceId) => {
+                  const device = devices.find((d) => d.id === deviceId);
+                  if (device) setSelectedDevice(device);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select device" />
+                </SelectTrigger>
+                <SelectContent>
+                  {devices.map((device) => (
+                    <SelectItem key={device.id} value={device.id}>
+                      {device.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <FileUpload />
+          </CardContent>
+        </Card>
+      )}
       <Card className="mb-4">
         <CardHeader>
           <CardTitle className="text-lg font-semibold">

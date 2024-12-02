@@ -1,74 +1,132 @@
-import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
-import { Prisma, Device, Register, Field } from "@prisma/client";
+import { authOptions } from "@/lib/auth";
+import { DeviceValidateSchema } from "@/types/validation";
+import { NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
+import { z } from "zod";
 
-// Define the expected request body type using Prisma types
-type RegisterInput = Omit<
-  Register,
-  "id" | "deviceId" | "createdAt" | "updatedAt"
-> & {
-  fields: Array<Omit<Field, "id" | "registerId" | "createdAt" | "updatedAt">>;
-  width: number;
-  description: string;
-};
+// Define explicit types for session
+interface SessionUser {
+  id: string;
+  email: string;
+}
 
-type DeviceInput = Omit<Device, "id" | "createdAt" | "updatedAt"> & {
-  registers: Record<string, RegisterInput>;
-  base_address: string;
-};
+interface Session {
+  user: SessionUser;
+}
 
-export async function POST(request: Request) {
+// Define explicit types for the validation schema result
+type ValidatedData = z.infer<typeof DeviceValidateSchema>;
+
+export async function POST(request: NextRequest) {
   try {
-    const body: DeviceInput = await request.json();
+    // Validate session
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id || !session?.user?.email) {
+      return NextResponse.json(
+        { error: "Valid authentication required" },
+        { status: 401 },
+      );
+    }
 
-    const result = await prisma.$transaction(async (tx) => {
-      const device = await tx.device.create({
-        data: {
-          name: body.name,
-          description: body.description,
-          isPublic: body.isPublic ?? false,
-          ownerId: body.ownerId,
-          base_address: body.base_address,
-          originalDeviceId: body.originalDeviceId,
-          registers: {
-            create: Object.values(body.registers).map((register) => ({
-              name: register.name,
-              address: register.address,
-              width: register.width,
-              description: register.description,
-              fields: {
-                create: register.fields.map((field) => ({
-                  name: field.name,
-                  bits: field.bits,
-                  access: field.access,
-                  description: field.description,
-                })),
-              },
-            })),
-          },
-        },
-        include: {
-          registers: {
-            include: {
-              fields: true,
-            },
-          },
-        },
+    // Get the current user with error handling
+    await prisma.user
+      .findUniqueOrThrow({
+        where: { id: session.user.id },
+      })
+      .catch(() => {
+        return NextResponse.json({ error: "User not found" }, { status: 404 });
       });
 
-      return device;
-    });
+    // Parse request body with explicit error handling
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch (e) {
+      return NextResponse.json(
+        { error: "Invalid JSON in request body" },
+        { status: 400 },
+      );
+    }
 
-    return NextResponse.json(result, { status: 201 });
+    // Validate the request data
+    const validatedData = DeviceValidateSchema.safeParse(body);
+    if (!validatedData.success) {
+      return NextResponse.json(
+        { error: "Invalid data", details: validatedData.error.format() },
+        { status: 400 },
+      );
+    }
+
+    // Prepare the device creation data
+    const deviceData = prepareDeviceData(validatedData.data, session.user.id);
+
+    // Execute the transaction
+    const device = await prisma.$transaction(
+      async (tx) => {
+        return await tx.device.create({
+          data: deviceData,
+          include: {
+            registers: {
+              include: {
+                fields: true,
+              },
+            },
+          },
+        });
+      },
+      {
+        timeout: 10000, // 10s timeout
+        isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted,
+      },
+    );
+
+    return NextResponse.json(device, { status: 201 });
   } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === "P2002") {
+    return handlePrismaError(error);
+  }
+}
+
+// Helper function to prepare device data
+function prepareDeviceData(data: ValidatedData, ownerId: string) {
+  return {
+    name: data.name,
+    description: data.description,
+    isPublic: data.isPublic ?? false,
+    ownerId,
+    base_address: data.base_address,
+    originalDeviceId: null,
+    registers: {
+      create:
+        data.registers?.map((register) => ({
+          name: register.name,
+          address: register.address,
+          width: parseInt(register.width, 10),
+          description: register.description,
+          fields: {
+            create: register.fields?.map((field) => ({
+              name: field.name,
+              bits: field.bits,
+              access: field.access,
+              description: field.description,
+            })),
+          },
+        })) ?? [],
+    },
+  };
+}
+
+// Helper function to handle Prisma errors
+function handlePrismaError(error: unknown) {
+  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    switch (error.code) {
+      case "P2002":
         return NextResponse.json(
           { error: "Device ID already exists" },
           { status: 409 },
         );
-      }
-      if (error.code === "P2003") {
+      case "P2003":
         return NextResponse.json(
           {
             error:
@@ -76,15 +134,25 @@ export async function POST(request: Request) {
           },
           { status: 400 },
         );
-      }
+      case "P2025":
+        return NextResponse.json(
+          { error: "Record not found" },
+          { status: 404 },
+        );
+      default:
+        console.error("Prisma error:", error);
+        return NextResponse.json(
+          { error: "Database operation failed" },
+          { status: 500 },
+        );
     }
-
-    console.error("Failed to create device:", error);
-    return NextResponse.json(
-      { error: "Failed to create device" },
-      { status: 500 },
-    );
   }
+
+  console.error("Unexpected error:", error);
+  return NextResponse.json(
+    { error: "Failed to create device" },
+    { status: 500 },
+  );
 }
 
 export async function GET(request: Request) {
