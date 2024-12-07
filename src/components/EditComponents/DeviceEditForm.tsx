@@ -134,7 +134,6 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
 
   // Reset form when selectedDevice changes
   useEffect(() => {
-    console.log("Resetting: ", isSubmitting);
     if (newDevice) {
       reset({
         name: "",
@@ -143,7 +142,7 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
         isPublic: false,
         registers: [],
       });
-    } else if (selectedDevice && !isSubmitting) {
+    } else if (selectedDevice) {
       const formData = {
         name: selectedDevice.name,
         description: selectedDevice.description,
@@ -169,9 +168,14 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
 
       reset(formData);
     }
-  }, [selectedDevice, reset, isSubmitting, newDevice]);
+  }, [selectedDevice, reset, newDevice]);
 
   const onError = (errors: FieldErrors<DeviceFormData>) => {
+    toast({
+      title: "Error Updating Device",
+      description: "There was an error updating the device",
+      variant: "destructive",
+    });
     console.log("Submit Error:", errors);
   };
 
@@ -247,12 +251,20 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
         throw new Error(errorData.error || "Failed to update device");
       }
 
-      const updatedDevice = await response.json();
-      console.log(updatedDevice);
-      // You might want to refresh your devices list here as well
+      await response.json();
+
+      toast({
+        title: "Success",
+        description: "Device updated successfully!",
+      });
+
     } catch (error) {
       console.error("Error updating device:", error);
-      // Handle error appropriately (e.g., show error message to user)
+      toast({
+        title: "Error Updating Device",
+        description: "There was an error updating the device: " + error,
+        variant: "destructive",
+      });
     }
   };
 
