@@ -47,6 +47,7 @@ import { useState, MouseEvent } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import FormErrors from "./FormErrors"; //
+import { determineChange } from "@/utils/validation";
 
 interface DeviceEditFormProps {
   newDevice?: boolean;
@@ -65,7 +66,7 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
     control,
     setValue,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<DeviceFormData>({
     resolver: zodResolver(DeviceValidateSchema),
     defaultValues: {
@@ -257,7 +258,6 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
         title: "Success",
         description: "Device updated successfully!",
       });
-
     } catch (error) {
       console.error("Error updating device:", error);
       toast({
@@ -328,23 +328,22 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
             description: register.description || "",
             width: register.width?.toString() || "32",
             address: register.address || "",
-            status: "added",
+            status: register.status,
             fields: (register.fields || []).map((field: any) => ({
               name: field.name || "",
               description: field.description || "",
               bits: field.bits || "",
               access: field.access || "RW",
-              status: "added",
+              status: register.status,
             })),
           })),
         };
 
         // Reset the form with the new data
         reset(formData);
-
         toast({
           title: "Success",
-          description: "Configuration file loaded successfully",
+          description: "Configuration file loaded successfully!",
         });
       } catch (error) {
         toast({
@@ -440,10 +439,11 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
           <CardTitle className="text-lg font-semibold">
             <div className="flex justify-between">
               Device Information
-              <Button onClick={onUpload}>
-                {" "}
-                <Upload /> Upload Configuration JSON{" "}
-              </Button>
+              {newDevice && (
+                <Button onClick={onUpload}>
+                  <Upload /> Upload Configuration JSON{" "}
+                </Button>
+              )}
             </div>
           </CardTitle>
         </CardHeader>

@@ -42,6 +42,14 @@ export const columns: ColumnDef<RegisterData>[] = [
   {
     accessorKey: "description",
     header: "Description",
+    cell: ({ row }) => {
+      const description = row.getValue("description") as string;
+      return (
+        <div className="max-w-xs truncate" title={description}>
+          {description}
+        </div>
+      );
+    },
   },
   {
     accessorKey: "width",
