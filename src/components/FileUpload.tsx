@@ -77,7 +77,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
   };
 
   return (
-    <div className="w-full space-y-4">
+    <div className="space-y-4">
       <div
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}

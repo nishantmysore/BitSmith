@@ -3,11 +3,12 @@
 import { useDevice } from "@/DeviceContext";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import FileUpload from "@/components/FileUpload";
 import { FieldErrors } from "react-hook-form";
 import {
   DeviceFormData,
   DeviceValidateSchema,
+  FieldFormData,
+  RegisterFormData,
   Status,
 } from "@/types/validation";
 import { useForm, useFieldArray } from "react-hook-form";
@@ -30,7 +31,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Trash2 } from "lucide-react";
+import { Trash2, Upload } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,6 +43,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useState, MouseEvent } from "react";
+
+import { useToast } from "@/hooks/use-toast";
+import { Toaster } from "@/components/ui/toaster";
 import FormErrors from "./FormErrors"; //
 
 interface DeviceEditFormProps {
@@ -51,6 +55,8 @@ interface DeviceEditFormProps {
 export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
   const { selectedDevice, setSelectedDevice, devices } = useDevice();
   const [registerToDelete, setRegisterToDelete] = useState<number | null>(null);
+  const [deviceToDelete, setDeviceToDelete] = useState<boolean>(false);
+  const { toast } = useToast();
 
   const {
     register,
@@ -250,13 +256,147 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
     }
   };
 
+  const onUpload = async () => {
+    // Create a hidden file input element
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = "application/json";
+
+    fileInput.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+
+      // Validate file type
+      if (file.type !== "application/json") {
+        toast({
+          title: "Invalid file type",
+          description: "Please upload a JSON file",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      try {
+        // Read the file
+        const text = await file.text();
+        const jsonData = JSON.parse(text);
+        jsonData.registers = jsonData.registers.map(
+          (register: RegisterFormData) => ({
+            ...register,
+            status: "added",
+            fields:
+              register.fields?.map((field: FieldFormData) => ({
+                ...field,
+                status: "added",
+              })) || [],
+          }),
+        );
+
+        // Validate the JSON data against your schema
+        const result = DeviceValidateSchema.safeParse(jsonData);
+
+        if (!result.success) {
+          toast({
+            title: "Invalid configuration",
+            description: "The uploaded file does not match the expected format",
+            variant: "destructive",
+          });
+          console.error("Validation errors:", result.error);
+          return;
+        }
+
+        // Transform the data to match your form structure
+        const formData: DeviceFormData = {
+          name: jsonData.name || "",
+          description: jsonData.description || "",
+          base_address: jsonData.base_address || "",
+          isPublic: jsonData.isPublic || false,
+          registers: (jsonData.registers || []).map((register: any) => ({
+            name: register.name || "",
+            description: register.description || "",
+            width: register.width?.toString() || "32",
+            address: register.address || "",
+            status: "added",
+            fields: (register.fields || []).map((field: any) => ({
+              name: field.name || "",
+              description: field.description || "",
+              bits: field.bits || "",
+              access: field.access || "RW",
+              status: "added",
+            })),
+          })),
+        };
+
+        // Reset the form with the new data
+        reset(formData);
+
+        toast({
+          title: "Success",
+          description: "Configuration file loaded successfully",
+        });
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to parse the JSON file",
+          variant: "destructive",
+        });
+        console.error("Error processing file:", error);
+      }
+    };
+
+    // Trigger the file input click
+    fileInput.click();
+  };
+
+  const deleteDevice = async () => {
+    try {
+      const response = await fetch(`/api/devices/${selectedDevice?.id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to delete device");
+      }
+
+      const updatedDevice = await response.json();
+      console.log(updatedDevice);
+
+      toast({
+        title: "Success",
+        description: "Device deleted successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Could not delete Device: " + error,
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       {!newDevice && (
         <Card className="mb-4">
           <CardHeader>
             <CardTitle className="text-lg font-semibold">
-              Select a Device
+              <div className="flex justify-between">
+                Select a Device
+                <Button
+                  variant="outline"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDeviceToDelete(true);
+                  }}
+                >
+                  {" "}
+                  <Trash2 className="text-destructive" />
+                </Button>
+              </div>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -280,14 +420,19 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
                 </SelectContent>
               </Select>
             </div>
-            <FileUpload />
           </CardContent>
         </Card>
       )}
       <Card className="mb-4">
         <CardHeader>
           <CardTitle className="text-lg font-semibold">
-            Device Information
+            <div className="flex justify-between">
+              Device Information
+              <Button onClick={onUpload}>
+                {" "}
+                <Upload /> Upload Configuration JSON{" "}
+              </Button>
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -337,7 +482,6 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
                   />
                 </div>
               </div>
-
               <Card className="mb-4">
                 <CardHeader>
                   <CardTitle className="text-lg font-semibold">
@@ -402,6 +546,29 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
           </div>
         </CardContent>
       </Card>
+
+      <Toaster />
+
+      <AlertDialog
+        open={deviceToDelete}
+        onOpenChange={(open) => {
+          if (!open) setDeviceToDelete(false);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Device</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this device? This action is
+              irreversible!
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={deleteDevice}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog
         open={registerToDelete !== null}

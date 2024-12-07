@@ -83,7 +83,7 @@ export const DeviceSelector = () => {
             name: register.name,
             description: register.description,
             address: register.address,
-            width: register.width,
+            width: register.width.toString(),
             fields: register.fields.map((field: FieldExport) => ({
               name: field.name,
               description: field.description,

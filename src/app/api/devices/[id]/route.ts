@@ -254,7 +254,6 @@ export async function DELETE(
 
     return NextResponse.json({ message: "Device deleted successfully" });
   } catch (error) {
-    console.error("Error deleting device:", error);
     return NextResponse.json(
       { error: "Error deleting device" },
       { status: 500 },
