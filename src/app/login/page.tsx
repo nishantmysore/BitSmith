@@ -17,13 +17,26 @@ function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const error = searchParams.get("error");
 
   useEffect(() => {
     if (status === "authenticated" && session) {
-      router.push(callbackUrl);
+      // Ensure the callback URL is safe to redirect to
+      const safeCallbackUrl = callbackUrl.startsWith("/") || callbackUrl.startsWith(window.location.origin) 
+        ? callbackUrl 
+        : "/";
+        
+      router.push(safeCallbackUrl);
       router.refresh();
     }
   }, [status, session, router, callbackUrl]);
+
+  const handleSignIn = () => {
+    signIn("google", {
+      callbackUrl,
+      redirect: true,
+    });
+  };
 
   if (status === "loading") {
     return (
@@ -45,10 +58,15 @@ function LoginContent() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {error && (
+            <p className="text-red-500 text-sm text-center mb-4">
+              {error === "Callback" ? "Authentication failed" : error}
+            </p>
+          )}
           <Button
             className="w-full border-2"
             variant="outline"
-            onClick={() => signIn("google")}
+            onClick={handleSignIn}
           >
             Sign in with Google
           </Button>
