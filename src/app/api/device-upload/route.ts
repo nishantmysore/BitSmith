@@ -6,16 +6,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
-// Define explicit types for session
-interface SessionUser {
-  id: string;
-  email: string;
-}
-
-interface Session {
-  user: SessionUser;
-}
-
 // Define explicit types for the validation schema result
 type ValidatedData = z.infer<typeof DeviceValidateSchema>;
 
@@ -43,7 +33,7 @@ export async function POST(request: NextRequest) {
     let body: unknown;
     try {
       body = await request.json();
-    } catch (e) {
+    } catch {
       return NextResponse.json(
         { error: "Invalid JSON in request body" },
         { status: 400 },

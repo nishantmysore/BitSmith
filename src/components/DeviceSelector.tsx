@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useDevice } from "../DeviceContext";
 import { Button } from "@/components/ui/button";
-import { Register, Field, AccessType } from "@prisma/client";
+import { Register, AccessType } from "@prisma/client";
 
 type FieldExport = {
   name: string;

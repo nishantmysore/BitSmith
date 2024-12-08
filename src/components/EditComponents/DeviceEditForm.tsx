@@ -47,7 +47,6 @@ import { useState, MouseEvent } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import FormErrors from "./FormErrors"; //
-import { determineChange } from "@/utils/validation";
 
 interface DeviceEditFormProps {
   newDevice?: boolean;
@@ -323,13 +322,13 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
           description: jsonData.description || "",
           base_address: jsonData.base_address || "",
           isPublic: jsonData.isPublic || false,
-          registers: (jsonData.registers || []).map((register: any) => ({
+          registers: (jsonData.registers || []).map((register: RegisterFormData) => ({
             name: register.name || "",
             description: register.description || "",
             width: register.width?.toString() || "32",
             address: register.address || "",
             status: register.status,
-            fields: (register.fields || []).map((field: any) => ({
+            fields: (register.fields || []).map((field: FieldFormData) => ({
               name: field.name || "",
               description: field.description || "",
               bits: field.bits || "",

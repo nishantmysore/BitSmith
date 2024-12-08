@@ -201,9 +201,8 @@ export async function PUT(
 
     return NextResponse.json(updatedDevice);
   } catch (error) {
-    console.error("Error updating device:", error);
     return NextResponse.json(
-      { error: "Error updating device" },
+      { error: "Error updating device " + error },
       { status: 500 },
     );
   }
@@ -255,7 +254,7 @@ export async function DELETE(
     return NextResponse.json({ message: "Device deleted successfully" });
   } catch (error) {
     return NextResponse.json(
-      { error: "Error deleting device" },
+      { error: "Error deleting device " + error },
       { status: 500 },
     );
   }
