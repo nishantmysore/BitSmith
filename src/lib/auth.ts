@@ -47,11 +47,11 @@ export const authOptions: NextAuthOptions = {
     // Add this to handle the redirect after sign in
     async redirect({ url, baseUrl }) {
       // If the url is relative, prefix it with the base url
-      if (url.startsWith("/")) return `${baseUrl}${url}`
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
       // If the url is already absolute but on the same host, return it
-      else if (new URL(url).origin === baseUrl) return url
+      else if (new URL(url).origin === baseUrl) return url;
       // Return to the homepage by default
-      return baseUrl
+      return baseUrl;
     },
   },
 };

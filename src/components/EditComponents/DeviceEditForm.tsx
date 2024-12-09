@@ -322,20 +322,22 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
           description: jsonData.description || "",
           base_address: jsonData.base_address || "",
           isPublic: jsonData.isPublic || false,
-          registers: (jsonData.registers || []).map((register: RegisterFormData) => ({
-            name: register.name || "",
-            description: register.description || "",
-            width: register.width?.toString() || "32",
-            address: register.address || "",
-            status: register.status,
-            fields: (register.fields || []).map((field: FieldFormData) => ({
-              name: field.name || "",
-              description: field.description || "",
-              bits: field.bits || "",
-              access: field.access || "RW",
+          registers: (jsonData.registers || []).map(
+            (register: RegisterFormData) => ({
+              name: register.name || "",
+              description: register.description || "",
+              width: register.width?.toString() || "32",
+              address: register.address || "",
               status: register.status,
-            })),
-          })),
+              fields: (register.fields || []).map((field: FieldFormData) => ({
+                name: field.name || "",
+                description: field.description || "",
+                bits: field.bits || "",
+                access: field.access || "RW",
+                status: register.status,
+              })),
+            }),
+          ),
         };
 
         // Reset the form with the new data

@@ -22,10 +22,12 @@ function LoginContent() {
   useEffect(() => {
     if (status === "authenticated" && session) {
       // Ensure the callback URL is safe to redirect to
-      const safeCallbackUrl = callbackUrl.startsWith("/") || callbackUrl.startsWith(window.location.origin) 
-        ? callbackUrl 
-        : "/";
-        
+      const safeCallbackUrl =
+        callbackUrl.startsWith("/") ||
+        callbackUrl.startsWith(window.location.origin)
+          ? callbackUrl
+          : "/";
+
       router.push(safeCallbackUrl);
       router.refresh();
     }
