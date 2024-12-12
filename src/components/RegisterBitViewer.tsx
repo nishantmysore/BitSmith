@@ -114,7 +114,7 @@ const RegisterBitViewer: React.FC<RegisterBitViewerProps> = ({ register }) => {
   };
 
   return (
-    <div className="w-full max-w-xl p-4">
+    <div className="w-full p-4">
       <div className="space-y-2">
         <Label>Input Format</Label>
         <Tabs
