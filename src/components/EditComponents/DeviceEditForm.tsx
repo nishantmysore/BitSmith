@@ -53,7 +53,8 @@ interface DeviceEditFormProps {
 }
 
 export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
-  const { selectedDevice, setSelectedDevice, devices, refreshDevices } = useDevice();
+  const { selectedDevice, setSelectedDevice, devices, refreshDevices } =
+    useDevice();
   const [registerToDelete, setRegisterToDelete] = useState<number | null>(null);
   const [deviceToDelete, setDeviceToDelete] = useState<boolean>(false);
   const { toast } = useToast();
@@ -258,6 +259,9 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
         description: "Device updated successfully!",
       });
       await refreshDevices();
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     } catch (error) {
       console.error("Error updating device:", error);
       toast({
@@ -382,6 +386,11 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
         title: "Success",
         description: "Device deleted successfully",
       });
+
+      await refreshDevices();
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     } catch (error) {
       toast({
         title: "Error",

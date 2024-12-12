@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getAccessStyles } from "@/lib/access_colors"; 
+import { getAccessStyles } from "@/lib/access_colors";
 import FieldHoverCard from "@/components/FieldHoverCard";
 import ValueFormatActions from "./ValueFormatActions";
 import type { Register, Field } from "@prisma/client";
@@ -192,13 +192,9 @@ const RegisterBitViewer: React.FC<RegisterBitViewerProps> = ({ register }) => {
                 >
                   <span className="font-medium">{field.name}</span>
                   <div className="space-x-2 text-sm">
-                    <span className="text-muted-foreground">
-                      [{field.bits}]
-                    </span>
+                    <span className="">[{field.bits}]</span>
                     <span>0x{fieldValue.hex}</span>
-                    <span className="text-muted-foreground">
-                      ({fieldValue.decimal.toString()})
-                    </span>
+                    <span className="">({fieldValue.decimal.toString()})</span>
                   </div>
                   <FieldHoverCard field={field} fieldValue={fieldValue} />
                 </div>

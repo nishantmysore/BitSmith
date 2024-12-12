@@ -22,25 +22,18 @@ export const getAccessDescription = (access: AccessType) => {
 export const getAccessStyles = (access: AccessType) => {
   switch (access) {
     case "RO":
-      // A calm blue that works in both modes
-      return "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-200";
+      return "bg-gradient-to-br from-sky-600/90 via-blue-500/95 to-cyan-400/95 text-white dark:from-sky-800/90 dark:via-blue-700/95 dark:to-cyan-600/95 dark:text-blue-50";
     case "WO":
-      // A rich purple that matches the sophistication of the theme
-      return "bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-200";
+      return "bg-gradient-to-br from-fuchsia-600/90 via-purple-500/95 to-pink-400/95 text-white dark:from-fuchsia-800/90 dark:via-purple-700/95 dark:to-pink-600/95 dark:text-purple-50";
     case "RW":
-      // A success-like green that's visible but not too bright
-      return "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200";
+      return "bg-gradient-to-br from-teal-600/90 via-emerald-500/95 to-green-400/95 text-white dark:from-teal-800/90 dark:via-emerald-700/95 dark:to-green-600/95 dark:text-emerald-50";
     case "RW1C":
-      // A warm amber for special operations
-      return "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200";
+      return "bg-gradient-to-br from-orange-600/90 via-amber-500/95 to-yellow-400/95 text-white dark:from-orange-800/90 dark:via-amber-700/95 dark:to-yellow-600/95 dark:text-amber-50";
     case "W1S":
-      // A distinct indigo for set operations
-      return "bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-200";
+      return "bg-gradient-to-br from-violet-600/90 via-indigo-500/95 to-blue-400/95 text-white dark:from-violet-800/90 dark:via-indigo-700/95 dark:to-blue-600/95 dark:text-indigo-50";
     case "W1C":
-      // A rose color that complements the theme's red
-      return "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-200";
+      return "bg-gradient-to-br from-red-600/90 via-rose-500/95 to-pink-400/95 text-white dark:from-red-800/90 dark:via-rose-700/95 dark:to-pink-600/95 dark:text-rose-50";
     case "RSVD":
-      // Using the theme's muted colors for reserved
-      return "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-200";
+      return "bg-gradient-to-br from-zinc-600/90 via-slate-500/95 to-gray-400/95 text-white dark:from-zinc-800/90 dark:via-slate-700/95 dark:to-gray-600/95 dark:text-slate-50";
   }
 };
