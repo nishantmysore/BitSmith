@@ -23,6 +23,7 @@ import { Register, Field } from "@prisma/client";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import RegisterBitViewer from "./RegisterBitViewer";
 import { Separator } from "@/components/ui/separator";
+import { getAccessStyles } from "@/lib/access_colors"; // adjust import path as needed
 
 interface RegisterVisualizerProps {
   offsetBaseAddr: boolean;
@@ -160,16 +161,18 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
                         return (
                           <div
                             key={field.name}
-                            className="absolute h-full flex flex-col justify-center items-center text-sm border border-border border-secondary/100 bg-gradient-to-b from-primary/100 to-primary/40"
+                            //className="absolute h-full flex flex-col justify-center items-center text-sm border border-border border-secondary/100 bg-gradient-to-b from-primary/100 to-primary/40"
+                            className={`absolute h-full flex flex-col justify-center items-center text-sm border  border-border rounded ${getAccessStyles(field.access)}/100`}
+
                             style={{
                               left: `${left}%`,
                               width: `${width}%`,
                             }}
                           >
-                            <div className="font-medium truncate w-full text-center text-foreground">
+                            <div className="font-medium truncate w-full text-center ">
                               {field.name}
                             </div>
-                            <div className="text-muted-foreground text-xs opacity-75">
+                            <div className="font-medium text-xs">
                               {field.bits}
                             </div>
                           </div>

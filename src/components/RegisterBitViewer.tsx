@@ -192,11 +192,11 @@ const RegisterBitViewer: React.FC<RegisterBitViewerProps> = ({ register }) => {
                 >
                   <span className="font-medium">{field.name}</span>
                   <div className="space-x-2 text-sm">
-                    <span className="text-muted-foreground">
+                    <span className="">
                       [{field.bits}]
                     </span>
                     <span>0x{fieldValue.hex}</span>
-                    <span className="text-muted-foreground">
+                    <span className="">
                       ({fieldValue.decimal.toString()})
                     </span>
                   </div>
