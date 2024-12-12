@@ -163,7 +163,6 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
                             key={field.name}
                             //className="absolute h-full flex flex-col justify-center items-center text-sm border border-border border-secondary/100 bg-gradient-to-b from-primary/100 to-primary/40"
                             className={`absolute h-full flex flex-col justify-center items-center text-sm border  border-border rounded ${getAccessStyles(field.access)}/100`}
-
                             style={{
                               left: `${left}%`,
                               width: `${width}%`,

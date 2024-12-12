@@ -28,7 +28,7 @@ type DeviceContextType = {
   refreshDevices: () => Promise<void>; // New function to force refresh
 };
 
-const CACHE_KEY = 'deviceData';
+const CACHE_KEY = "deviceData";
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
 type CachedData = {
@@ -42,7 +42,8 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [devices, setDevices] = useState<DeviceWithRelations[]>([]);
-  const [selectedDevice, setSelectedDevice] = useState<DeviceWithRelations | null>(null);
+  const [selectedDevice, setSelectedDevice] =
+    useState<DeviceWithRelations | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [baseAddr, setBaseAddr] = useState("");
@@ -56,14 +57,14 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({
         throw new Error("Failed to fetch devices");
       }
       const data = await response.json();
-      
+
       // Store in cache
       const cacheData: CachedData = {
         timestamp: Date.now(),
-        devices: data
+        devices: data,
       };
       localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
-      
+
       return data;
     } catch (err) {
       throw err;
@@ -93,7 +94,7 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({
         const cachedDataStr = localStorage.getItem(CACHE_KEY);
         if (cachedDataStr) {
           const cachedData: CachedData = JSON.parse(cachedDataStr);
-          
+
           // Check if cache is still valid
           if (Date.now() - cachedData.timestamp < CACHE_DURATION) {
             console.log("Using cached devices data");
@@ -130,9 +131,11 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const getRegisterByAddress = (address: string): Register | null => {
     if (!selectedDevice) return null;
-    return selectedDevice.registers.find(
-      (register) => register.address === address,
-    ) || null;
+    return (
+      selectedDevice.registers.find(
+        (register) => register.address === address,
+      ) || null
+    );
   };
 
   return (
