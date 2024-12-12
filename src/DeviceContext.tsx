@@ -2,7 +2,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import type { Device, Register, AccessType } from "@prisma/client";
 
-// Extended types to include nested relations
 type DeviceWithRelations = Device & {
   registers: (Register & {
     fields: {
@@ -26,6 +25,15 @@ type DeviceContextType = {
   setBaseAddr: (addr: string) => void;
   offsetBaseAddr: boolean;
   setOffsetBaseAddr: (offset: boolean) => void;
+  refreshDevices: () => Promise<void>; // New function to force refresh
+};
+
+const CACHE_KEY = 'deviceData';
+const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+type CachedData = {
+  timestamp: number;
+  devices: DeviceWithRelations[];
 };
 
 const DeviceContext = createContext<DeviceContextType | null>(null);
@@ -34,30 +42,75 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [devices, setDevices] = useState<DeviceWithRelations[]>([]);
-  const [selectedDevice, setSelectedDevice] =
-    useState<DeviceWithRelations | null>(null);
+  const [selectedDevice, setSelectedDevice] = useState<DeviceWithRelations | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [baseAddr, setBaseAddr] = useState("");
   const [offsetBaseAddr, setOffsetBaseAddr] = useState(false);
 
-  // Fetch devices on component mount
+  const fetchDevices = async () => {
+    try {
+      console.log("Fetching fresh devices data");
+      const response = await fetch("/api/devices");
+      if (!response.ok) {
+        throw new Error("Failed to fetch devices");
+      }
+      const data = await response.json();
+      
+      // Store in cache
+      const cacheData: CachedData = {
+        timestamp: Date.now(),
+        devices: data
+      };
+      localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
+      
+      return data;
+    } catch (err) {
+      throw err;
+    }
+  };
+
+  const refreshDevices = async () => {
+    setLoading(true);
+    try {
+      const data = await fetchDevices();
+      setDevices(data);
+      if (data.length > 0 && !selectedDevice) {
+        setSelectedDevice(data[0]);
+      }
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchDevices = async () => {
+    const initializeDevices = async () => {
       try {
-        const response = await fetch("/api/devices");
-        if (!response.ok) {
-          throw new Error("Failed to fetch devices");
+        // Try to get cached data
+        const cachedDataStr = localStorage.getItem(CACHE_KEY);
+        if (cachedDataStr) {
+          const cachedData: CachedData = JSON.parse(cachedDataStr);
+          
+          // Check if cache is still valid
+          if (Date.now() - cachedData.timestamp < CACHE_DURATION) {
+            console.log("Using cached devices data");
+            setDevices(cachedData.devices);
+            if (cachedData.devices.length > 0 && !selectedDevice) {
+              setSelectedDevice(cachedData.devices[0]);
+            }
+            setLoading(false);
+            return;
+          }
         }
-        const data = await response.json();
+
+        // If no cache or cache expired, fetch fresh data
+        const data = await fetchDevices();
         setDevices(data);
-        // Set the first device as selected if we have devices and no device is selected
         if (data.length > 0 && !selectedDevice) {
           setSelectedDevice(data[0]);
-        }
-        setError(null);
-        if (selectedDevice?.base_address) {
-          setBaseAddr(selectedDevice.base_address);
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "An error occurred");
@@ -66,17 +119,20 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     };
 
-    fetchDevices();
+    initializeDevices();
+  }, []);
+
+  useEffect(() => {
+    if (selectedDevice?.base_address) {
+      setBaseAddr(selectedDevice.base_address);
+    }
   }, [selectedDevice]);
 
   const getRegisterByAddress = (address: string): Register | null => {
     if (!selectedDevice) return null;
-
-    return (
-      selectedDevice.registers.find(
-        (register) => register.address === address,
-      ) || null
-    );
+    return selectedDevice.registers.find(
+      (register) => register.address === address,
+    ) || null;
   };
 
   return (
@@ -92,6 +148,7 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({
         setBaseAddr,
         offsetBaseAddr,
         setOffsetBaseAddr,
+        refreshDevices,
       }}
     >
       {children}

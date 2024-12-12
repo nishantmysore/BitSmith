@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getAccessColor } from "@/utils/access_color";
+import { getAccessStyles } from "@/lib/access_colors"; 
 import FieldHoverCard from "@/components/FieldHoverCard";
 import ValueFormatActions from "./ValueFormatActions";
 import type { Register, Field } from "@prisma/client";
@@ -188,7 +188,7 @@ const RegisterBitViewer: React.FC<RegisterBitViewerProps> = ({ register }) => {
                   key={field.name}
                   className={`relative group flex justify-between items-center p-2 
                       rounded transition-colors cursor-pointer
-                      ${getAccessColor(field.access)}`}
+                      ${getAccessStyles(field.access)}`}
                 >
                   <span className="font-medium">{field.name}</span>
                   <div className="space-x-2 text-sm">
