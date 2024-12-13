@@ -2,7 +2,7 @@ import { prisma } from "../prisma";
 import type { Device } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 export class DeviceService {
   static async getAllDevices() {
