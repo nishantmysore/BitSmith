@@ -6,7 +6,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 export class DeviceService {
   static async getAllDevices() {
-
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json(
@@ -24,11 +23,10 @@ export class DeviceService {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-
-    console.log("Session user id: ", session.user.id)
+    console.log("Session user id: ", session.user.id);
     return prisma.device.findMany({
       where: {
-        ownerId: session.user.id
+        ownerId: session.user.id,
       },
       include: {
         registers: {

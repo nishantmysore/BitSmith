@@ -23,6 +23,7 @@ import {
   DropdownMenuContent,
 } from "@/components/ui/dropdown-menu";
 import { ModeToggle } from "@/components/ModeToggle";
+import { clearDevicesCache } from "@/utils/cache";
 
 const appitems = [
   {
@@ -109,7 +110,10 @@ export function AppSidebar() {
                   className="w-[--radix-popper-anchor-width]"
                 >
                   <DropdownMenuItem
-                    onSelect={() => signOut({ callbackUrl: "/login" })}
+                    onSelect={() => {
+                      clearDevicesCache(session.user.id);
+                      signOut({ callbackUrl: "/login" });
+                    }}
                   >
                     <span>Sign out</span>
                   </DropdownMenuItem>

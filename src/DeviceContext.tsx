@@ -1,6 +1,8 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect } from "react";
 import type { Device, Register, AccessType } from "@prisma/client";
+import { useSession } from "next-auth/react";
+import { CACHE_KEY, CACHE_DURATION } from "@/utils/cache";
 
 type DeviceWithRelations = Device & {
   registers: (Register & {
@@ -28,9 +30,6 @@ type DeviceContextType = {
   refreshDevices: () => Promise<void>; // New function to force refresh
 };
 
-const CACHE_KEY = "deviceData";
-const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
-
 type CachedData = {
   timestamp: number;
   devices: DeviceWithRelations[];
@@ -48,12 +47,14 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({
   const [error, setError] = useState<string | null>(null);
   const [baseAddr, setBaseAddr] = useState("");
   const [offsetBaseAddr, setOffsetBaseAddr] = useState(false);
+  const { data: session } = useSession();
+  console.log("session: ", session);
 
   const fetchDevices = async () => {
     try {
       console.log("Fetching fresh devices data");
       const response = await fetch("/api/devices");
-      if (!response.ok) {
+      if (!response.ok || !session?.user?.id) {
         throw new Error("Failed to fetch devices");
       }
       const data = await response.json();
@@ -63,7 +64,10 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({
         timestamp: Date.now(),
         devices: data,
       };
-      localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
+      localStorage.setItem(
+        CACHE_KEY(session.user.id),
+        JSON.stringify(cacheData),
+      );
 
       return data;
     } catch (err) {
@@ -88,10 +92,12 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   useEffect(() => {
+    if (!session?.user?.id) return;
+
     const initializeDevices = async () => {
       try {
         // Try to get cached data
-        const cachedDataStr = localStorage.getItem(CACHE_KEY);
+        const cachedDataStr = localStorage.getItem(CACHE_KEY(session.user.id));
         if (cachedDataStr) {
           const cachedData: CachedData = JSON.parse(cachedDataStr);
 
@@ -121,7 +127,7 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({
     };
 
     initializeDevices();
-  }, []);
+  }, [session]);
 
   useEffect(() => {
     if (selectedDevice?.base_address) {
