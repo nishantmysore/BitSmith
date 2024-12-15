@@ -136,7 +136,7 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
                       <div className="flex justify-between">
                         Description
                         <Button
-                          variant="outline"
+                          variant="default"
                           size="sm"
                           onClick={() => setShowBitViewer(!showBitViewer)}
                         >
