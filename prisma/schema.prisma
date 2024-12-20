@@ -7,7 +7,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum AccessType {
+enum RegisterAccessType {
+  RO
+  WO
+  RW
+  RW1C
+  W1S
+  W1C
+  RMW
+  RSVD
+}
+
+enum FieldAccessType {
   RO
   WO
   RW
@@ -71,9 +82,12 @@ model Device {
   id          String     @id @default(cuid())
   name        String
   description String
-  base_address String    
   isPublic    Boolean    @default(false)
-  
+  littleEndian   Boolean
+  defaultClockFreq Int?  
+
+  version String? 
+
   // Owner relationship
   ownerId     String?
   owner       User?      @relation("DeviceOwner", fields: [ownerId], references: [id])
@@ -87,11 +101,30 @@ model Device {
   copies          Device[] @relation("DeviceCopies")
   
   // Existing relationships
-  registers   Register[]  @relation("DeviceToRegister")
+  peripherals Peripheral[]
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+
   @@index([ownerId])
   @@index([originalDeviceId])
+}
+
+model Peripheral {
+  id String @id @default(cuid())
+  name String
+  description String
+  baseAddress BigInt  // hex address
+  size BigInt        // address space size
+  
+  // Relations
+  deviceId String
+  device Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  registers Register[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([deviceId])
 }
 
 model Register {
@@ -99,23 +132,62 @@ model Register {
   name        String
   description String
   width       Int 
-  address     String
-  deviceId    String
-  device      Device     @relation("DeviceToRegister", fields: [deviceId], references: [id], onDelete: Cascade)
+  addressOffset   BigInt
+  resetValue  BigInt
+  resetMask     BigInt?            // New optional field
+  readAction  String?
+  writeAction String? 
+  modifiedWriteValues String?          // New optional field
+  access      RegisterAccessType
+
+  isArray     Boolean    @default(false)
+  arraySize   Int?       // number of elements in array
+  arrayStride BigInt?    // address increment between elements (hex)
+  namePattern String?    // e.g. "%s[%d]" or "%s_%d"
+   
+  peripheralId String
+  peripheral  Peripheral @relation(fields: [peripheralId], references: [id], onDelete: Cascade)
+
   fields      Field[]    @relation("RegisterToField")
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+
+  @@unique([peripheralId, name])
+  @@unique([peripheralId, addressOffset])
 }
 
 model Field {
   id          String      @id @default(cuid())
   name        String
-  bits        String
-  access      AccessType  // Changed from String to AccessType
+  access      FieldAccessType  // Changed from String to AccessType
   description String
+
+  bitOffset   Int
+  bitWidth    Int
+
+  readAction  String?
+  writeAction String?
+
   registerId  String
   register    Register    @relation("RegisterToField", fields: [registerId], references: [id], onDelete: Cascade)
+  enumeratedValues FieldEnum[]
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   @@index([registerId])
+}
+
+model FieldEnum {
+  id          String   @id @default(cuid())
+  name        String
+  value       Int
+  description String?
+
+  fieldId     String
+  field       Field    @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([fieldId, value])
+  @@index([fieldId])
 }
