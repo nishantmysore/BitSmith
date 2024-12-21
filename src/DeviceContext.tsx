@@ -1,18 +1,9 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect } from "react";
-import type { Device, Peripheral, Register, Field, FieldEnum} from "@prisma/client";
+import type { Register } from "@prisma/client";
 import { useSession } from "next-auth/react";
 import { CACHE_KEY, CACHE_DURATION } from "@/utils/cache";
-
-type DeviceWithRelations = Device & {
-  peripherals: (Peripheral & {
-    registers: (Register & {
-      fields: (Field & {
-        enumeratedValues: FieldEnum[]
-      })[]
-    })[]
-  })[]
-}
+import { DeviceWithRelations, CachedData } from "./types/device";
 
 type DeviceContextType = {
   devices: DeviceWithRelations[];
@@ -21,16 +12,7 @@ type DeviceContextType = {
   getRegisterByAddress: (peripheralId: string, offset: BigInt) => Register | null;
   loading: boolean;
   error: string | null;
-  baseAddr: string;
-  setBaseAddr: (addr: string) => void;
-  offsetBaseAddr: boolean;
-  setOffsetBaseAddr: (offset: boolean) => void;
   refreshDevices: () => Promise<void>; // New function to force refresh
-};
-
-type CachedData = {
-  timestamp: number;
-  devices: DeviceWithRelations[];
 };
 
 const DeviceContext = createContext<DeviceContextType | null>(null);
@@ -43,8 +25,6 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({
     useState<DeviceWithRelations | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [baseAddr, setBaseAddr] = useState("");
-  const [offsetBaseAddr, setOffsetBaseAddr] = useState(false);
   const { data: session } = useSession();
   console.log("session: ", session);
 
@@ -148,10 +128,6 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({
         getRegisterByAddress,
         loading,
         error,
-        baseAddr,
-        setBaseAddr,
-        offsetBaseAddr,
-        setOffsetBaseAddr,
         refreshDevices,
       }}
     >
