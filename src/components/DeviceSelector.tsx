@@ -11,13 +11,19 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useDevice } from "../DeviceContext";
 import { Button } from "@/components/ui/button";
+import { DeviceWithRelations } from "@/types/device";
 
 export const DeviceSelector = () => {
   const {
     selectedDevice,
     setSelectedDevice,
     devices,
+  }: {
+    selectedDevice: DeviceWithRelations | null;
+    setSelectedDevice: (device: DeviceWithRelations) => void;
+    devices: DeviceWithRelations[];
   } = useDevice();
+  console.log("Devices, ", devices)
 
   const exportDevice = (): void => {
     if (selectedDevice) {
@@ -107,7 +113,7 @@ export const DeviceSelector = () => {
               <SelectValue placeholder="Select device" />
             </SelectTrigger>
             <SelectContent>
-              {devices.map((device) => (
+              {devices?.map((device) => (
                 <SelectItem key={device.id} value={device.id}>
                   {device.name}
                 </SelectItem>

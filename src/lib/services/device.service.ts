@@ -1,5 +1,4 @@
 import { prisma } from "../prisma";
-import type { Device } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
