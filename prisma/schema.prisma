@@ -83,7 +83,7 @@ model Device {
   name        String
   description String
   isPublic    Boolean    @default(false)
-  littleEndian   Boolean
+  littleEndian   Boolean @default(true)
   defaultClockFreq Int?  
 
   version String? 
@@ -132,13 +132,13 @@ model Register {
   name        String
   description String
   width       Int 
-  addressOffset   BigInt
-  resetValue  BigInt
+  addressOffset   BigInt @default(0)
+  resetValue  BigInt @default(0)
   resetMask     BigInt?            // New optional field
   readAction  String?
   writeAction String? 
   modifiedWriteValues String?          // New optional field
-  access      RegisterAccessType
+  access      RegisterAccessType 
 
   isArray     Boolean    @default(false)
   arraySize   Int?       // number of elements in array
@@ -159,11 +159,11 @@ model Register {
 model Field {
   id          String      @id @default(cuid())
   name        String
-  access      FieldAccessType  // Changed from String to AccessType
+  access      FieldAccessType
   description String
 
-  bitOffset   Int
-  bitWidth    Int
+  bitOffset   Int @default(0)
+  bitWidth    Int @default(0)
 
   readAction  String?
   writeAction String?

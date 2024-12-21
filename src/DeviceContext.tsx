@@ -1,26 +1,24 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect } from "react";
-import type { Device, Register, AccessType } from "@prisma/client";
+import type { Device, Peripheral, Register, Field, FieldEnum} from "@prisma/client";
 import { useSession } from "next-auth/react";
 import { CACHE_KEY, CACHE_DURATION } from "@/utils/cache";
 
 type DeviceWithRelations = Device & {
-  registers: (Register & {
-    fields: {
-      id: string;
-      name: string;
-      bits: string;
-      access: AccessType;
-      description: string;
-    }[];
-  })[];
-};
+  peripherals: (Peripheral & {
+    registers: (Register & {
+      fields: (Field & {
+        enumeratedValues: FieldEnum[]
+      })[]
+    })[]
+  })[]
+}
 
 type DeviceContextType = {
   devices: DeviceWithRelations[];
   selectedDevice: DeviceWithRelations | null;
   setSelectedDevice: (device: DeviceWithRelations) => void;
-  getRegisterByAddress: (address: string) => Register | null;
+  getRegisterByAddress: (peripheralId: string, offset: BigInt) => Register | null;
   loading: boolean;
   error: string | null;
   baseAddr: string;
@@ -57,7 +55,7 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({
       if (!response.ok || !session?.user?.id) {
         throw new Error("Failed to fetch devices");
       }
-      const data = await response.json();
+      const data: DeviceWithRelations[] = await response.json();
 
       // Store in cache
       const cacheData: CachedData = {
@@ -129,17 +127,14 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({
     initializeDevices();
   }, [session]);
 
-  useEffect(() => {
-    if (selectedDevice?.base_address) {
-      setBaseAddr(selectedDevice.base_address);
-    }
-  }, [selectedDevice]);
-
-  const getRegisterByAddress = (address: string): Register | null => {
+  const getRegisterByAddress = (peripheralId: string, offset: BigInt): Register | null => {
     if (!selectedDevice) return null;
+    const peripheral = selectedDevice.peripherals.find(p => p.id === peripheralId)
+    if (!peripheral) return null;
+
     return (
-      selectedDevice.registers.find(
-        (register) => register.address === address,
+      peripheral.registers.find(
+        (register) => register.addressOffset === offset,
       ) || null
     );
   };
