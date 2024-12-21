@@ -43,10 +43,9 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
     useDevice();
   const [deviceToDelete, setDeviceToDelete] = useState<boolean>(false);
   const { toast } = useToast();
+  const [data, setData] = useState<DeviceFormData | null>(null);
 
-
-  const onSubmit = async (data: DeviceFormData) => {
-
+  const onSubmit = async () => {
     console.log(data);
     try {
       const response = await fetch(
@@ -134,7 +133,7 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
           }),
         );
 
-        // Validate the JSON data against your schema
+        // Validate the JSON data against schema
         const result = DeviceValidateSchema.safeParse(jsonData);
 
         if (!result.success) {
@@ -152,12 +151,14 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
           description: "Configuration file loaded successfully!",
         });
       } catch (error) {
+
+        console.log("TTT")
         toast({
           title: "Error",
           description: "Failed to parse the JSON file",
           variant: "destructive",
         });
-        console.error("Error processing file:", error);
+        console.error("Error processing file: ", error);
       }
     };
 
@@ -260,7 +261,7 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
         </CardHeader>
         <CardContent className="flex justify-center">
         
-        <Button> Upload </Button>
+        <Button onClick={onSubmit}> Upload </Button>
         </CardContent>
       </Card>
 

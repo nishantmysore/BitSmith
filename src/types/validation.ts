@@ -24,7 +24,6 @@ export type Status = (typeof STATUS_VALUES)[number];
 export type DeviceFormData = {
   name: string;
   description: string;
-  base_address: string;
   isPublic: boolean;
   littleEndian: boolean;
   defaultClockFreq?: number;
@@ -51,7 +50,7 @@ export type PeripheralFormData = {
   db_id?: string;
   name: string;
   description: string;
-  base_address: BigInt;
+  baseAddress: BigInt;
   size: BigInt;
   status: Status;
   registers?: RegisterFormData[];
@@ -231,7 +230,7 @@ export const PeripheralValidateSchema: ZodType<PeripheralFormData> = z
      .string({ required_error: "Register description is required" })
       .min(1, { message: "Register description is too short" })
       .max(500, { message: "Register description is too long" }),
-    base_address: z.coerce.bigint().nonnegative(),
+    baseAddress: z.coerce.bigint().nonnegative(),
     size: z.coerce.bigint().nonnegative(),
     status: z.enum(STATUS_VALUES),
     registers: z.array(RegisterValidateSchema).optional(),
@@ -247,9 +246,6 @@ export const DeviceValidateSchema: ZodType<DeviceFormData> = z
       .string({ required_error: "Device description is required" })
       .min(1, { message: "Device description is too short" })
       .max(500, { message: "Device description is too long" }),
-    base_address: z
-      .string()
-      .regex(/^(0x)?[0-9A-Fa-f]+$/, "Device base address be a valid hex value"),
     isPublic: z.boolean({ required_error: "isPublic is required" }),
     littleEndian: z.boolean({ required_error: "littleEndian is required" }),
     defaultClockFreq: z.number({ required_error: "ClockFrequency in Mhz is required" }),
