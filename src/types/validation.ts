@@ -1,4 +1,4 @@
-import { AccessType } from "@prisma/client";
+import { RegisterAccessType, FieldAccessType } from "@prisma/client";
 import { FieldError, UseFormRegister } from "react-hook-form";
 import { z, ZodType } from "zod";
 import {
@@ -17,6 +17,7 @@ export const acceptedWidthsStr = [
   "64",
   "128",
 ] as const;
+
 const STATUS_VALUES = ["unchanged", "added", "modified", "deleted"] as const;
 export type Status = (typeof STATUS_VALUES)[number];
 
@@ -25,7 +26,10 @@ export type DeviceFormData = {
   description: string;
   base_address: string;
   isPublic: boolean;
-  registers?: RegisterFormData[];
+  littleEndian: boolean;
+  defaultClockFreq?: number;
+  version?: String; 
+  peripherals?: PeripheralFormData[];
 };
 
 export type DeviceFormFieldProps = {
@@ -43,13 +47,32 @@ export type ValidDeviceFieldNames =
   | "base_address"
   | "isPublic";
 
+export type PeripheralFormData = {
+  db_id?: string;
+  name: string;
+  description: string;
+  base_address: BigInt;
+  size: BigInt;
+  status: Status;
+  registers?: RegisterFormData[];
+};
+
 export type RegisterFormData = {
   db_id?: string;
   name: string;
   description: string;
-  width: string;
-  address: string;
-  status: Status;
+  width: number;
+  addressOffset: BigInt;
+  resetValue: BigInt;
+  resetMask?: BigInt;
+  readAction?: String;
+  writeAction?: String;
+  modifiedWritevalues?: String;
+  access: RegisterAccessType;
+  isArray: Boolean;
+  arraySize?: number;
+  arrayStride?: BigInt;
+  namePattern?: String;
   fields?: FieldFormData[];
 };
 
@@ -63,11 +86,20 @@ export type FieldFormData = {
   db_id?: string;
   name: string;
   description: string;
-  bits: string;
+  bitOffset: string;
+  bitWidth: number;
   status: Status;
-  access: AccessType;
+  readAction: String;
+  writeAction: String;
+  access: FieldAccessType;
 };
 
+export type FieldEnumFormData = {
+  db_id?: string;
+  name: string;
+  value: number;
+  description: string;
+};
 export type ValidFieldFieldNames = "name" | "description" | "bits" | "access";
 
 export const FieldValidateSchema: ZodType<FieldFormData> = z.object({
