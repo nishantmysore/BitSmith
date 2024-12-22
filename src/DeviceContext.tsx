@@ -9,7 +9,10 @@ type DeviceContextType = {
   devices: DeviceWithRelations[];
   selectedDevice: DeviceWithRelations | null;
   setSelectedDevice: (device: DeviceWithRelations) => void;
-  getRegisterByAddress: (peripheralId: string, offset: BigInt) => Register | null;
+  getRegisterByAddress: (
+    peripheralId: string,
+    offset: BigInt,
+  ) => Register | null;
   loading: boolean;
   error: string | null;
   refreshDevices: () => Promise<void>; // New function to force refresh
@@ -26,29 +29,41 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { data: session } = useSession();
-  console.log("session: ", session);
+  console.log("session is: ", session);
+
 
   const fetchDevices = async () => {
     try {
       console.log("Fetching fresh devices data");
       const response = await fetch("/api/devices");
-      if (!response.ok || !session?.user?.id) {
-        throw new Error("Failed to fetch devices");
-      }
-      const data: DeviceWithRelations[] = await response.json();
 
+      if (!session?.user?.id) {
+        throw new Error("No authenticated user");
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to fetch devices");
+      }
+
+      // Call json() only once and match the property name from backend
+      const { devices } = await response.json();
+
+      console.log("GOT DEVICES", devices);
+      
       // Store in cache
       const cacheData: CachedData = {
         timestamp: Date.now(),
-        devices: data,
+        devices, // Now using the correct devices array
       };
       localStorage.setItem(
         CACHE_KEY(session.user.id),
         JSON.stringify(cacheData),
       );
 
-      return data;
+      return devices;
     } catch (err) {
+      console.error("Error fetching devices:", err);
       throw err;
     }
   };
@@ -107,9 +122,14 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({
     initializeDevices();
   }, [session]);
 
-  const getRegisterByAddress = (peripheralId: string, offset: BigInt): Register | null => {
+  const getRegisterByAddress = (
+    peripheralId: string,
+    offset: BigInt,
+  ): Register | null => {
     if (!selectedDevice) return null;
-    const peripheral = selectedDevice.peripherals.find(p => p.id === peripheralId)
+    const peripheral = selectedDevice.peripherals.find(
+      (p) => p.id === peripheralId,
+    );
     if (!peripheral) return null;
 
     return (

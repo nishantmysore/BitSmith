@@ -9,7 +9,7 @@ export type RegisterData = {
   name: string;
   description: string;
   width: number;
-  address: string;
+  addressOffset: bigint;
 };
 
 export const columns: ColumnDef<RegisterData>[] = [

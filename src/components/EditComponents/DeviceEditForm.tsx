@@ -29,7 +29,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useState} from "react";
+import { useState } from "react";
 
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
@@ -46,11 +46,19 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
   const [data, setData] = useState<DeviceFormData | null>(null);
 
   const onSubmit = async () => {
-    console.log(data);
+    if (!data) {
+      toast({
+        title: "Error",
+        description: "No data to submit",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const response = await fetch(
         newDevice
-          ? "/api/device-upload/"
+          ? "/api/device-upload"  // Remove trailing slash
           : `/api/devices/${selectedDevice?.id}`,
         {
           method: newDevice ? "POST" : "PUT",
@@ -61,12 +69,14 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
         },
       );
 
+      console.log("Finished!")
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to update device");
       }
 
-      await response.json();
+      console.log("Finished!")
+      const responseData = await response.json();
 
       toast({
         title: "Success",
@@ -77,10 +87,9 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
         window.location.reload();
       }, 1000);
     } catch (error) {
-      console.error("Error updating device:", error);
       toast({
         title: "Error Updating Device",
-        description: "There was an error updating the device: " + error,
+        description: error instanceof Error ? error.message : "An unknown error occurred",
         variant: "destructive",
       });
     }
@@ -142,23 +151,23 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
             description: "The uploaded file does not match the expected format",
             variant: "destructive",
           });
-          console.error("Validation errors:", result.error);
+          //console.error("Validation errors:", result.error);
           return;
         }
+
+        setData(jsonData);
 
         toast({
           title: "Success",
           description: "Configuration file loaded successfully!",
         });
       } catch (error) {
-
-        console.log("TTT")
         toast({
           title: "Error",
           description: "Failed to parse the JSON file",
           variant: "destructive",
         });
-        console.error("Error processing file: ", error);
+        //console.error("Error processing file: ", error.stack);
       }
     };
 
@@ -260,8 +269,7 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
           </CardTitle>
         </CardHeader>
         <CardContent className="flex justify-center">
-        
-        <Button onClick={onSubmit}> Upload </Button>
+          <Button onClick={onSubmit}> Upload </Button>
         </CardContent>
       </Card>
 

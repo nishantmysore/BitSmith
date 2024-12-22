@@ -23,7 +23,6 @@ export const DeviceSelector = () => {
     setSelectedDevice: (device: DeviceWithRelations) => void;
     devices: DeviceWithRelations[];
   } = useDevice();
-  console.log("Devices, ", devices)
 
   const exportDevice = (): void => {
     if (selectedDevice) {
@@ -34,44 +33,42 @@ export const DeviceSelector = () => {
         isPublic: selectedDevice.isPublic,
         defaultClockFreq: selectedDevice.defaultClockFreq,
         version: selectedDevice.version,
-        peripherals: selectedDevice.peripherals.map(
-          (peripheral) => ({
-            name: peripheral.name,
-            description: peripheral.description,
-            baseAddress: peripheral.baseAddress,
-            size: peripheral.size,
-            registers: peripheral.registers.map((register) => ({
-              name: register.name,
-              description: register.description,
-              width: register.width,
-              addressOffset: register.addressOffset,
-              resetValue: register.resetValue,
-              resetMask: register.resetMask,
-              readAction: register.addressOffset,
-              writeAction: register.writeAction,
-              modifiedWriteValues: register.modifiedWriteValues,
-              isArray: register.isArray,
-              arraySize: register.arraySize,
-              arrayStride: register.arrayStride,
-              namePattern: register.namePattern,
-              access: register.access,
-              fields: register.fields.map((field) => ({
-                name: field.name,
-                description: field.description,
-                access: field.access,
-                bitOffset: field.bitOffset,
-                bitWidth: field.bitWidth,
-                readAction: field.readAction,
-                writeAction: field.writeAction,
-                enumeratedValues: field.enumeratedValues.map((enumVal) => ({
-                  name: enumVal.name,
-                  value: enumVal.value,
-                  description: enumVal.description,
-                })),
+        peripherals: selectedDevice.peripherals.map((peripheral) => ({
+          name: peripheral.name,
+          description: peripheral.description,
+          baseAddress: peripheral.baseAddress,
+          size: peripheral.size,
+          registers: peripheral.registers.map((register) => ({
+            name: register.name,
+            description: register.description,
+            width: register.width,
+            addressOffset: register.addressOffset,
+            resetValue: register.resetValue,
+            resetMask: register.resetMask,
+            readAction: register.addressOffset,
+            writeAction: register.writeAction,
+            modifiedWriteValues: register.modifiedWriteValues,
+            isArray: register.isArray,
+            arraySize: register.arraySize,
+            arrayStride: register.arrayStride,
+            namePattern: register.namePattern,
+            access: register.access,
+            fields: register.fields.map((field) => ({
+              name: field.name,
+              description: field.description,
+              access: field.access,
+              bitOffset: field.bitOffset,
+              bitWidth: field.bitWidth,
+              readAction: field.readAction,
+              writeAction: field.writeAction,
+              enumeratedValues: field.enumeratedValues.map((enumVal) => ({
+                name: enumVal.name,
+                value: enumVal.value,
+                description: enumVal.description,
               })),
             })),
-          }),
-        ),
+          })),
+        })),
       };
 
       // Export the object
@@ -135,8 +132,7 @@ export const DeviceSelector = () => {
           <div className="flex flex-col space-y-2">
             <Label htmlFor="base-addr-input">Base Address</Label>
             <div className="flex justify-between">
-              <div className="flex items-center space-x-4">
-              </div>
+              <div className="flex items-center space-x-4"></div>
             </div>
           </div>
         </div>
