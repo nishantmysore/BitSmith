@@ -1,3 +1,7 @@
+export const convertToHexString = (num: bigint) => {
+  return "0x" + num.toString(16).padStart(8, "0");
+};
+
 // Helper function to parse bit range string
 export const parseBitRange = (bitStr: string): [number, number] => {
   const parts = bitStr.split(":");

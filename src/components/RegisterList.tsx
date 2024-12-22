@@ -7,6 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { DataTable } from "@/components/Table/DataTable";
 import { columns } from "@/components/Table/TableColumns";
+import { convertToHexString } from "@/utils/validation";
 
 const RegisterList = () => {
   // Update the useDevice hook to use the proper type
@@ -39,8 +40,10 @@ const RegisterList = () => {
                   name,
                   description,
                   width,
-                  addressOffset: peripheral.baseAddress + addressOffset,
-                  resetValue,
+                  addressOffset: convertToHexString(
+                    peripheral.baseAddress + addressOffset,
+                  ),
+                  resetValue: convertToHexString(resetValue),
                 }),
               ),
             )}

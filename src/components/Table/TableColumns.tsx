@@ -9,8 +9,8 @@ export type RegisterData = {
   name: string;
   description: string;
   width: number;
-  addressOffset: bigint;
-  resetValue: bigint;
+  addressOffset: string;
+  resetValue: string;
 };
 
 export const columns: ColumnDef<RegisterData>[] = [

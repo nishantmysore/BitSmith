@@ -24,6 +24,7 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import RegisterBitViewer from "./RegisterBitViewer";
 import { Separator } from "@/components/ui/separator";
 import { getAccessStyles } from "@/lib/access_colors"; // adjust import path as needed
+import { convertToHexString } from "@/utils/validation";
 
 interface RegisterVisualizerProps {
   baseAddr: bigint;
@@ -32,27 +33,9 @@ interface RegisterVisualizerProps {
   };
 }
 
-// Helper function to calculate final address
-const calculateAddress = (
-  baseAddr: string,
-  registerAddr: string,
-  shouldOffset: boolean,
-): string => {
-  if (!shouldOffset) return registerAddr;
-
-  // Convert hex strings to numbers, perform addition, convert back to hex
-  const base = parseInt(baseAddr.replace("0x", ""), 16);
-  const addr = parseInt(registerAddr.replace("0x", ""), 16);
-  const result = base + addr;
-
-  return "0x" + result.toString(16).toUpperCase().padStart(8, "0");
-};
-
 // Helper function to calculate field position and width
 const calculateFieldDimensions = (field: Field, registerWidth: number) => {
-  const [msb, lsb] = field.bits.includes(":")
-    ? field.bits.split(":").map(Number)
-    : [Number(field.bits), Number(field.bits)];
+  const [msb, lsb] = [field.bitOffset + field.bitWidth - 1, field.bitOffset];
 
   const width = ((msb - lsb + 1) / registerWidth) * 100;
   const left = ((registerWidth - 1 - msb) / registerWidth) * 100;
@@ -63,7 +46,6 @@ const calculateFieldDimensions = (field: Field, registerWidth: number) => {
 const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
   register,
   baseAddr,
-  offsetBaseAddr,
 }) => {
   const [isOpen, setIsOpen] = React.useState(true);
   const [isCopied, setIsCopied] = React.useState(false);
@@ -72,15 +54,10 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
   // Default to 32 if width is not specified
   const registerWidth = register.width || 32;
 
-  // Calculate final address once
-  const finalAddress = calculateAddress(
-    baseAddr,
-    register.address,
-    offsetBaseAddr,
-  );
-
   const handleCopy = () => {
-    navigator.clipboard.writeText(finalAddress);
+    navigator.clipboard.writeText(
+      convertToHexString(baseAddr + register.addressOffset),
+    );
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
   };
@@ -103,7 +80,9 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
                   </CardTitle>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xl font-mono">{finalAddress}</span>
+                  <span className="text-xl font-mono">
+                    {convertToHexString(baseAddr + register.addressOffset)}
+                  </span>
                   <Button
                     variant="outline"
                     size="sm"
@@ -171,7 +150,8 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
                               {field.name}
                             </div>
                             <div className="font-medium text-xs">
-                              {field.bits}
+                              {field.bitOffset + field.bitWidth - 1}:
+                              {field.bitOffset}
                             </div>
                           </div>
                         );
@@ -192,7 +172,10 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
                             <TableCell className="font-medium">
                               {field.name}
                             </TableCell>
-                            <TableCell>{field.bits}</TableCell>
+                            <TableCell>
+                              {field.bitOffset + field.bitWidth - 1}:
+                              {field.bitOffset}
+                            </TableCell>
                             <TableCell>
                               <AccessBadge access={field.access} />
                             </TableCell>
