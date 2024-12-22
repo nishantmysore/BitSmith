@@ -32,13 +32,17 @@ const RegisterList = () => {
         <div className="px-2">
           <DataTable
             columns={columns}
-            data={selectedDevice.peripherals[0].registers.map(
-              ({ name, description, width, addressOffset }) => ({
-                name,
-                description,
-                width,
-                addressOffset,
-              }),
+            data={selectedDevice.peripherals.flatMap((peripheral) =>
+              peripheral.registers.map(
+                ({ name, description, width, addressOffset, resetValue }) => ({
+                  peripheralName: peripheral.name, // Include peripheral info
+                  name,
+                  description,
+                  width,
+                  addressOffset: peripheral.baseAddress + addressOffset,
+                  resetValue,
+                }),
+              ),
             )}
           />
         </div>
@@ -46,15 +50,16 @@ const RegisterList = () => {
       <div className="pb-10">
         <Separator />
       </div>
-      
-      {/*selectedDevice.registers.map((register) => (
-        <RegisterVisualizer
-          key={register.id} // Using id instead of address for key is generally better
-          register={register}
-          baseAddr={baseAddr}
-          offsetBaseAddr={offsetBaseAddr}
-        />
-      ))*/}
+
+      {selectedDevice.peripherals.flatMap((peripheral) =>
+        peripheral.registers.map((register) => (
+          <RegisterVisualizer
+            key={register.id}
+            register={register}
+            baseAddr={peripheral.baseAddress}
+          />
+        )),
+      )}
     </div>
   );
 };

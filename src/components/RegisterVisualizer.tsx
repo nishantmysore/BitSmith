@@ -26,8 +26,7 @@ import { Separator } from "@/components/ui/separator";
 import { getAccessStyles } from "@/lib/access_colors"; // adjust import path as needed
 
 interface RegisterVisualizerProps {
-  offsetBaseAddr: boolean;
-  baseAddr: string;
+  baseAddr: bigint;
   register: Register & {
     fields: Field[];
   };

@@ -58,7 +58,7 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
     try {
       const response = await fetch(
         newDevice
-          ? "/api/device-upload"  // Remove trailing slash
+          ? "/api/device-upload" // Remove trailing slash
           : `/api/devices/${selectedDevice?.id}`,
         {
           method: newDevice ? "POST" : "PUT",
@@ -69,13 +69,13 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
         },
       );
 
-      console.log("Finished!")
+      console.log("Finished!");
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to update device");
       }
 
-      console.log("Finished!")
+      console.log("Finished!");
       const responseData = await response.json();
 
       toast({
@@ -89,7 +89,8 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
     } catch (error) {
       toast({
         title: "Error Updating Device",
-        description: error instanceof Error ? error.message : "An unknown error occurred",
+        description:
+          error instanceof Error ? error.message : "An unknown error occurred",
         variant: "destructive",
       });
     }

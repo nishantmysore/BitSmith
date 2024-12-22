@@ -10,6 +10,7 @@ export type RegisterData = {
   description: string;
   width: number;
   addressOffset: bigint;
+  resetValue: bigint;
 };
 
 export const columns: ColumnDef<RegisterData>[] = [
@@ -56,7 +57,7 @@ export const columns: ColumnDef<RegisterData>[] = [
     header: "Width",
   },
   {
-    accessorKey: "address",
+    accessorKey: "addressOffset",
     header: ({ column }) => {
       return (
         <div className="flex items-center text-left font-medium py-1 ">
@@ -70,5 +71,10 @@ export const columns: ColumnDef<RegisterData>[] = [
         </div>
       );
     },
+  },
+
+  {
+    accessorKey: "resetValue",
+    header: "Reset Value",
   },
 ];

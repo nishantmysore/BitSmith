@@ -6,21 +6,24 @@ import { NextResponse } from "next/server";
 // Utility function to transform BigInts
 const transformBigInts = (data: any): any => {
   if (data === null || data === undefined) return data;
-  
-  if (typeof data === 'bigint') {
+
+  if (typeof data === "bigint") {
     return Number(data); // or data.toString() if you prefer string representation
   }
-  
+
   if (Array.isArray(data)) {
-    return data.map(item => transformBigInts(item));
+    return data.map((item) => transformBigInts(item));
   }
-  
-  if (typeof data === 'object') {
+
+  if (typeof data === "object") {
     return Object.fromEntries(
-      Object.entries(data).map(([key, value]) => [key, transformBigInts(value)])
+      Object.entries(data).map(([key, value]) => [
+        key,
+        transformBigInts(value),
+      ]),
     );
   }
-  
+
   return data;
 };
 
@@ -67,12 +70,12 @@ export class DeviceService {
             },
           },
         });
-        console.log("finished it!")
-        
+        console.log("finished it!");
+
         // Transform BigInts before sending response
         const transformedDevices = transformBigInts(devices);
-        
-        console.log(transformedDevices)
+
+        console.log(transformedDevices);
         return NextResponse.json({ devices: transformedDevices });
       } catch (e) {
         console.error("Error in full devices query:", e);
@@ -87,4 +90,3 @@ export class DeviceService {
     }
   }
 }
-

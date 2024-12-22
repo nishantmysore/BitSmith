@@ -31,7 +31,6 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({
   const { data: session } = useSession();
   console.log("session is: ", session);
 
-
   const fetchDevices = async () => {
     try {
       console.log("Fetching fresh devices data");
@@ -50,7 +49,7 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({
       const { devices } = await response.json();
 
       console.log("GOT DEVICES", devices);
-      
+
       // Store in cache
       const cacheData: CachedData = {
         timestamp: Date.now(),

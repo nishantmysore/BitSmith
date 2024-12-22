@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     if (!body) {
       return NextResponse.json(
         { error: "Invalid JSON in request body" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -27,11 +27,11 @@ export async function POST(request: NextRequest) {
     if (!validatedData.success) {
       return NextResponse.json(
         { error: "Invalid data", details: validatedData.error.format() },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    console.log("Validated data!")
+    console.log("Validated data!");
     const deviceData = prepareDeviceData(validatedData.data, session.user.id);
 
     const device = await prisma.device.create({
@@ -53,16 +53,16 @@ export async function POST(request: NextRequest) {
       },
     });
     console.log("Device created successfully:", device); // Confirm transaction success
-    return NextResponse.json({ success: true});
+    return NextResponse.json({ success: true });
   } catch (error) {
     if (error instanceof NextResponse) {
       return error;
     }
-    
+
     console.error("Unexpected error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
