@@ -1,5 +1,5 @@
 export const convertToHexString = (num: bigint) => {
-  return "0x" + num.toString(16).padStart(8, "0");
+  return "0x" + num.toString(16).padStart(8, "0").toUpperCase();
 };
 
 // Helper function to parse bit range string

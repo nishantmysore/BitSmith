@@ -1,8 +1,15 @@
 "use client";
 
 import React from "react";
+import { ReactNode } from "react";
 import { Copy, Check } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardDescription,
+} from "@/components/ui/card";
 import AccessBadge from "./AccessBadge";
 import {
   Table,
@@ -20,11 +27,28 @@ import {
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Register, Field } from "@prisma/client";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import RegisterBitViewer from "./RegisterBitViewer";
 import { Separator } from "@/components/ui/separator";
 import { getAccessStyles } from "@/lib/access_colors"; // adjust import path as needed
 import { convertToHexString } from "@/utils/validation";
+import {
+  EyeIcon,
+  EyeOffIcon,
+  RulerIcon,
+  LockIcon,
+  RefreshCwIcon,
+  FilterIcon,
+  BookOpenIcon,
+  PencilIcon,
+  EditIcon,
+} from "lucide-react";
+
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface RegisterVisualizerProps {
   baseAddr: bigint;
@@ -61,6 +85,22 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
   };
+
+  interface PropertyItemProps {
+    icon: ReactNode;
+    label: string;
+    value: ReactNode;
+  }
+
+  const PropertyItem = ({ icon, label, value }: PropertyItemProps) => (
+    <div className="flex items-center gap-2 p-2 rounded-md hover:bg-secondary/20 transition-colors duration-200">
+      <div className="text-muted-foreground">{icon}</div>
+      <div className="min-w-0 flex-1">
+        <div className="text-xs text-muted-foreground">{label}</div>
+        <div className="text-sm font-medium truncate">{value}</div>
+      </div>
+    </div>
+  );
 
   return (
     <div id={`register-${register.name}`} className="px-2">
@@ -109,25 +149,114 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
                 className={`transition-all duration-300 ease-in-out ${showBitViewer ? "w-2/3" : "w-full"}`}
               >
                 <CardContent className="p-6">
-                  <Alert className="mb-6">
-                    <AlertTitle className="text-base font-semibold">
-                      <div className="flex justify-between">
-                        Description
+                  <Card className="w-full mb-4">
+                    <CardHeader className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-xl font-semibold">
+                          Description
+                        </CardTitle>
                         <Button
-                          variant="default"
+                          variant="outline"
                           size="sm"
+                          className="hover:shadow-md transition-all duration-200"
                           onClick={() => setShowBitViewer(!showBitViewer)}
                         >
-                          {showBitViewer
-                            ? "Hide Bit Viewer"
-                            : "Show Bit Viewer"}
+                          {showBitViewer ? (
+                            <>
+                              <EyeOffIcon className="mr-2 h-3 w-3" />
+                              Hide Bit Viewer
+                            </>
+                          ) : (
+                            <>
+                              <EyeIcon className="mr-2 h-3 w-3" />
+                              Show Bit Viewer
+                            </>
+                          )}
                         </Button>
                       </div>
-                    </AlertTitle>
-                    <AlertDescription className="text-base mt-2 text-muted-foreground">
-                      {register.description}
-                    </AlertDescription>
-                  </Alert>
+                      <CardDescription className="text-sm text-muted-foreground">
+                        {register.description}
+                      </CardDescription>
+                    </CardHeader>
+
+                    <CardContent className="space-y-4">
+                      {/* Register Properties Section */}
+                      <div>
+                        <h3 className="text-sm font-semibold mb-2">
+                          Register Properties
+                        </h3>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                          <PropertyItem
+                            icon={<RulerIcon className="h-3 w-3" />}
+                            label="Width"
+                            value={`${register.width} bits`}
+                          />
+                          <PropertyItem
+                            icon={<LockIcon className="h-3 w-3" />}
+                            label="Access"
+                            value={<AccessBadge access={register.access} />}
+                          />
+                          {register.resetValue !== undefined && (
+                            <PropertyItem
+                              icon={<RefreshCwIcon className="h-3 w-3" />}
+                              label="Reset Value"
+                              value={
+                                <code className="font-mono text-xs bg-secondary/30 py-0.5 rounded">
+                                  {convertToHexString(register.resetValue)}
+                                </code>
+                              }
+                            />
+                          )}
+                          {register.resetMask && (
+                            <PropertyItem
+                              icon={<FilterIcon className="h-3 w-3" />}
+                              label="Reset Mask"
+                              value={
+                                <code className="font-mono text-xs bg-secondary/30 py-0.5 rounded">
+                                  {convertToHexString(register.resetMask)}
+                                </code>
+                              }
+                            />
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Actions Section */}
+                      {(register.readAction ||
+                        register.writeAction ||
+                        register.modifiedWriteValues) && (
+                        <div>
+                          <Separator className="my-4" />
+                          <h3 className="text-sm font-semibold mb-2">
+                            Actions
+                          </h3>
+                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                            {register.readAction && (
+                              <PropertyItem
+                                icon={<BookOpenIcon className="h-3 w-3" />}
+                                label="Read Action"
+                                value={register.readAction}
+                              />
+                            )}
+                            {register.writeAction && (
+                              <PropertyItem
+                                icon={<PencilIcon className="h-3 w-3" />}
+                                label="Write Action"
+                                value={register.writeAction}
+                              />
+                            )}
+                            {register.modifiedWriteValues && (
+                              <PropertyItem
+                                icon={<EditIcon className="h-3 w-3" />}
+                                label="Modified Write Values"
+                                value={register.modifiedWriteValues}
+                              />
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
                   <div className="space-y-6">
                     <div className="w-full h-12 relative rounded-md">
                       {register.fields.map((field) => {
