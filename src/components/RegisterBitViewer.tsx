@@ -177,10 +177,10 @@ const RegisterBitViewer: React.FC<RegisterBitViewerProps> = ({ register }) => {
           <Label>Field Values</Label>
           <div className="space-y-1">
             {register.fields.map((field) => {
-              const [msb, lsb] = field.bits.includes(":")
-                ? field.bits.split(":").map(Number)
-                : [Number(field.bits), Number(field.bits)];
-
+              const [msb, lsb] = [
+                field.bitOffset + field.bitWidth - 1,
+                field.bitOffset,
+              ];
               const fieldValue = getFieldValue(msb, lsb);
 
               return (
@@ -192,7 +192,9 @@ const RegisterBitViewer: React.FC<RegisterBitViewerProps> = ({ register }) => {
                 >
                   <span className="font-medium">{field.name}</span>
                   <div className="space-x-2 text-sm">
-                    <span className="">[{field.bits}]</span>
+                    <span className="">
+                      [{field.bitOffset + field.bitWidth - 1}:{field.bitOffset}]
+                    </span>
                     <span>0x{fieldValue.hex}</span>
                     <span className="">({fieldValue.decimal.toString()})</span>
                   </div>

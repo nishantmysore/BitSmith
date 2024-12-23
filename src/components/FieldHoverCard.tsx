@@ -1,16 +1,9 @@
-import { type AccessType } from "@prisma/client";
+import { Field } from "@prisma/client";
 import { getAccessDescription } from "@/lib/access_colors";
 import AccessBadge from "./AccessBadge";
 
-interface FieldInfo {
-  name: string;
-  description: string;
-  bits: string;
-  access: AccessType;
-}
-
 interface FieldHoverCardProps {
-  field: FieldInfo;
+  field: Field;
   fieldValue: {
     hex: string;
     decimal: bigint;
@@ -28,7 +21,9 @@ const FieldHoverCard = ({ field, fieldValue }: FieldHoverCardProps) => {
       <div className="flex justify-between items-start">
         <div>
           <h4 className="font-semibold">{field.name}</h4>
-          <p className="text-sm text-muted-foreground">Bits [{field.bits}]</p>
+          <p className="text-sm text-muted-foreground">
+            Bits [{field.bitOffset + field.bitWidth - 1}:{field.bitOffset}]
+          </p>
         </div>
         <AccessBadge access={field.access} />
       </div>
