@@ -100,21 +100,44 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
   );
 
   const EnumContent = ({ enums }: { enums: FieldEnum[] }) => (
-    <div className="px-4 py-2 bg-muted/50">
-      <div className="grid grid-cols-3 gap-4">
-        {enums.map((enumItem) => (
-          <div key={enumItem.name} className="space-y-1">
-            <div className="text-sm font-medium">{enumItem.name}</div>
-            <div className="text-xs text-muted-foreground">
-              Value: {enumItem.value}
-            </div>
-            <div className="text-xs text-muted-foreground">
-              {enumItem.description}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+    <Card>
+      <CardTitle className="p-4 text-sm"> Field Enums </CardTitle>
+      <Table>
+        {/* Table Header */}
+        <TableHeader className="border-b">
+          <TableRow>
+            <TableHead className="text-left font-semibold">Name</TableHead>
+            <TableHead className="text-left font-semibold">Value</TableHead>
+            <TableHead className="text-left font-semibold">
+              Description
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+
+        {/* Table Body */}
+        <TableBody>
+          {enums.map((enumItem) => (
+            <TableRow
+              key={enumItem.name}
+              className="hover:bg-muted/50 transition-colors border-b last:border-b-0"
+            >
+              <TableCell className="text-xs ">{enumItem.name}</TableCell>
+              <TableCell className="text-muted-foreground">
+                {enumItem.value}
+              </TableCell>
+              <TableCell>
+                <span
+                  className="truncate block max-w-[400px] text-muted-foreground"
+                  title={enumItem.description ?? ""}
+                >
+                  {enumItem.description}
+                </span>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </Card>
   );
 
   return (
@@ -283,7 +306,6 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
                         return (
                           <div
                             key={field.name}
-                            //className="absolute h-full flex flex-col justify-center items-center text-sm border border-border border-secondary/100 bg-gradient-to-b from-primary/100 to-primary/40"
                             className={`absolute h-full flex flex-col justify-center items-center text-sm border  border-border rounded ${getAccessStyles(field.access)}/100`}
                             style={{
                               left: `${left}%`,
@@ -314,19 +336,24 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
                         {register.fields.map((field) => (
                           <React.Fragment key={field.name}>
                             <TableRow
-                              className="cursor-pointer hover:bg-muted/50"
+                              className={`${
+                                field.enumeratedValues?.length
+                                  ? "cursor-pointer hover:bg-muted/50"
+                                  : ""
+                              } [&:has(>td:hover)]:hover:bg-muted/50`}
                               onClick={() =>
-                                field.enumeratedValues &&
-                                setExpandedField(
-                                  expandedField === field.name
-                                    ? null
-                                    : field.name,
-                                )
+                                field.enumeratedValues?.length
+                                  ? setExpandedField(
+                                      expandedField === field.name
+                                        ? null
+                                        : field.name,
+                                    )
+                                  : null
                               }
                             >
                               <TableCell className="font-medium">
                                 <div className="flex items-center gap-2">
-                                  {field.enumeratedValues && (
+                                  {field.enumeratedValues?.length ? (
                                     <ChevronRight
                                       className={`h-4 w-4 transition-transform duration-200 ${
                                         expandedField === field.name
@@ -334,7 +361,7 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
                                           : ""
                                       }`}
                                     />
-                                  )}
+                                  ) : null}
                                   {field.name}
                                 </div>
                               </TableCell>
@@ -347,11 +374,12 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
                               </TableCell>
                               <TableCell>{field.description}</TableCell>
                             </TableRow>
+
                             {expandedField === field.name &&
                               field.enumeratedValues && (
                                 <TableRow>
                                   <TableCell colSpan={4} className="p-0">
-                                    <div className="animate-in slide-in-from-top-1 duration-200">
+                                    <div className="animate-in slide-in-from-top-1 duration-200 p-4">
                                       <EnumContent
                                         enums={field.enumeratedValues}
                                       />
