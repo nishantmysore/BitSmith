@@ -133,11 +133,13 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
                   register.fields?.map((field: FieldFormData) => ({
                     ...field,
                     status: "added",
-                    fieldEnums:
-                      field.fieldEnums?.map((fieldEnum: FieldEnumFormData) => ({
-                        ...fieldEnum,
-                        status: "added",
-                      })) || [],
+                    enumeratedValues:
+                      field.enumeratedValues?.map(
+                        (fieldEnum: FieldEnumFormData) => ({
+                          ...fieldEnum,
+                          status: "added",
+                        }),
+                      ) || [],
                   })) || [],
               })) || [],
           }),
@@ -152,10 +154,11 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
             description: "The uploaded file does not match the expected format",
             variant: "destructive",
           });
-          //console.error("Validation errors:", result.error);
+          console.error("Validation errors:", result.error);
           return;
         }
 
+        console.log(jsonData);
         setData(jsonData);
 
         toast({

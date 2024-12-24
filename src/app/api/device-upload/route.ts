@@ -108,7 +108,7 @@ function prepareDeviceData(data: DeviceFormData, userId: string) {
                 writeAction: field.writeAction,
                 access: field.access,
                 enumeratedValues: {
-                  create: field.fieldEnums?.map((enumVal) => ({
+                  create: field.enumeratedValues?.map((enumVal) => ({
                     name: enumVal.name,
                     description: enumVal.description,
                     value: enumVal.value,

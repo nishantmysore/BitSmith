@@ -92,7 +92,7 @@ export type FieldFormData = {
   writeAction?: string;
   access: FieldAccessType;
   status: Status;
-  fieldEnums?: FieldEnumFormData[];
+  enumeratedValues?: FieldEnumFormData[];
 };
 
 export type FieldEnumFormData = {
@@ -133,7 +133,7 @@ export const FieldValidateSchema: ZodType<FieldFormData> = z.object({
   writeAction: z.string().optional(),
   access: z.nativeEnum(FieldAccessType),
   status: z.enum(STATUS_VALUES),
-  fieldEnums: z.array(FieldEnumValidateSchema).optional(),
+  enumeratedValues: z.array(FieldEnumValidateSchema).optional(),
 });
 
 export const RegisterValidateSchema: ZodType<RegisterFormData> = z.object({

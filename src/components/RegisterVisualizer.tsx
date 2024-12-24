@@ -26,10 +26,10 @@ import {
 } from "@/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Register, Field } from "@prisma/client";
+import { Register, Field, FieldEnum } from "@prisma/client";
 import RegisterBitViewer from "./RegisterBitViewer";
 import { Separator } from "@/components/ui/separator";
-import { getAccessStyles } from "@/lib/access_colors"; // adjust import path as needed
+import { getAccessStyles } from "@/lib/access_colors";
 import { convertToHexString } from "@/utils/validation";
 import {
   EyeIcon,
@@ -41,19 +41,15 @@ import {
   BookOpenIcon,
   PencilIcon,
   EditIcon,
+  ChevronRight,
 } from "lucide-react";
-
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 interface RegisterVisualizerProps {
   baseAddr: bigint;
   register: Register & {
-    fields: Field[];
+    fields: (Field & {
+      enumeratedValues?: FieldEnum[];
+    })[];
   };
 }
 
@@ -74,6 +70,7 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
   const [isOpen, setIsOpen] = React.useState(true);
   const [isCopied, setIsCopied] = React.useState(false);
   const [showBitViewer, setShowBitViewer] = React.useState(false);
+  const [expandedField, setExpandedField] = React.useState<string | null>(null);
 
   // Default to 32 if width is not specified
   const registerWidth = register.width || 32;
@@ -98,6 +95,24 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
       <div className="min-w-0 flex-1">
         <div className="text-xs text-muted-foreground">{label}</div>
         <div className="text-sm font-medium truncate">{value}</div>
+      </div>
+    </div>
+  );
+
+  const EnumContent = ({ enums }: { enums: FieldEnum[] }) => (
+    <div className="px-4 py-2 bg-muted/50">
+      <div className="grid grid-cols-3 gap-4">
+        {enums.map((enumItem) => (
+          <div key={enumItem.name} className="space-y-1">
+            <div className="text-sm font-medium">{enumItem.name}</div>
+            <div className="text-xs text-muted-foreground">
+              Value: {enumItem.value}
+            </div>
+            <div className="text-xs text-muted-foreground">
+              {enumItem.description}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -297,19 +312,54 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
                       </TableHeader>
                       <TableBody>
                         {register.fields.map((field) => (
-                          <TableRow key={field.name}>
-                            <TableCell className="font-medium">
-                              {field.name}
-                            </TableCell>
-                            <TableCell>
-                              {field.bitOffset + field.bitWidth - 1}:
-                              {field.bitOffset}
-                            </TableCell>
-                            <TableCell>
-                              <AccessBadge access={field.access} />
-                            </TableCell>
-                            <TableCell>{field.description}</TableCell>
-                          </TableRow>
+                          <React.Fragment key={field.name}>
+                            <TableRow
+                              className="cursor-pointer hover:bg-muted/50"
+                              onClick={() =>
+                                field.enumeratedValues &&
+                                setExpandedField(
+                                  expandedField === field.name
+                                    ? null
+                                    : field.name,
+                                )
+                              }
+                            >
+                              <TableCell className="font-medium">
+                                <div className="flex items-center gap-2">
+                                  {field.enumeratedValues && (
+                                    <ChevronRight
+                                      className={`h-4 w-4 transition-transform duration-200 ${
+                                        expandedField === field.name
+                                          ? "rotate-90"
+                                          : ""
+                                      }`}
+                                    />
+                                  )}
+                                  {field.name}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                {field.bitOffset + field.bitWidth - 1}:
+                                {field.bitOffset}
+                              </TableCell>
+                              <TableCell>
+                                <AccessBadge access={field.access} />
+                              </TableCell>
+                              <TableCell>{field.description}</TableCell>
+                            </TableRow>
+                            {expandedField === field.name &&
+                              field.enumeratedValues && (
+                                <TableRow>
+                                  <TableCell colSpan={4} className="p-0">
+                                    <div className="animate-in slide-in-from-top-1 duration-200">
+                                      <EnumContent
+                                        enums={field.enumeratedValues}
+                                      />
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                              )}
+                          </React.Fragment>
                         ))}
                       </TableBody>
                     </Table>
