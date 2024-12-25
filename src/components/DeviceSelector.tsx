@@ -7,12 +7,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import { useDevice } from "../DeviceContext";
 import { Button } from "@/components/ui/button";
 import { DeviceWithRelations } from "@/types/device";
 import { ReactNode } from "react";
 import { ClockIcon, FolderLock, GitFork } from "lucide-react";
+import { MemoryMap } from "./MemoryMap";
 
 interface PropertyItemProps {
   icon: ReactNode;
@@ -168,6 +168,18 @@ export const DeviceSelector = () => {
             }
           </div>
         </div>
+        {selectedDevice && selectedDevice.peripherals && (
+          <div className="mt-4">
+            <MemoryMap
+              peripherals={selectedDevice.peripherals.map((peripheral) => ({
+                name: peripheral.name,
+                baseAddress: peripheral.baseAddress, // Already BigInt
+                size: peripheral.size, // Already BigInt
+                description: peripheral.description,
+              }))}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
