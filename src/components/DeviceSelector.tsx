@@ -7,11 +7,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useDevice } from "../DeviceContext";
 import { Button } from "@/components/ui/button";
 import { DeviceWithRelations } from "@/types/device";
+import { ReactNode } from "react";
+import { ClockIcon, FolderLock, GitFork } from "lucide-react";
+
+interface PropertyItemProps {
+  icon: ReactNode;
+  label: string;
+  value: ReactNode;
+}
+
+const PropertyItem = ({ icon, label, value }: PropertyItemProps) => (
+  <div className="flex items-center gap-2 p-2 rounded-md hover:bg-secondary/20 transition-colors duration-200">
+    <div className="text-muted-foreground">{icon}</div>
+    <div className="min-w-0 flex-1">
+      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className="text-sm font-medium truncate">{value}</div>
+    </div>
+  </div>
+);
 
 export const DeviceSelector = () => {
   const {
@@ -87,16 +104,14 @@ export const DeviceSelector = () => {
   };
 
   return (
-    <Card className="mb-4 px-2">
-      <CardHeader>
-        <CardTitle className="text-lg font-semibold">
-          <div className="flex justify-between">
-            Device Selection
-            <Button onClick={exportDevice}> Export to JSON </Button>
-          </div>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
+    <div>
+      <div className="text-xl font-semibold">
+        <div className="flex justify-between">
+          Device Selection
+          <Button onClick={exportDevice}> Export to JSON </Button>
+        </div>
+      </div>
+      <div className="space-y-6 mt-4">
         {/* Device Selection Section */}
         <div className="space-y-3">
           <Select
@@ -120,7 +135,7 @@ export const DeviceSelector = () => {
 
           {/* Device Description */}
           {selectedDevice?.description && (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-lg text-muted-foreground">
               {selectedDevice.description}
             </p>
           )}
@@ -130,13 +145,30 @@ export const DeviceSelector = () => {
         <div className="space-y-4">
           {/* Base Address Input */}
           <div className="flex flex-col space-y-2">
-            <Label htmlFor="base-addr-input">Base Address</Label>
-            <div className="flex justify-between">
-              <div className="flex items-center space-x-4"></div>
-            </div>
+            {
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                {selectedDevice?.version !== undefined && (
+                  <PropertyItem
+                    icon={<GitFork />}
+                    label="Version"
+                    value={`${selectedDevice?.version}`}
+                  />
+                )}
+                <PropertyItem
+                  icon={<ClockIcon />}
+                  label="Clock Frequency"
+                  value={`${(selectedDevice?.defaultClockFreq ?? 0) / 1e6} MHz`}
+                />
+                <PropertyItem
+                  icon={<FolderLock />}
+                  label="Public"
+                  value={`${selectedDevice?.isPublic}` ? "Yes" : "No"}
+                />
+              </div>
+            }
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
