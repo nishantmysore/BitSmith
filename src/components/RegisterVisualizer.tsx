@@ -159,7 +159,9 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xl font-mono">
-                    {convertToHexString(baseAddr + register.addressOffset)}
+                    {convertToHexString(
+                      BigInt(baseAddr) + BigInt(register.addressOffset),
+                    )}
                   </span>
                   <Button
                     variant="outline"
@@ -377,7 +379,7 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
 
                             {expandedField === field.name &&
                               field.enumeratedValues && (
-                                <TableRow>
+                                <TableRow className="overflow-hidden transition-height duration-200">
                                   <TableCell colSpan={4} className="p-0">
                                     <div className="animate-in slide-in-from-top-1 duration-200 p-4">
                                       <EnumContent
