@@ -19,13 +19,13 @@ export const columns: ColumnDef<RegisterData>[] = [
 
     header: ({ column }) => {
       return (
-        <div className="flex items-center text-left font-medium py-1">
+        <div className="flex items-center text-left font-medium py-1 text-lg">
           <span
             className="flex cursor-pointer hover:bg-accent hover:text-accent-foreground"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Name
-            <ArrowUpDown className="ml-2 h-4 w-4" />
+            <ArrowUpDown className="ml-1 mt-1.5 h-4 w-4" />
           </span>
         </div>
       );
@@ -42,7 +42,14 @@ export const columns: ColumnDef<RegisterData>[] = [
 
   {
     accessorKey: "description",
-    header: "Description",
+
+    header: () => {
+      return (
+        <div className="text-lg">
+        Description
+        </div>
+      );
+    },
     cell: ({ row }) => {
       const description = row.getValue("description") as string;
       return (
@@ -54,19 +61,25 @@ export const columns: ColumnDef<RegisterData>[] = [
   },
   {
     accessorKey: "width",
-    header: "Width",
+    header: () => {
+      return (
+        <div className="text-lg">
+        Width
+        </div>
+      );
+    },
   },
   {
     accessorKey: "addressOffset",
     header: ({ column }) => {
       return (
-        <div className="flex items-center text-left font-medium py-1 ">
+        <div className="flex items-center text-left font-medium py-1 text-lg">
           <span
             className="flex cursor-pointer hover:bg-accent hover:text-accent-foreground"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Address
-            <ArrowUpDown className="ml-2 h-4 w-4" />
+            <ArrowUpDown className="ml-1 mt-1.5 h-4 w-4" />
           </span>
         </div>
       );
@@ -75,6 +88,13 @@ export const columns: ColumnDef<RegisterData>[] = [
 
   {
     accessorKey: "resetValue",
-    header: "Reset Value",
+
+    header: () => {
+      return (
+        <div className="text-lg">
+        Reset Value
+        </div>
+      );
+    },
   },
 ];
