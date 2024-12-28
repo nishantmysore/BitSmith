@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
 
 interface MatrixRainProps {
   className?: string;
@@ -11,7 +11,7 @@ const MatrixRain: React.FC<MatrixRainProps> = ({ className }) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     // Set canvas size to container size
@@ -32,7 +32,7 @@ const MatrixRain: React.FC<MatrixRainProps> = ({ className }) => {
     }
 
     // Matrix characters
-    const chars = '01';
+    const chars = "01";
     const fontSize = 14;
     const columns = canvas.width / fontSize;
     const drops: number[] = Array(Math.floor(columns)).fill(1);
@@ -40,16 +40,16 @@ const MatrixRain: React.FC<MatrixRainProps> = ({ className }) => {
     // Get CSS variable value for primary color
     const getPrimaryColor = (): string => {
       const primaryHue = getComputedStyle(document.documentElement)
-        .getPropertyValue('--primary')
+        .getPropertyValue("--primary")
         .trim();
-      return primaryHue ? `hsl(${primaryHue})` : '#00ff00'; // Fallback color
+      return primaryHue ? `hsl(${primaryHue})` : "#00ff00"; // Fallback color
     };
 
     const draw = () => {
       if (!ctx || !canvas) return;
 
       // Add semi-transparent black rectangle to create fade effect
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.15)'; // Adjust opacity here (0.05 - 0.3)
+      ctx.fillStyle = "rgba(0, 0, 0, 0.15)"; // Adjust opacity here (0.05 - 0.3)
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       // Set the text style
@@ -86,7 +86,7 @@ const MatrixRain: React.FC<MatrixRainProps> = ({ className }) => {
   return (
     <canvas
       ref={canvasRef}
-      className={`absolute top-0 left-0 w-full h-full -z-10 ${className || ''}`}
+      className={`absolute top-0 left-0 w-full h-full -z-10 ${className || ""}`}
       aria-hidden="true"
     />
   );

@@ -103,9 +103,7 @@ export const Navbar = () => {
             ))}
           </nav>
 
-          <div className="hidden md:flex gap-2">
-            {/*<ModeToggle />*/}
-          </div>
+          <div className="hidden md:flex gap-2">{/*<ModeToggle />*/}</div>
         </NavigationMenuList>
       </NavigationMenu>
     </header>

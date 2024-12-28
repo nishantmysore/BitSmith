@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-import { GitFork } from "lucide-react";
+import { Eye, Database, Upload, Code } from "lucide-react";
 
 interface FeatureProps {
   icon: JSX.Element;
@@ -10,28 +10,28 @@ interface FeatureProps {
 
 const features: FeatureProps[] = [
   {
-    icon: <GitFork />,
-    title: "Accessibility",
+    icon: <Eye />,
+    title: "Visual Register Management",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Illum quas provident cum",
+      "Navigate complex register maps through an interactive visual interface. Toggle bits, modify values, and see changes in real-time across hex, decimal, and binary formats",
   },
   {
-    icon: <GitFork />,
-    title: "Community",
+    icon: <Database />,
+    title: "Smart Device Organization",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Illum quas provident cum",
+      "Effortlessly manage multiple devices with our structured database system. Search, filter, and access your entire register catalog with comprehensive device documentation at your fingertips",
   },
   {
-    icon: <GitFork />,
-    title: "Scalability",
+    icon: <Upload />,
+    title: "Seamless Device Configuration",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Illum quas provident cum",
+      "Add new devices effortlessly through our structured JSON import system or use our intuitive interface for manual configuration. Build your device register database with precision and ease.",
   },
   {
-    icon: <GitFork />,
-    title: "Gamification",
+    icon: <Code />,
+    title: "Development-Ready Output",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Illum quas provident cum",
+      "Generate production-ready header files and macros with a single click. Group registers by tags and export exactly what you need for your project, saving hours of manual configuration.\n (Coming Soon)",
   },
 ];
 
@@ -46,11 +46,12 @@ export const HowItWorks = () => {
         <span className="bg-gradient-to-b from-primary/60 to-primary text-transparent bg-clip-text">
           Works{" "}
         </span>
-        Step-by-Step Guide
       </h2>
       <p className="md:w-3/4 mx-auto mt-4 mb-8 text-xl text-muted-foreground">
-        Lorem ipsum dolor sit amet consectetur, adipisicing elit. Veritatis
-        dolor pariatur sit!
+        Simply upload your device specifications and instantly gain access to a
+        visual interface that makes register manipulation straightforward and
+        error-free. Whether you're debugging, developing, or documenting,
+        BitSmith provides a clear path from complexity to clarity.
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">

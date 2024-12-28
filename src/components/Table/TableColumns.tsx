@@ -44,11 +44,7 @@ export const columns: ColumnDef<RegisterData>[] = [
     accessorKey: "description",
 
     header: () => {
-      return (
-        <div className="text-lg">
-        Description
-        </div>
-      );
+      return <div className="text-lg">Description</div>;
     },
     cell: ({ row }) => {
       const description = row.getValue("description") as string;
@@ -62,11 +58,7 @@ export const columns: ColumnDef<RegisterData>[] = [
   {
     accessorKey: "width",
     header: () => {
-      return (
-        <div className="text-lg">
-        Width
-        </div>
-      );
+      return <div className="text-lg">Width</div>;
     },
   },
   {
@@ -90,11 +82,7 @@ export const columns: ColumnDef<RegisterData>[] = [
     accessorKey: "resetValue",
 
     header: () => {
-      return (
-        <div className="text-lg">
-        Reset Value
-        </div>
-      );
+      return <div className="text-lg">Reset Value</div>;
     },
   },
 ];
