@@ -4,8 +4,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { MagnifierIcon, WalletIcon, ChartIcon } from "./Icons";
-import cubeLeg from "@/assets/cube-leg.png";
+import { Layers, Database, Share2 } from "lucide-react";
+import Image from "next/image";
+import serviceImage from "@/assets/602shots_so.png";
 
 interface ServiceProps {
   title: string;
@@ -15,22 +16,22 @@ interface ServiceProps {
 
 const serviceList: ServiceProps[] = [
   {
-    title: "Code Collaboration",
+    title: "Interactive Bit Visualization",
     description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Nisi nesciunt est nostrum omnis ab sapiente.",
-    icon: <ChartIcon />,
+      "Manipulate register values through our intuitive bit viewer. Toggle individual bits, input hex, decimal, or binary values, and see real-time updates across all formats. Makes complex register manipulation simple and error-free.",
+    icon: <Layers />, // or <Grid />
   },
   {
-    title: "Project Management",
+    title: "Comprehensive Register Database",
     description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Nisi nesciunt est nostrum omnis ab sapiente.",
-    icon: <WalletIcon />,
+      "Access a clear, organized view of your device's complete memory map. Navigate through peripherals, registers, fields, and enumerations with our intuitive UI. Search, filter, and quickly find the registers you need.",
+    icon: <Database />,
   },
   {
-    title: "Task Automation",
+    title: "Seamless Device Management",
     description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Nisi nesciunt est nostrum omnis ab sapiente.",
-    icon: <MagnifierIcon />,
+      "Import and share device configurations effortlessly through our JSON-based system. Perfect for team collaboration and project organization.",
+    icon: <Share2 />, // or <Users />
   },
 ];
 
@@ -47,8 +48,9 @@ export const Services = () => {
           </h2>
 
           <p className="text-muted-foreground text-xl mt-4 mb-8 ">
-            Lorem ipsum dolor sit amet consectetur, adipisicing elit. Veritatis
-            dolor.
+            Simply upload your device specifications and instantly gain access
+            to a visual interface that makes register manipulation
+            straightforward and error-free.
           </p>
 
           <div className="flex flex-col gap-8">
@@ -69,11 +71,11 @@ export const Services = () => {
             ))}
           </div>
         </div>
-
-        <img
-          src={cubeLeg}
-          className="w-[300px] md:w-[500px] lg:w-[600px] object-contain"
+        <Image
+          src={serviceImage}
           alt="About services"
+          width={1000}
+          height={1000}
         />
       </div>
     </section>
