@@ -38,7 +38,7 @@ const features: FeatureProps[] = [
 export const HowItWorks = () => {
   return (
     <section
-      id="howItWorks"
+      id="features"
       className="container text-center py-24 sm:py-32 mx-auto"
     >
       <h2 className="text-3xl md:text-4xl font-bold ">

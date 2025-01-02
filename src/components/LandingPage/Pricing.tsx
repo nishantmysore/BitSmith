@@ -18,14 +18,14 @@ enum PopularPlanType {
 interface PricingProps {
   title: string;
   popular: PopularPlanType;
-  price: number;
+  price: number | string;
   description: string;
   buttonText: string;
   benefitList: string[];
 }
 
 const pricingList: PricingProps[] = [
-  {
+/*  {
     title: "Free",
     popular: 0,
     price: 0,
@@ -40,36 +40,38 @@ const pricingList: PricingProps[] = [
       "lorem ipsum dolor",
     ],
   },
+  */
   {
-    title: "Premium",
+    title: "Individual",
     popular: 1,
-    price: 5,
+    price: 10,
     description:
-      "Lorem ipsum dolor sit, amet ipsum consectetur adipisicing elit.",
+      "Perfect for developers and small teams working with hardware registers.",
     buttonText: "Start Free Trial",
     benefitList: [
-      "4 Team member",
-      "4 GB Storage",
-      "Upto 6 pages",
-      "Priority support",
-      "lorem ipsum dolor",
+      "Full register visualization tools",
+      "Unlimited device configurations",
+      "JSON import/export capabilities",
+      "Basic documentation storage",
+      "Standard support",
+      "Personal workspace"
     ],
   },
   {
     title: "Enterprise",
     popular: 0,
-    price: 40,
+    price: "0", // or however you handle "Contact Us" pricing
     description:
-      "Lorem ipsum dolor sit, amet ipsum consectetur adipisicing elit.",
-    buttonText: "Contact US",
+      "Customized solutions for organizations requiring advanced features and support.",
+    buttonText: "Contact Us",
     benefitList: [
-      "10 Team member",
-      "8 GB Storage",
-      "Upto 10 pages",
-      "Priority support",
-      "lorem ipsum dolor",
+      "Everything in Individual, plus:",
+      "Custom deployment options",
+      "Priority technical support",
+      "Team collaboration features",
+      "Custom integration support",
     ],
-  },
+}
 ];
 
 export const Pricing = () => {
@@ -84,10 +86,9 @@ export const Pricing = () => {
         Access
       </h2>
       <h3 className="text-xl text-center text-muted-foreground pt-4 pb-8">
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Alias
-        reiciendis.
+Streamline your hardware development workflow with our flexible pricing options
       </h3>
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+<div className="grid md:grid-cols-2 lg:grid-cols-2 gap-8 max-w-[1000px] mx-auto">
         {pricingList.map((pricing: PricingProps) => (
           <Card
             key={pricing.title}
@@ -107,8 +108,15 @@ export const Pricing = () => {
                 ) : null}
               </CardTitle>
               <div>
+                {typeof pricing.price === "number" ?
+                <div>
                 <span className="text-3xl font-bold">${pricing.price}</span>
                 <span className="text-muted-foreground"> /month</span>
+                </div>
+                  :
+
+                <span className="text-3xl font-bold">Contact Us</span> 
+                }
               </div>
 
               <CardDescription>{pricing.description}</CardDescription>
