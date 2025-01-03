@@ -25,7 +25,7 @@ interface PricingProps {
 }
 
 const pricingList: PricingProps[] = [
-/*  {
+  /*  {
     title: "Free",
     popular: 0,
     price: 0,
@@ -54,7 +54,7 @@ const pricingList: PricingProps[] = [
       "JSON import/export capabilities",
       "Basic documentation storage",
       "Standard support",
-      "Personal workspace"
+      "Personal workspace",
     ],
   },
   {
@@ -71,7 +71,7 @@ const pricingList: PricingProps[] = [
       "Team collaboration features",
       "Custom integration support",
     ],
-}
+  },
 ];
 
 export const Pricing = () => {
@@ -86,9 +86,10 @@ export const Pricing = () => {
         Access
       </h2>
       <h3 className="text-xl text-center text-muted-foreground pt-4 pb-8">
-Streamline your hardware development workflow with our flexible pricing options
+        Streamline your hardware development workflow with our flexible pricing
+        options
       </h3>
-<div className="grid md:grid-cols-2 lg:grid-cols-2 gap-8 max-w-[1000px] mx-auto">
+      <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-8 max-w-[1000px] mx-auto">
         {pricingList.map((pricing: PricingProps) => (
           <Card
             key={pricing.title}
@@ -108,15 +109,14 @@ Streamline your hardware development workflow with our flexible pricing options
                 ) : null}
               </CardTitle>
               <div>
-                {typeof pricing.price === "number" ?
-                <div>
-                <span className="text-3xl font-bold">${pricing.price}</span>
-                <span className="text-muted-foreground"> /month</span>
-                </div>
-                  :
-
-                <span className="text-3xl font-bold">Contact Us</span> 
-                }
+                {typeof pricing.price === "number" ? (
+                  <div>
+                    <span className="text-3xl font-bold">${pricing.price}</span>
+                    <span className="text-muted-foreground"> /month</span>
+                  </div>
+                ) : (
+                  <span className="text-3xl font-bold">Contact Us</span>
+                )}
               </div>
 
               <CardDescription>{pricing.description}</CardDescription>

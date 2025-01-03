@@ -106,13 +106,12 @@ export type FieldEnumFormData = {
 export const FieldEnumValidateSchema: ZodType<FieldEnumFormData> = z.object({
   db_id: z.string().optional(),
   name: z
-    .string({ required_error: "Field is required" })
-    .min(1, { message: "Field name is too short" })
-    .max(30, { message: "Field name is too long" }),
+    .string({ required_error: "FieldEnum is required" })
+    .min(1, { message: "FieldEnum name is too short" })
+    .max(100, { message: "FieldEnum name is too long" }),
   description: z
-    .string({ required_error: "Field description is required" })
-    .min(1, { message: "Field description is too short" })
-    .max(500, { message: "Field description is too long" }),
+    .string({ required_error: "FieldEnum description is required" })
+    .max(2000, { message: "FieldEnum description is too long" }),
   value: z.coerce.number().nonnegative(),
   status: z.enum(STATUS_VALUES),
 });
@@ -120,13 +119,12 @@ export const FieldEnumValidateSchema: ZodType<FieldEnumFormData> = z.object({
 export const FieldValidateSchema: ZodType<FieldFormData> = z.object({
   db_id: z.string().optional(),
   name: z
-    .string({ required_error: "Field Enum name is required" })
-    .min(1, { message: "Field Enum name is too short" })
-    .max(30, { message: "Field Enum name is too long" }),
+    .string({ required_error: "Field name is required" })
+    .min(1, { message: "Field name is too short" })
+    .max(100, { message: "Field name is too long" }),
   description: z
-    .string({ required_error: "Field Enum description is required" })
-    .min(1, { message: "Field Enum description is too short" })
-    .max(500, { message: "Field Enum description is too long" }),
+    .string({ required_error: "Field description is required" })
+    .max(2000, { message: "Field description is too long" }),
   bitOffset: z.coerce.number().nonnegative(),
   bitWidth: z.coerce.number().nonnegative(),
   readAction: z.string().optional(),
@@ -141,11 +139,11 @@ export const RegisterValidateSchema: ZodType<RegisterFormData> = z.object({
   name: z
     .string({ required_error: "Register is required" })
     .min(1, { message: "Register name is too short" })
-    .max(30, { message: "Register name is too long" }),
+    .max(100, { message: "Register name is too long" }),
   description: z
     .string({ required_error: "Register description is required" })
     .min(1, { message: "Register description is too short" })
-    .max(500, { message: "Register description is too long" }),
+    .max(2000, { message: "Register description is too long" }),
   width: z.coerce.number().positive(),
   addressOffset: z.coerce.bigint().nonnegative(),
   resetValue: z.coerce.bigint().nonnegative(),
@@ -223,11 +221,11 @@ export const PeripheralValidateSchema: ZodType<PeripheralFormData> = z.object({
   name: z
     .string({ required_error: "Register is required" })
     .min(1, { message: "Register name is too short" })
-    .max(30, { message: "Register name is too long" }),
+    .max(100, { message: "Register name is too long" }),
   description: z
     .string({ required_error: "Register description is required" })
     .min(1, { message: "Register description is too short" })
-    .max(500, { message: "Register description is too long" }),
+    .max(2000, { message: "Register description is too long" }),
   baseAddress: z.coerce.bigint().nonnegative(),
   size: z.coerce.bigint().nonnegative(),
   status: z.enum(STATUS_VALUES),
@@ -238,16 +236,14 @@ export const DeviceValidateSchema: ZodType<DeviceFormData> = z.object({
   name: z
     .string({ required_error: "Device name is required" })
     .min(1, { message: "Device name is too short" })
-    .max(30, { message: "Device name is too long" }),
+    .max(100, { message: "Device name is too long" }),
   description: z
     .string({ required_error: "Device description is required" })
     .min(1, { message: "Device description is too short" })
-    .max(500, { message: "Device description is too long" }),
+    .max(2000, { message: "Device description is too long" }),
   isPublic: z.boolean({ required_error: "isPublic is required" }),
   littleEndian: z.boolean({ required_error: "littleEndian is required" }),
-  defaultClockFreq: z.number({
-    required_error: "ClockFrequency in Mhz is required",
-  }),
+  defaultClockFreq: z.number().optional(),
   version: z.string().optional(),
   peripherals: z.array(PeripheralValidateSchema).optional(),
 });

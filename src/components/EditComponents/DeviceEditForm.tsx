@@ -45,6 +45,37 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
   const { toast } = useToast();
   const [data, setData] = useState<DeviceFormData | null>(null);
 
+  interface ValidationErrorDetail {
+    path: (string | number)[];
+    message: string;
+    invalidValue?: any;
+    friendlyPath?: string;
+  }
+  const [validationErrors, setValidationErrors] = useState<
+    ValidationErrorDetail[]
+  >([]);
+
+  const getFriendlyErrorPath = (path: (string | number)[], data: any) => {
+    let current = data;
+    const parts: string[] = [];
+
+    for (let i = 0; i < path.length; i++) {
+      const segment = path[i];
+
+      if (typeof segment === "number") {
+        if (current[path[i - 1]]?.[segment]?.name) {
+          parts.push(current[path[i - 1]][segment].name);
+        }
+      } else if (segment !== "name" && segment !== "description") {
+        parts.push(segment);
+      }
+
+      current = current[segment];
+    }
+
+    return parts.join(" > ");
+  };
+
   const onSubmit = async () => {
     if (!data) {
       toast({
@@ -149,15 +180,25 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
         const result = DeviceValidateSchema.safeParse(jsonData);
 
         if (!result.success) {
+          const formattedErrors = result.error.issues.map((issue) => ({
+            path: issue.path,
+            message: issue.message,
+            invalidValue:
+              issue.path.length > 0
+                ? issue.path.reduce((obj, key) => obj?.[key], jsonData)
+                : undefined,
+            friendlyPath: getFriendlyErrorPath(issue.path, jsonData),
+          }));
+          setValidationErrors(formattedErrors);
           toast({
             title: "Invalid configuration",
-            description: "The uploaded file does not match the expected format",
+            description: "The uploaded file contains validation errors.",
             variant: "destructive",
           });
-          console.error("Validation errors:", result.error);
           return;
         }
 
+        setValidationErrors([]);
         console.log(jsonData);
         setData(jsonData);
 
@@ -276,6 +317,35 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
           <Button onClick={onSubmit}> Upload </Button>
         </CardContent>
       </Card>
+
+      {validationErrors.length > 0 && (
+        <Card className="mb-4 border-destructive">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-destructive">
+              Validation Errors
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {validationErrors.map((error, index) => (
+                <div key={index} className="p-4 rounded-md bg-destructive/10">
+                  <p className="font-medium text-destructive">
+                    {error.friendlyPath}
+                  </p>
+                  <p className="text-sm mt-1">
+                    {error.message}
+                    {error.invalidValue && (
+                      <span className="ml-2 font-mono">
+                        (Value: {String(error.invalidValue)})
+                      </span>
+                    )}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Toaster />
 
