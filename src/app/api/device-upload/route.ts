@@ -3,7 +3,6 @@ import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { DeviceValidateSchema, DeviceFormData } from "@/types/validation";
 import { NextRequest, NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,6 +32,7 @@ export async function POST(request: NextRequest) {
 
     console.log("Validated data!");
     const deviceData = prepareDeviceData(validatedData.data, session.user.id);
+    //console.log("Prepared device data:", JSON.stringify(deviceData, null, 2));
 
     const device = await prisma.device.create({
       data: deviceData,

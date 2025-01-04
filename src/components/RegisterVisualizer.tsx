@@ -52,6 +52,13 @@ interface RegisterVisualizerProps {
     })[];
   };
 }
+const createBitString = (field: Field): String => {
+  const bitString =
+    field.bitWidth === 1
+      ? `${field.bitOffset}`
+      : `${field.bitOffset + field.bitWidth - 1}:${field.bitOffset}`;
+  return bitString;
+};
 
 // Helper function to calculate field position and width
 const calculateFieldDimensions = (field: Field, registerWidth: number) => {
@@ -61,6 +68,64 @@ const calculateFieldDimensions = (field: Field, registerWidth: number) => {
   const left = ((registerWidth - 1 - msb) / registerWidth) * 100;
 
   return { width, left, msb, lsb };
+};
+
+type Gap = {
+  start: number;
+  end: number;
+};
+
+const findGaps = (fields: Field[], registerWidth: number): Gap[] => {
+  // Sort fields by bitOffset
+  const sortedFields = [...fields].sort((a, b) => a.bitOffset - b.bitOffset);
+
+  const gaps: Gap[] = [];
+  let currentPosition = 0;
+
+  sortedFields.forEach((field) => {
+    if (field.bitOffset > currentPosition) {
+      gaps.push({
+        start: currentPosition,
+        end: field.bitOffset - 1,
+      });
+    }
+    currentPosition = field.bitOffset + field.bitWidth;
+  });
+
+  // Check if there's a gap after the last field
+  if (currentPosition < registerWidth) {
+    gaps.push({
+      start: currentPosition,
+      end: registerWidth - 1,
+    });
+  }
+
+  return gaps;
+};
+
+const GapComponent = ({
+  gap,
+  registerWidth,
+}: {
+  gap: Gap;
+  registerWidth: number;
+}) => {
+  const width = ((gap.end - gap.start + 1) / registerWidth) * 100;
+  const left = ((registerWidth - 1 - gap.end) / registerWidth) * 100;
+
+  return (
+    <div
+      className={`absolute h-full flex flex-col justify-center items-center text-sm border  border-border rounded ${getAccessStyles("RSVD")}/100`}
+      style={{
+        left: `${left}%`,
+        width: `${width}%`,
+      }}
+    >
+      <div className="font-medium text-xs text-gray-500">
+        {gap.end === gap.start ? gap.end : `${gap.end}:${gap.start}`}
+      </div>
+    </div>
+  );
 };
 
 const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
@@ -299,12 +364,20 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
                   </Card>
                   <div className="space-y-6">
                     <div className="w-full h-12 relative rounded-md">
+                      {findGaps(register.fields, registerWidth).map(
+                        (gap, index) => (
+                          <GapComponent
+                            key={`gap-${index}`}
+                            gap={gap}
+                            registerWidth={registerWidth}
+                          />
+                        ),
+                      )}
                       {register.fields.map((field) => {
                         const { width, left } = calculateFieldDimensions(
                           field,
                           registerWidth,
                         );
-
                         return (
                           <div
                             key={field.name}
@@ -318,8 +391,7 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
                               {field.name}
                             </div>
                             <div className="font-medium text-xs">
-                              {field.bitOffset + field.bitWidth - 1}:
-                              {field.bitOffset}
+                              {createBitString(field)}
                             </div>
                           </div>
                         );
@@ -367,10 +439,7 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
                                   {field.name}
                                 </div>
                               </TableCell>
-                              <TableCell>
-                                {field.bitOffset + field.bitWidth - 1}:
-                                {field.bitOffset}
-                              </TableCell>
+                              <TableCell>{createBitString(field)}</TableCell>
                               <TableCell>
                                 <AccessBadge access={field.access} />
                               </TableCell>
