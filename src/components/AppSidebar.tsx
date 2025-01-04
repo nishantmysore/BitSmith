@@ -25,22 +25,19 @@ import {
 import { ModeToggle } from "@/components/ModeToggle";
 import { clearDevicesCache } from "@/utils/cache";
 
-const appitems = [
+const deviceitems = [
   {
-    title: "Register Maps",
+    title: "View Device Maps",
     url: "/",
     icon: Home,
   },
-];
-
-const deviceitems = [
   {
-    title: "Edit Device Configurations",
+    title: "Edit Devices",
     url: "/edit",
     icon: Pencil,
   },
   {
-    title: "Upload New Configuration",
+    title: "Upload New Device",
     url: "/upload",
     icon: Upload,
   },
@@ -57,24 +54,6 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {appitems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
         <SidebarSeparator />
         <SidebarGroup>
           <SidebarGroupLabel>Device Register Maps</SidebarGroupLabel>

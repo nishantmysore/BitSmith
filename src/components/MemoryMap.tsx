@@ -1,6 +1,4 @@
-"use client";
 import React, { useMemo } from "react";
-import { scaleLinear } from "@visx/scale";
 import { motion } from "framer-motion";
 import {
   Tooltip,
@@ -20,33 +18,19 @@ interface Peripheral {
 interface MemoryMapProps {
   peripherals: Peripheral[];
   className?: string;
+  gapScale?: number; // Factor to compress gaps (default: 0.1)
+  minPeripheralWidth?: number; // Minimum width percentage (default: 5)
 }
 
 export const MemoryMap: React.FC<MemoryMapProps> = ({
   peripherals,
   className,
+  gapScale = 0.1,
+  minPeripheralWidth = 5,
 }) => {
   const sortedPeripherals = useMemo(
     () =>
       [...peripherals].sort((a, b) => (a.baseAddress < b.baseAddress ? -1 : 1)),
-    [peripherals],
-  );
-
-  const minAddress = useMemo(
-    () =>
-      peripherals.reduce(
-        (min, p) => (p.baseAddress < min ? p.baseAddress : min),
-        peripherals[0].baseAddress,
-      ),
-    [peripherals],
-  );
-
-  const maxAddress = useMemo(
-    () =>
-      peripherals.reduce((max, p) => {
-        const endAddress = p.baseAddress + p.size;
-        return endAddress > max ? endAddress : max;
-      }, peripherals[0].baseAddress + peripherals[0].size),
     [peripherals],
   );
 
@@ -61,10 +45,62 @@ export const MemoryMap: React.FC<MemoryMapProps> = ({
     return Number(value);
   };
 
-  const scale = scaleLinear({
-    domain: [safeNumber(minAddress), safeNumber(maxAddress)],
-    range: [0, 100],
-  });
+  // Improved scaling logic with gap calculation
+  const { positions, totalWidth, gaps } = useMemo(() => {
+    const positions = new Map<string, { start: number; width: number }>();
+    const gaps: { start: number; width: number }[] = [];
+    let currentPosition = 0;
+
+    // Normalize all sizes and gaps into relative proportions
+    let totalSize = 0;
+    const sizes = sortedPeripherals.map((p) => safeNumber(p.size));
+    const calculatedGaps = sortedPeripherals
+      .slice(1)
+      .map((p, i) =>
+        safeNumber(
+          p.baseAddress -
+            (sortedPeripherals[i].baseAddress + sortedPeripherals[i].size),
+        ),
+      );
+
+    totalSize =
+      sizes.reduce((a, b) => a + b, 0) +
+      calculatedGaps.reduce((a, b) => a + Math.max(b, 0), 0);
+
+    const normalizedGapScale = (gapScale * 100) / totalSize;
+
+    for (let i = 0; i < sortedPeripherals.length; i++) {
+      const peripheral = sortedPeripherals[i];
+      const peripheralSize = safeNumber(peripheral.size);
+
+      // Calculate the gap before this peripheral
+      if (i > 0) {
+        const prevPeripheral = sortedPeripherals[i - 1];
+        const gap = safeNumber(
+          peripheral.baseAddress -
+            (prevPeripheral.baseAddress + prevPeripheral.size),
+        );
+        const scaledGap = Math.log1p(Math.max(gap * normalizedGapScale, 0)); // Logarithmic scaling for gaps
+
+        if (scaledGap > 0) {
+          gaps.push({
+            start: currentPosition,
+            width: scaledGap,
+          });
+          currentPosition += scaledGap;
+        }
+      }
+
+      const width = Math.max(
+        (peripheralSize / totalSize) * 100, // Size proportion within the total map
+        minPeripheralWidth,
+      );
+      positions.set(peripheral.name, { start: currentPosition, width });
+      currentPosition += width;
+    }
+
+    return { positions, totalWidth: currentPosition, gaps };
+  }, [sortedPeripherals, gapScale, minPeripheralWidth]);
 
   const formatAddress = (address: bigint) =>
     `0x${address.toString(16).toUpperCase().padStart(8, "0")}`;
@@ -76,61 +112,34 @@ export const MemoryMap: React.FC<MemoryMapProps> = ({
     return `${bytes} B`;
   };
 
-  // Calculate gaps between peripherals
-  const gaps = useMemo(() => {
-    const gaps = [];
-    for (let i = 0; i < sortedPeripherals.length - 1; i++) {
-      const currentEnd =
-        sortedPeripherals[i].baseAddress + sortedPeripherals[i].size;
-      const nextStart = sortedPeripherals[i + 1].baseAddress;
-      if (currentEnd < nextStart) {
-        gaps.push({
-          start: currentEnd,
-          end: nextStart,
-        });
-      }
-    }
-    return gaps;
-  }, [sortedPeripherals]);
-
   return (
     <div className={cn("relative w-full h-[200px]", className)}>
       <TooltipProvider>
         <div className="relative h-20 w-full">
-          {/* Render gaps with diagonal pattern */}
-          {gaps.map((gap, index) => {
-            const start = scale(safeNumber(gap.start));
-            const end = scale(safeNumber(gap.end));
-            const width = end - start;
+          {/* Render gaps */}
+          {gaps.map((gap, index) => (
+            <div
+              key={`gap-${index}`}
+              className="absolute top-0 h-full dark:[--stripe-color-1:rgba(255,255,255,0.01)] dark:[--stripe-color-2:rgba(255,255,255,0.05)]"
+              style={{
+                left: `${(gap.start / totalWidth) * 100}%`,
+                width: `${(gap.width / totalWidth) * 100}%`,
+                background: `repeating-linear-gradient(
+                  45deg,
+                  var(--stripe-color-1, rgba(0, 0, 0, 0.03)),
+                  var(--stripe-color-1, rgba(0, 0, 0, 0.03)) 10px,
+                  var(--stripe-color-2, rgba(0, 0, 0, 0.15)) 10px,
+                  var(--stripe-color-2, rgba(0, 0, 0, 0.15)) 20px
+                )`,
+              }}
+            />
+          ))}
 
-            return (
-              <div
-                key={`gap-${index}`}
-                className="border absolute top-0 h-full dark:[--stripe-color-1:rgba(255,255,255,0.01)] dark:[--stripe-color-2:rgba(255,255,255,0.05)]"
-                style={{
-                  left: `${start}%`,
-                  width: `${width}%`,
-                  background: `repeating-linear-gradient(
-                      45deg,
-                      var(--stripe-color-1, rgba(0, 0, 0, 0.03)),
-                      var(--stripe-color-1, rgba(0, 0, 0, 0.03)) 10px,
-                      var(--stripe-color-2, rgba(0, 0, 0, 0.15)) 10px,
-                      var(--stripe-color-2, rgba(0, 0, 0, 0.15)) 20px
-                    )`,
-                }}
-              />
-            );
-          })}
-
+          {/* Render peripherals */}
           {sortedPeripherals.map((peripheral, index) => {
-            const start = scale(safeNumber(peripheral.baseAddress));
-            const end = scale(
-              safeNumber(peripheral.baseAddress + peripheral.size),
-            );
-            const width = end - start;
-
-            // Only show name if block is wide enough
-            const showName = width > 3; // Adjust threshold as needed
+            const position = positions.get(peripheral.name)!;
+            const start = (position.start / totalWidth) * 100;
+            const width = (position.width / totalWidth) * 100;
 
             return (
               <Tooltip key={peripheral.name}>
@@ -151,16 +160,11 @@ export const MemoryMap: React.FC<MemoryMapProps> = ({
                       width: `${width}%`,
                     }}
                   >
-                    {showName && (
-                      <div className="p-2 text-sm font-medium h-full flex items-center justify-center overflow-hidden">
-                        <div
-                          className="truncate max-w-[95%]"
-                          style={{ width: "100%" }}
-                        >
-                          {peripheral.name}
-                        </div>
+                    <div className="p-2 text-xs font-medium h-full flex items-center justify-center overflow-hidden">
+                      <div className="truncate" style={{ width: "100%" }}>
+                        {peripheral.name}
                       </div>
-                    )}
+                    </div>
                   </motion.div>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-sm">
@@ -189,41 +193,9 @@ export const MemoryMap: React.FC<MemoryMapProps> = ({
             );
           })}
         </div>
-
-        <div className="left-0 right-0 flex text-xs text-muted-foreground pt-2">
-          {sortedPeripherals.map((peripheral, index) => {
-            const start = scale(safeNumber(peripheral.baseAddress));
-            const end = scale(
-              safeNumber(peripheral.baseAddress + peripheral.size),
-            );
-
-            return (
-              <React.Fragment key={peripheral.name}>
-                <div
-                  className="absolute"
-                  style={{ left: `${start}%`, transform: "translateX(-50%)" }}
-                >
-                  <div className="h-4 w-[1px] bg-muted-foreground/50 mx-auto" />
-                  <div className="text-center">
-                    {formatAddress(peripheral.baseAddress)}
-                  </div>
-                </div>
-                {index === sortedPeripherals.length - 1 && (
-                  <div
-                    className="absolute"
-                    style={{ left: `${end}%`, transform: "translateX(-50%)" }}
-                  >
-                    <div className="h-4 w-[1px] bg-muted-foreground/50 mx-auto" />
-                    <div className="text-center">
-                      {formatAddress(peripheral.baseAddress + peripheral.size)}
-                    </div>
-                  </div>
-                )}
-              </React.Fragment>
-            );
-          })}
-        </div>
       </TooltipProvider>
     </div>
   );
 };
+
+export default MemoryMap;
