@@ -1,6 +1,4 @@
 "use client";
-
-import { useDevice } from "@/DeviceContext";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,8 +37,6 @@ interface DeviceEditFormProps {
 }
 
 export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
-  const { selectedDevice, setSelectedDevice, devices, refreshDevices } =
-    useDevice();
   const [deviceToDelete, setDeviceToDelete] = useState<boolean>(false);
   const { toast } = useToast();
   const [data, setData] = useState<DeviceFormData | null>(null);
@@ -87,18 +83,13 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
     }
 
     try {
-      const response = await fetch(
-        newDevice
-          ? "/api/device-upload" // Remove trailing slash
-          : `/api/devices/${selectedDevice?.id}`,
-        {
-          method: newDevice ? "POST" : "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
+      const response = await fetch("/api/device-upload", {
+        method: newDevice ? "POST" : "PUT",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify(data),
+      });
 
       console.log("Finished!");
       if (!response.ok) {
@@ -113,7 +104,6 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
         title: "Success",
         description: "Device updated successfully!",
       });
-      await refreshDevices();
       setTimeout(() => {
         window.location.reload();
       }, 1000);
@@ -219,7 +209,7 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
     // Trigger the file input click
     fileInput.click();
   };
-
+  /*
   const deleteDevice = async () => {
     try {
       const response = await fetch(`/api/devices/${selectedDevice?.id}`, {
@@ -254,52 +244,10 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
       });
     }
   };
+  */
 
   return (
     <div className="space-y-6">
-      {!newDevice && (
-        <Card className="mb-4">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold">
-              <div className="flex justify-between">
-                Select a Device
-                <Button
-                  variant="outline"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setDeviceToDelete(true);
-                  }}
-                >
-                  {" "}
-                  <Trash2 className="text-destructive" />
-                </Button>
-              </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-3">
-              <Select
-                value={selectedDevice?.id}
-                onValueChange={(deviceId) => {
-                  const device = devices.find((d) => d.id === deviceId);
-                  if (device) setSelectedDevice(device);
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select device" />
-                </SelectTrigger>
-                <SelectContent>
-                  {devices.map((device) => (
-                    <SelectItem key={device.id} value={device.id}>
-                      {device.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-        </Card>
-      )}
       <Card className="mb-4">
         <CardHeader>
           <CardTitle className="text-lg font-semibold">

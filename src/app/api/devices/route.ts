@@ -46,25 +46,17 @@ export async function GET() {
     console.log("User:", user);
     console.log("About to query devices with ownerId:", session.user.id);
 
-    // Query the devices
+    // Query only basic device information
     const devices = await prisma.device.findMany({
       where: {
         ownerId: session.user.id,
       },
-      include: {
-        peripherals: {
-          include: {
-            registers: {
-              include: {
-                fields: {
-                  include: {
-                    enumeratedValues: true,
-                  },
-                },
-              },
-            },
-          },
-        },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        defaultClockFreq: true,
+        version: true,
       },
     });
     console.log("finished query!");

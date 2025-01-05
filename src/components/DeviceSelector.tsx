@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Select,
   SelectContent,
@@ -7,12 +7,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useDevice } from "../DeviceContext";
 import { Button } from "@/components/ui/button";
 import { DeviceWithRelations } from "@/types/device";
 import { ReactNode } from "react";
 import { ClockIcon, FolderLock, GitFork } from "lucide-react";
 import { MemoryMap } from "./MemoryMap";
+import RegisterList from "./RegisterList"; // Add this at the top with other imports
 
 interface PropertyItemProps {
   icon: ReactNode;
@@ -31,15 +31,40 @@ const PropertyItem = ({ icon, label, value }: PropertyItemProps) => (
 );
 
 export const DeviceSelector = () => {
-  const {
-    selectedDevice,
-    setSelectedDevice,
-    devices,
-  }: {
-    selectedDevice: DeviceWithRelations | null;
-    setSelectedDevice: (device: DeviceWithRelations) => void;
-    devices: DeviceWithRelations[];
-  } = useDevice();
+  const [devices, setDevices] = useState<DeviceWithRelations[]>([]);
+  const [selectedDevice, setSelectedDevice] =
+    useState<DeviceWithRelations | null>(null);
+
+  // Fetch all devices on component mount
+  useEffect(() => {
+    const fetchDevices = async () => {
+      try {
+        const response = await fetch("/api/devices");
+        if (!response.ok) throw new Error("Failed to fetch devices");
+        const data = await response.json();
+        setDevices(data.devices);
+      } catch (error) {
+        console.error("Failed to fetch devices:", error);
+      }
+    };
+
+    fetchDevices();
+  }, []);
+
+  // Fetch complete device information when a device is selected
+  const handleDeviceSelection = async (value: string) => {
+    console.log("value: ", value);
+    try {
+      const response = await fetch(`/api/devices/${value}`);
+      if (!response.ok) throw new Error("Failed to fetch device details");
+      const data = await response.json();
+      setSelectedDevice(data);
+      console.log(data);
+    } catch (error) {
+      console.error("Failed to fetch device details:", error);
+      setSelectedDevice(null);
+    }
+  };
 
   const exportDevice = (): void => {
     if (selectedDevice) {
@@ -88,7 +113,6 @@ export const DeviceSelector = () => {
         })),
       };
 
-      // Export the object
       const jsonString = JSON.stringify(exportedDeviceObject, null, 2);
       const blob = new Blob([jsonString], { type: "application/json" });
       const url = URL.createObjectURL(blob);
@@ -104,22 +128,20 @@ export const DeviceSelector = () => {
   };
 
   return (
-    <div>
-      <div className="text-xl font-semibold">
+    <div className="w-full">
+      <div className="text-xl font-semibold w-full">
         <div className="flex justify-between">
           Device Selection
           <Button onClick={exportDevice}> Export to JSON </Button>
         </div>
       </div>
+
       <div className="space-y-6 mt-4">
         {/* Device Selection Section */}
         <div className="space-y-3">
           <Select
             value={selectedDevice?.id}
-            onValueChange={(deviceId) => {
-              const device = devices.find((d) => d.id === deviceId);
-              if (device) setSelectedDevice(device);
-            }}
+            onValueChange={handleDeviceSelection}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select device" />
@@ -142,45 +164,42 @@ export const DeviceSelector = () => {
         </div>
 
         {/* Configuration Controls */}
-        <div className="space-y-4">
-          {/* Base Address Input */}
-          <div className="flex flex-col space-y-2">
-            {
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                {selectedDevice?.version !== undefined && (
-                  <PropertyItem
-                    icon={<GitFork />}
-                    label="Version"
-                    value={`${selectedDevice?.version}`}
-                  />
-                )}
-                <PropertyItem
-                  icon={<ClockIcon />}
-                  label="Clock Frequency"
-                  value={`${(selectedDevice?.defaultClockFreq ?? 0) / 1e6} MHz`}
-                />
-                <PropertyItem
-                  icon={<FolderLock />}
-                  label="Public"
-                  value={`${selectedDevice?.isPublic}` ? "Yes" : "No"}
-                />
-              </div>
-            }
+        <div className="space-y-4 mt-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+            {selectedDevice?.version && (
+              <PropertyItem
+                icon={<GitFork />}
+                label="Version"
+                value={`${selectedDevice.version}`}
+              />
+            )}
+            <PropertyItem
+              icon={<ClockIcon />}
+              label="Clock Frequency"
+              value={`${(selectedDevice?.defaultClockFreq ?? 0) / 1e6} MHz`}
+            />
+            <PropertyItem
+              icon={<FolderLock />}
+              label="Public"
+              value={`${selectedDevice?.isPublic}` ? "Yes" : "No"}
+            />
           </div>
         </div>
-        {selectedDevice && selectedDevice.peripherals && (
+
+        {selectedDevice?.peripherals && (
           <div className="mt-4">
             <MemoryMap
               peripherals={selectedDevice.peripherals.map((peripheral) => ({
                 name: peripheral.name,
-                baseAddress: peripheral.baseAddress, // Already BigInt
-                size: peripheral.size, // Already BigInt
+                baseAddress: peripheral.baseAddress,
+                size: peripheral.size,
                 description: peripheral.description,
               }))}
             />
           </div>
         )}
       </div>
+      {selectedDevice && <RegisterList selectedDevice={selectedDevice} />}
     </div>
   );
 };

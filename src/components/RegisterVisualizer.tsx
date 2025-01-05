@@ -290,7 +290,7 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
                         <h3 className="text-sm font-semibold mb-2">
                           Register Properties
                         </h3>
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 min-w-0">
                           <PropertyItem
                             icon={<RulerIcon className="h-3 w-3" />}
                             label="Width"
@@ -335,7 +335,7 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
                           <h3 className="text-sm font-semibold mb-2">
                             Actions
                           </h3>
-                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 min-w-0">
                             {register.readAction && (
                               <PropertyItem
                                 icon={<BookOpenIcon className="h-3 w-3" />}

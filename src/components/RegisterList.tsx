@@ -1,7 +1,6 @@
 "use client";
 import React from "react";
 import RegisterVisualizer from "./RegisterVisualizer";
-import { useDevice } from "@/DeviceContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -9,6 +8,7 @@ import { DataTable } from "@/components/Table/DataTable";
 import { columns } from "@/components/Table/TableColumns";
 import { convertToHexString } from "@/utils/validation";
 import { Register, Field, FieldEnum } from "@prisma/client";
+import { DeviceWithRelations } from "@/types/device";
 
 interface RegisterData {
   peripheralName: string;
@@ -25,9 +25,12 @@ interface RegisterData {
   baseAddr: bigint;
 }
 
-const RegisterList = () => {
+interface RegisterListProps {
+  selectedDevice: DeviceWithRelations | null; // Assume DeviceWithRelations is your type
+}
+
+const RegisterList: React.FC<RegisterListProps> = ({ selectedDevice }) => {
   // Update the useDevice hook to use the proper type
-  const { selectedDevice } = useDevice();
 
   if (!selectedDevice) {
     return (
