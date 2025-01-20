@@ -11,8 +11,8 @@ enum RegisterAccessType {
   RO
   WO
   RW
-  RW1C
-  W1S
+  RW1
+  W1
   W1C
   RMW
   RSVD
@@ -22,8 +22,8 @@ enum FieldAccessType {
   RO
   WO
   RW
-  RW1C
-  W1S
+  RW1
+  W1
   W1C
   RMW
   RSVD

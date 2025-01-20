@@ -297,6 +297,7 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
 
       <Toaster />
 
+      {/*
       <AlertDialog
         open={deviceToDelete}
         onOpenChange={(open) => {
@@ -317,6 +318,7 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      */}
     </div>
   );
 }

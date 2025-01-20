@@ -52,7 +52,6 @@ export type PeripheralFormData = {
   description: string;
   baseAddress: bigint;
   size: bigint;
-  status: Status;
   registers?: RegisterFormData[];
 };
 
@@ -72,7 +71,6 @@ export type RegisterFormData = {
   arraySize?: number;
   arrayStride?: bigint;
   namePattern?: string;
-  status: Status;
   fields?: FieldFormData[];
 };
 
@@ -91,7 +89,6 @@ export type FieldFormData = {
   readAction?: string;
   writeAction?: string;
   access: FieldAccessType;
-  status: Status;
   enumeratedValues?: FieldEnumFormData[];
 };
 
@@ -100,7 +97,6 @@ export type FieldEnumFormData = {
   name: string;
   value: number;
   description: string;
-  status: Status;
 };
 
 export const FieldEnumValidateSchema: ZodType<FieldEnumFormData> = z.object({
@@ -111,9 +107,8 @@ export const FieldEnumValidateSchema: ZodType<FieldEnumFormData> = z.object({
     .max(100, { message: "FieldEnum name is too long" }),
   description: z
     .string({ required_error: "FieldEnum description is required" })
-    .max(2000, { message: "FieldEnum description is too long" }),
+    .max(5000, { message: "FieldEnum description is too long" }),
   value: z.coerce.number().nonnegative(),
-  status: z.enum(STATUS_VALUES),
 });
 
 export const FieldValidateSchema: ZodType<FieldFormData> = z.object({
@@ -124,13 +119,12 @@ export const FieldValidateSchema: ZodType<FieldFormData> = z.object({
     .max(100, { message: "Field name is too long" }),
   description: z
     .string({ required_error: "Field description is required" })
-    .max(2000, { message: "Field description is too long" }),
+    .max(5000, { message: "Field description is too long" }),
   bitOffset: z.coerce.number().nonnegative(),
   bitWidth: z.coerce.number().nonnegative(),
   readAction: z.string().optional(),
   writeAction: z.string().optional(),
   access: z.nativeEnum(FieldAccessType),
-  status: z.enum(STATUS_VALUES),
   enumeratedValues: z.array(FieldEnumValidateSchema).optional(),
 });
 
@@ -143,7 +137,7 @@ export const RegisterValidateSchema: ZodType<RegisterFormData> = z.object({
   description: z
     .string({ required_error: "Register description is required" })
     .min(1, { message: "Register description is too short" })
-    .max(2000, { message: "Register description is too long" }),
+    .max(5000, { message: "Register description is too long" }),
   width: z.coerce.number().positive(),
   addressOffset: z.coerce.bigint().nonnegative(),
   resetValue: z.coerce.bigint().nonnegative(),
@@ -156,7 +150,6 @@ export const RegisterValidateSchema: ZodType<RegisterFormData> = z.object({
   arraySize: z.coerce.number().positive().optional(),
   arrayStride: z.coerce.bigint().nonnegative().optional(),
   namePattern: z.string().optional(),
-  status: z.enum(STATUS_VALUES),
   fields: z.array(FieldValidateSchema).optional(),
 });
 /*
@@ -225,10 +218,9 @@ export const PeripheralValidateSchema: ZodType<PeripheralFormData> = z.object({
   description: z
     .string({ required_error: "Register description is required" })
     .min(1, { message: "Register description is too short" })
-    .max(2000, { message: "Register description is too long" }),
+    .max(5000, { message: "Register description is too long" }),
   baseAddress: z.coerce.bigint().nonnegative(),
   size: z.coerce.bigint().nonnegative(),
-  status: z.enum(STATUS_VALUES),
   registers: z.array(RegisterValidateSchema).optional(),
 });
 
@@ -240,7 +232,7 @@ export const DeviceValidateSchema: ZodType<DeviceFormData> = z.object({
   description: z
     .string({ required_error: "Device description is required" })
     .min(1, { message: "Device description is too short" })
-    .max(2000, { message: "Device description is too long" }),
+    .max(5000, { message: "Device description is too long" }),
   isPublic: z.boolean({ required_error: "isPublic is required" }),
   littleEndian: z.boolean({ required_error: "littleEndian is required" }),
   defaultClockFreq: z.number().optional(),
