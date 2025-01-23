@@ -1,5 +1,5 @@
 "use client";
-import { Home, Pencil, Upload } from "lucide-react";
+import { Home, Pencil, Upload, Search } from "lucide-react";
 import Link from "next/link";
 import {
   Sidebar,
@@ -40,6 +40,11 @@ const deviceitems = [
     title: "Upload New Device",
     url: "/upload",
     icon: Upload,
+  },
+  {
+    title: "Public Devices",
+    url: "/public",
+    icon: Search,
   },
 ];
 
