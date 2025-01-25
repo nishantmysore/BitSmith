@@ -121,7 +121,7 @@ const GapComponent = ({
         width: `${width}%`,
       }}
     >
-      <div className="font-medium text-xs text-gray-500">
+      <div className="font-medium text-xs text-white">
         {gap.end === gap.start ? gap.end : `${gap.end}:${gap.start}`}
       </div>
     </div>

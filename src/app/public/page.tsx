@@ -8,20 +8,13 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Plus } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { debounce } from "lodash";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
+import { Toaster } from "@/components/ui/toaster";
 
 interface Device {
   id: string;
@@ -34,10 +27,8 @@ export default function PublicDevicesPage() {
   const [devices, setDevices] = useState<Device[]>([]);
   const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedDevice, setSelectedDevice] = useState<Device | null>(null);
-  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
-  const [showErrorDialog, setShowErrorDialog] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [copyingDevices, setCopyingDevices] = useState<Set<string>>(new Set());
+  const { toast } = useToast();
 
   const fetchDevices = async (searchTerm: string) => {
     try {
@@ -46,6 +37,11 @@ export default function PublicDevicesPage() {
       setDevices(data);
     } catch (error) {
       console.error("Failed to fetch devices:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to fetch devices. Please try again later.",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -63,8 +59,7 @@ export default function PublicDevicesPage() {
   }, [search]);
 
   const copyDevice = async (device: Device) => {
-    setSelectedDevice(device);
-    setIsProcessing(true);
+    setCopyingDevices((prev) => new Set(prev).add(device.id));
 
     try {
       const response = await fetch("/api/devices/copy", {
@@ -79,12 +74,24 @@ export default function PublicDevicesPage() {
         throw new Error("Failed to copy device");
       }
 
-      setShowSuccessDialog(true);
+      console.log("success!!!");
+      toast({
+        title: "Success",
+        description: `${device.name} has been added to your devices.`,
+      });
     } catch (error) {
       console.error("Error copying device:", error);
-      setShowErrorDialog(true);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: `Failed to copy ${device.name}. Please try again later.`,
+      });
     } finally {
-      setIsProcessing(false);
+      setCopyingDevices((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(device.id);
+        return newSet;
+      });
     }
   };
 
@@ -107,7 +114,9 @@ export default function PublicDevicesPage() {
         </div>
 
         {isLoading ? (
-          <div className="text-center">Loading...</div>
+          <div className="flex items-center justify-center h-32">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {devices.map((device) => (
@@ -133,51 +142,21 @@ export default function PublicDevicesPage() {
                     className="ml-auto hover:bg-secondary"
                     title="Add to my devices"
                     onClick={() => copyDevice(device)}
-                    disabled={isProcessing}
+                    disabled={copyingDevices.has(device.id)}
                   >
-                    <Plus className="h-4 w-4" />
+                    {copyingDevices.has(device.id) ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Plus className="h-4 w-4" />
+                    )}
                   </Button>
                 </CardHeader>
               </Card>
             ))}
           </div>
         )}
-        <AlertDialog
-          open={showSuccessDialog}
-          onOpenChange={setShowSuccessDialog}
-        >
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Device Copied Successfully</AlertDialogTitle>
-              <AlertDialogDescription>
-                {selectedDevice?.name} has been added to your devices.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogAction onClick={() => setShowSuccessDialog(false)}>
-                OK
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-
-        {/* Error Dialog */}
-        <AlertDialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Error</AlertDialogTitle>
-              <AlertDialogDescription>
-                Failed to copy {selectedDevice?.name}. Please try again later.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogAction onClick={() => setShowErrorDialog(false)}>
-                OK
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
       </div>
+      <Toaster />
     </SidebarProvider>
   );
 }

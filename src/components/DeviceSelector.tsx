@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { DeviceWithRelations } from "@/types/device";
 import { ReactNode } from "react";
-import { ClockIcon, FolderLock, GitFork } from "lucide-react";
+import { ClockIcon, ArrowLeftRight, GitFork } from "lucide-react";
 import { MemoryMap } from "./MemoryMap";
 import RegisterList from "./RegisterList"; // Add this at the top with other imports
 
@@ -173,16 +173,21 @@ export const DeviceSelector = () => {
                 value={`${selectedDevice.version}`}
               />
             )}
-            <PropertyItem
-              icon={<ClockIcon />}
-              label="Clock Frequency"
-              value={`${(selectedDevice?.defaultClockFreq ?? 0) / 1e6} MHz`}
-            />
-            <PropertyItem
-              icon={<FolderLock />}
-              label="Public"
-              value={`${selectedDevice?.isPublic}` ? "Yes" : "No"}
-            />
+            {selectedDevice?.defaultClockFreq !== undefined &&
+              selectedDevice?.defaultClockFreq !== 0 && (
+                <PropertyItem
+                  icon={<ClockIcon />}
+                  label="Clock Frequency"
+                  value={`${(selectedDevice?.defaultClockFreq ?? 0) / 1e6} MHz`}
+                />
+              )}
+            {selectedDevice?.littleEndian && (
+              <PropertyItem
+                icon={<ArrowLeftRight />}
+                label="Endianness"
+                value={`${selectedDevice?.littleEndian}` ? "Little" : "Big"}
+              />
+            )}
           </div>
         </div>
 

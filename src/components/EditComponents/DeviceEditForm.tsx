@@ -1,9 +1,14 @@
 "use client";
+import ReactJsonView from "@microlink/react-json-view";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   DeviceFormData,
   DeviceValidateSchema,
+  RegisterValidateSchema,
+  FieldValidateSchema,
+  PeripheralValidateSchema,
+  FieldEnumValidateSchema,
   FieldFormData,
   FieldEnumFormData,
   PeripheralFormData,
@@ -28,6 +33,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
+import { SchemaDoc } from "./SchemaDocs";
 
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
@@ -36,10 +42,52 @@ interface DeviceEditFormProps {
   newDevice?: boolean;
 }
 
+const lightTheme = {
+  base00: "#ffffff",
+  base01: "#e5e5e5",
+  base02: "#f3f3f3",
+  base03: "#767676",
+  base04: "#1a1a1a",
+  base05: "#0a0a0a",
+  base06: "#fafafa",
+  base07: "#f3f3f3",
+  base08: "#d62424",
+  base09: "#ff9e45",
+  base0A: "#f1c15a",
+  base0B: "#28a745",
+  base0C: "#165478",
+  base0D: "#1a1a1a",
+  base0E: "#d76262",
+  base0F: "#242424",
+};
+
+const darkTheme = {
+  base00: "#0a0a0a",
+  base01: "#282828",
+  base02: "#d5d5d5",
+  base03: "#a3a3a3",
+  base04: "#191919",
+  base05: "#fafafa",
+  base06: "#fafafa",
+  base07: "#d5d5d5",
+  base08: "#4d0f0f",
+  base09: "#dd9140",
+  base0A: "#9e6fd9",
+  base0B: "#2b8262",
+  base0C: "#1e52b4",
+  base0D: "#283333",
+  base0E: "#982a64",
+  base0F: "#4c0d0d",
+};
+
 export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
   const [deviceToDelete, setDeviceToDelete] = useState<boolean>(false);
   const { toast } = useToast();
   const [data, setData] = useState<DeviceFormData | null>(null);
+
+  const handleJsonChange = (updatedSrc: DeviceFormData) => {
+    setData(updatedSrc);
+  };
 
   interface ValidationErrorDetail {
     path: (string | number)[];
@@ -261,8 +309,24 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
             </div>
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex justify-center">
-          <Button onClick={onSubmit}> Upload </Button>
+        <CardContent>
+          <div className="w-full">
+            {/* JsonView takes the full width */}
+            <ReactJsonView
+              src={data ?? {}}
+              theme={darkTheme}
+              onEdit={({ updated_src }) => handleJsonChange(updated_src)}
+              onAdd={({ updated_src }) => handleJsonChange(updated_src)}
+              onDelete={({ updated_src }) => handleJsonChange(updated_src)}
+              name={"Device"}
+              collapseStringsAfterLength={100}
+              collapsed={4}
+            />
+          </div>
+          {/* Button below the JsonView */}
+          <div className="flex justify-center mt-4">
+            <Button onClick={onSubmit}>Upload</Button>
+          </div>
         </CardContent>
       </Card>
 
@@ -294,7 +358,16 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
           </CardContent>
         </Card>
       )}
-
+      <div className="space-y-8">
+        <SchemaDoc schema={DeviceValidateSchema} title="Device Schema" />
+        <SchemaDoc
+          schema={PeripheralValidateSchema}
+          title="Peripheral Schema"
+        />
+        <SchemaDoc schema={RegisterValidateSchema} title="Register Schema" />
+        <SchemaDoc schema={FieldValidateSchema} title="Field Schema" />
+        <SchemaDoc schema={FieldEnumValidateSchema} title="Field Enum Schema" />
+      </div>
       <Toaster />
 
       {/*
