@@ -2,6 +2,8 @@
 import ReactJsonView from "@microlink/react-json-view";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+
+import { useTheme } from "next-themes";
 import {
   DeviceFormData,
   DeviceValidateSchema,
@@ -9,29 +11,8 @@ import {
   FieldValidateSchema,
   PeripheralValidateSchema,
   FieldEnumValidateSchema,
-  FieldFormData,
-  FieldEnumFormData,
-  PeripheralFormData,
-  RegisterFormData,
 } from "@/types/validation";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Trash2, Upload } from "lucide-react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { Upload } from "lucide-react";
 import { useState } from "react";
 import { SchemaDoc } from "./SchemaDocs";
 
@@ -62,28 +43,28 @@ const lightTheme = {
 };
 
 const darkTheme = {
-  base00: "#0a0a0a",
-  base01: "#282828",
-  base02: "#d5d5d5",
-  base03: "#a3a3a3",
-  base04: "#191919",
-  base05: "#fafafa",
-  base06: "#fafafa",
-  base07: "#d5d5d5",
-  base08: "#4d0f0f",
-  base09: "#dd9140",
-  base0A: "#9e6fd9",
-  base0B: "#2b8262",
-  base0C: "#1e52b4",
-  base0D: "#283333",
-  base0E: "#982a64",
-  base0F: "#4c0d0d",
+  base00: "#09090b", //background
+  base01: "#09090b", //card
+  base02: "#FFFFFF", //muted
+  base03: "#fafafa", //secondary
+  base04: "#fafafa", //border
+  base05: "#fafafa", //foreground
+  base06: "#fafafa", //primary
+  base07: "#fafafa", //brightest-foreground
+  base08: "#7f1d1d", //destructive
+  base09: "#27272a", //accent
+  base0A: "#FFFFFF",
+  base0B: "#FFFFFF",
+  base0C: "#FFFFFF",
+  base0D: "#FFFFFF",
+  base0E: "#e23670",
+  base0F: "#FFFFFF",
 };
 
 export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
-  const [deviceToDelete, setDeviceToDelete] = useState<boolean>(false);
   const { toast } = useToast();
   const [data, setData] = useState<DeviceFormData | null>(null);
+  const { theme } = useTheme();
 
   const handleJsonChange = (updatedSrc: DeviceFormData) => {
     setData(updatedSrc);
@@ -121,6 +102,23 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
   };
 
   const onSubmit = async () => {
+    console.log(data);
+
+    const result = DeviceValidateSchema.safeParse(data);
+
+    if (!result.success) {
+      const formattedErrors = result.error.issues.map((issue) => ({
+        path: issue.path,
+        message: issue.message,
+        invalidValue:
+          issue.path.length > 0
+            ? issue.path.reduce((obj, key) => obj?.[key], data)
+            : undefined,
+        friendlyPath: getFriendlyErrorPath(issue.path, data),
+      }));
+      console.log(formattedErrors);
+      setValidationErrors(formattedErrors);
+    }
     if (!data) {
       toast({
         title: "Error",
@@ -190,30 +188,6 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
         const text = await file.text();
         const jsonData = JSON.parse(text);
 
-        jsonData.peripherals = jsonData.peripherals.map(
-          (peripheral: PeripheralFormData) => ({
-            ...peripheral,
-            status: "added",
-            registers:
-              peripheral.registers?.map((register: RegisterFormData) => ({
-                ...register,
-                status: "added",
-                fields:
-                  register.fields?.map((field: FieldFormData) => ({
-                    ...field,
-                    status: "added",
-                    enumeratedValues:
-                      field.enumeratedValues?.map(
-                        (fieldEnum: FieldEnumFormData) => ({
-                          ...fieldEnum,
-                          status: "added",
-                        }),
-                      ) || [],
-                  })) || [],
-              })) || [],
-          }),
-        );
-
         // Validate the JSON data against schema
         const result = DeviceValidateSchema.safeParse(jsonData);
 
@@ -227,6 +201,7 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
                 : undefined,
             friendlyPath: getFriendlyErrorPath(issue.path, jsonData),
           }));
+          console.log(formattedErrors);
           setValidationErrors(formattedErrors);
           toast({
             title: "Invalid configuration",
@@ -314,10 +289,21 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
             {/* JsonView takes the full width */}
             <ReactJsonView
               src={data ?? {}}
-              theme={darkTheme}
-              onEdit={({ updated_src }) => handleJsonChange(updated_src)}
-              onAdd={({ updated_src }) => handleJsonChange(updated_src)}
-              onDelete={({ updated_src }) => handleJsonChange(updated_src)}
+              theme={
+                theme === "dark" ? "shapeshifter" : "shapeshifter:inverted"
+              }
+              style={{
+                backgroundColor: theme === "dark" ? "#09090b" : "#ffffff",
+              }}
+              onEdit={({ updated_src }) =>
+                handleJsonChange(updated_src as DeviceFormData)
+              }
+              onAdd={({ updated_src }) =>
+                handleJsonChange(updated_src as DeviceFormData)
+              }
+              onDelete={({ updated_src }) =>
+                handleJsonChange(updated_src as DeviceFormData)
+              }
               name={"Device"}
               collapseStringsAfterLength={100}
               collapsed={4}
@@ -369,29 +355,6 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
         <SchemaDoc schema={FieldEnumValidateSchema} title="Field Enum Schema" />
       </div>
       <Toaster />
-
-      {/*
-      <AlertDialog
-        open={deviceToDelete}
-        onOpenChange={(open) => {
-          if (!open) setDeviceToDelete(false);
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Device</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this device? This action is
-              irreversible!
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={deleteDevice}>Delete</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-      */}
     </div>
   );
 }
