@@ -7,7 +7,15 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { z } from "zod";
-import { cn } from "@/lib/utils";
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface SchemaDocProps {
   schema: z.ZodType<any>;
@@ -35,38 +43,61 @@ function SchemaField({
   depth?: number;
 }) {
   if (schema instanceof z.ZodObject) {
-    const shape = schema._def.shape();
+    const shape = schema._def.shape() as { [key: string]: z.ZodType<any> };
 
     return (
       <div className="space-y-4">
-        {Object.entries(shape).map(([key, field]) => (
-          <div key={key} className={cn("pl-4", depth > 0 && "border-l")}>
-            <div className="flex items-center gap-2">
-              <span className="font-medium">{key}</span>
-              <FieldBadges field={field} />
-            </div>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Field</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Validation</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {Object.entries(shape)
+              .filter(([key]) => key !== "db_id")
+              .map(([key, field]) => (
+                <TableRow key={key}>
+                  <TableCell className="font-medium">{key}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <FieldBadges field={field} />
 
-            {field instanceof z.ZodObject && (
-              <Accordion type="single" collapsible className="mt-2">
-                <AccordionItem value="item-1">
-                  <AccordionTrigger>View Object Schema</AccordionTrigger>
-                  <AccordionContent>
-                    <SchemaField schema={field} depth={depth + 1} />
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            )}
+                      {field instanceof z.ZodObject && (
+                        <Accordion type="single" collapsible>
+                          <AccordionItem value="item-1">
+                            <AccordionTrigger>
+                              View Object Schema
+                            </AccordionTrigger>
+                            <AccordionContent>
+                              <SchemaField schema={field} depth={depth + 1} />
+                            </AccordionContent>
+                          </AccordionItem>
+                        </Accordion>
+                      )}
 
-            {field instanceof z.ZodArray && (
-              <div className="mt-2 pl-4">
-                <span className="text-sm text-muted-foreground">Array of:</span>
-                <SchemaField schema={field.element} depth={depth + 1} />
-              </div>
-            )}
-
-            <FieldValidation field={field} />
-          </div>
-        ))}
+                      {field instanceof z.ZodArray && (
+                        <div>
+                          <span className="text-sm text-muted-foreground">
+                            Array of:
+                          </span>
+                          <SchemaField
+                            schema={field.element}
+                            depth={depth + 1}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <FieldValidation field={field} />
+                  </TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
       </div>
     );
   }
@@ -100,6 +131,12 @@ function FieldValidation({ field }: { field: z.ZodType<any> }) {
 }
 
 function getFieldType(field: z.ZodType<any>): string {
+  // First, handle optional types by unwrapping them
+  if (field instanceof z.ZodOptional) {
+    return getFieldType(field.unwrap());
+  }
+
+  // Then handle the regular types
   if (field instanceof z.ZodString) return "string";
   if (field instanceof z.ZodNumber) return "number";
   if (field instanceof z.ZodBigInt) return "bigint";
@@ -115,14 +152,23 @@ function getValidationChecks(field: z.ZodType<any>): string[] {
   const checks: string[] = [];
 
   if (field instanceof z.ZodString) {
-    if (field.minLength !== null) checks.push(`Min length: ${field.minLength}`);
-    if (field.maxLength !== null) checks.push(`Max length: ${field.maxLength}`);
+    const def = field._def;
+    if (def.checks) {
+      def.checks.forEach((check: any) => {
+        if (check.kind === "min") checks.push(`Min length: ${check.value}`);
+        if (check.kind === "max") checks.push(`Max length: ${check.value}`);
+      });
+    }
   }
 
   if (field instanceof z.ZodNumber) {
     const def = field._def;
-    if (def.minimum !== undefined) checks.push(`Min: ${def.minimum}`);
-    if (def.maximum !== undefined) checks.push(`Max: ${def.maximum}`);
+    if (def.checks) {
+      def.checks.forEach((check: any) => {
+        if (check.kind === "min") checks.push(`Min: ${check.value}`);
+        if (check.kind === "max") checks.push(`Max: ${check.value}`);
+      });
+    }
   }
 
   return checks;

@@ -14,6 +14,8 @@ import { ClockIcon, ArrowLeftRight, GitFork } from "lucide-react";
 import { MemoryMap } from "./MemoryMap";
 import RegisterList from "./RegisterList"; // Add this at the top with other imports
 
+const SELECTED_DEVICE_KEY = "selectedDeviceId";
+
 interface PropertyItemProps {
   icon: ReactNode;
   label: string;
@@ -43,6 +45,11 @@ export const DeviceSelector = () => {
         if (!response.ok) throw new Error("Failed to fetch devices");
         const data = await response.json();
         setDevices(data.devices);
+        // Check for saved device ID
+        const savedDeviceId = localStorage.getItem(SELECTED_DEVICE_KEY);
+        if (savedDeviceId) {
+          handleDeviceSelection(savedDeviceId);
+        }
       } catch (error) {
         console.error("Failed to fetch devices:", error);
       }
@@ -53,15 +60,16 @@ export const DeviceSelector = () => {
 
   // Fetch complete device information when a device is selected
   const handleDeviceSelection = async (value: string) => {
-    console.log("value: ", value);
     try {
       const response = await fetch(`/api/devices/${value}`);
       if (!response.ok) throw new Error("Failed to fetch device details");
       const data = await response.json();
       setSelectedDevice(data);
+      localStorage.setItem(SELECTED_DEVICE_KEY, value);
       console.log(data);
     } catch (error) {
       console.error("Failed to fetch device details:", error);
+      localStorage.removeItem(SELECTED_DEVICE_KEY);
       setSelectedDevice(null);
     }
   };

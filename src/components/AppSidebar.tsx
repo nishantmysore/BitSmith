@@ -1,5 +1,5 @@
 "use client";
-import { Home, Pencil, Upload, Search } from "lucide-react";
+import { Home, Pencil, Upload, Search, BookOpen } from "lucide-react";
 import Link from "next/link";
 import {
   Sidebar,
@@ -25,26 +25,29 @@ import {
 import { ModeToggle } from "@/components/ModeToggle";
 import { clearDevicesCache } from "@/utils/cache";
 
-const deviceitems = [
+const deviceLibraryItems = [
   {
     title: "View Device Maps",
     url: "/",
     icon: Home,
   },
   {
-    title: "Edit Devices",
-    url: "/edit",
-    icon: Pencil,
+    title: "Public Devices",
+    url: "/public",
+    icon: Search,
   },
+];
+
+const deviceManagementItems = [
   {
     title: "Upload New Device",
     url: "/upload",
     icon: Upload,
   },
   {
-    title: "Public Devices",
-    url: "/public",
-    icon: Search,
+    title: "Device Schema",
+    url: "/schema",
+    icon: BookOpen,
   },
 ];
 
@@ -61,10 +64,28 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarSeparator />
         <SidebarGroup>
-          <SidebarGroupLabel>Device Register Maps</SidebarGroupLabel>
+          <SidebarGroupLabel>Device Library</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {deviceitems.map((item) => (
+              {deviceLibraryItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <Link href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Device Management</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {deviceManagementItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <Link href={item.url}>

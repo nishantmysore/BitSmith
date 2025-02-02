@@ -23,44 +23,6 @@ interface DeviceEditFormProps {
   newDevice?: boolean;
 }
 
-const lightTheme = {
-  base00: "#ffffff",
-  base01: "#e5e5e5",
-  base02: "#f3f3f3",
-  base03: "#767676",
-  base04: "#1a1a1a",
-  base05: "#0a0a0a",
-  base06: "#fafafa",
-  base07: "#f3f3f3",
-  base08: "#d62424",
-  base09: "#ff9e45",
-  base0A: "#f1c15a",
-  base0B: "#28a745",
-  base0C: "#165478",
-  base0D: "#1a1a1a",
-  base0E: "#d76262",
-  base0F: "#242424",
-};
-
-const darkTheme = {
-  base00: "#09090b", //background
-  base01: "#09090b", //card
-  base02: "#FFFFFF", //muted
-  base03: "#fafafa", //secondary
-  base04: "#fafafa", //border
-  base05: "#fafafa", //foreground
-  base06: "#fafafa", //primary
-  base07: "#fafafa", //brightest-foreground
-  base08: "#7f1d1d", //destructive
-  base09: "#27272a", //accent
-  base0A: "#FFFFFF",
-  base0B: "#FFFFFF",
-  base0C: "#FFFFFF",
-  base0D: "#FFFFFF",
-  base0E: "#e23670",
-  base0F: "#FFFFFF",
-};
-
 export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
   const { toast } = useToast();
   const [data, setData] = useState<DeviceFormData | null>(null);
@@ -232,6 +194,7 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
     // Trigger the file input click
     fileInput.click();
   };
+
   /*
   const deleteDevice = async () => {
     try {
@@ -344,16 +307,6 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
           </CardContent>
         </Card>
       )}
-      <div className="space-y-8">
-        <SchemaDoc schema={DeviceValidateSchema} title="Device Schema" />
-        <SchemaDoc
-          schema={PeripheralValidateSchema}
-          title="Peripheral Schema"
-        />
-        <SchemaDoc schema={RegisterValidateSchema} title="Register Schema" />
-        <SchemaDoc schema={FieldValidateSchema} title="Field Schema" />
-        <SchemaDoc schema={FieldEnumValidateSchema} title="Field Enum Schema" />
-      </div>
       <Toaster />
     </div>
   );

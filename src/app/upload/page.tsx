@@ -6,7 +6,6 @@ import { AppSidebar } from "@/components/AppSidebar";
 
 export default async function Page() {
   const user = await getCurrentUser();
-  const schema = {};
 
   if (!user) {
     redirect("/login");
