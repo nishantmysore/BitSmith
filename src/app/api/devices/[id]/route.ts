@@ -18,7 +18,6 @@ const transformBigInts = (data: any): any => {
   return data;
 };
 
-// This should be in app/api/devices/[id]/route.ts
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } },
@@ -70,6 +69,55 @@ export async function GET(
     console.error("Failed to fetch device:", error);
     return NextResponse.json(
       { error: "Failed to fetch device" },
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } },
+) {
+  try {
+    console.log("Received DELETE request for device ID:", params.id);
+
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 },
+      );
+    }
+
+    // First verify the device exists and belongs to the user
+    const device = await prisma.device.findFirst({
+      where: {
+        id: params.id,
+        ownerId: session.user.id,
+      },
+    });
+
+    if (!device) {
+      console.log("Device not found or unauthorized for ID:", params.id);
+      return NextResponse.json(
+        { error: "Device not found or unauthorized" },
+        { status: 404 },
+      );
+    }
+
+    // Delete the device and all related data
+    await prisma.device.delete({
+      where: {
+        id: params.id,
+      },
+    });
+
+    console.log("Successfully deleted device:", params.id);
+    return NextResponse.json({ message: "Device deleted successfully" });
+  } catch (error) {
+    console.error("Failed to delete device:", error);
+    return NextResponse.json(
+      { error: "Failed to delete device" },
       { status: 500 },
     );
   }

@@ -1,5 +1,5 @@
 "use client";
-import { Home, Pencil, Upload, Search, BookOpen } from "lucide-react";
+import { Home, Settings, Upload, Search, BookOpen } from "lucide-react";
 import Link from "next/link";
 import {
   Sidebar,
@@ -39,6 +39,11 @@ const deviceLibraryItems = [
 ];
 
 const deviceManagementItems = [
+  {
+    title: "My Devices",
+    url: "/mydevices",
+    icon: Settings,
+  },
   {
     title: "Upload New Device",
     url: "/upload",

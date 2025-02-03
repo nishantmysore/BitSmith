@@ -63,7 +63,6 @@ export async function GET() {
 
     // Transform BigInts before sending response
     const transformedDevices = transformBigInts(devices);
-    console.log(transformedDevices);
 
     return NextResponse.json({ devices: transformedDevices });
   } catch (error) {

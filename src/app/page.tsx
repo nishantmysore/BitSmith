@@ -3,6 +3,7 @@ import { ClientContent } from "./ClientContent";
 import { getCurrentUser } from "@/lib/session";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
+import { ScrollToTop } from "@/components/ScrollToTop";
 
 export default async function Home() {
   const user = await getCurrentUser();
@@ -16,8 +17,8 @@ export default async function Home() {
       <SidebarProvider>
         <AppSidebar />
         <SidebarTrigger />
-
         <ClientContent />
+        <ScrollToTop />
       </SidebarProvider>
     </main>
   );

@@ -2,7 +2,7 @@ import { getCurrentUser } from "@/lib/session";
 import { redirect } from "next/navigation";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
-import { SchemaDoc } from "@/components/EditComponents/SchemaDocs";
+import { SchemaDoc } from "@/components/SchemaDocs";
 import {
   DeviceValidateSchema,
   PeripheralValidateSchema,

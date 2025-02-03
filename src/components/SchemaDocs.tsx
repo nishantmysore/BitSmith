@@ -52,7 +52,7 @@ function SchemaField({
             <TableRow>
               <TableHead>Field</TableHead>
               <TableHead>Type</TableHead>
-              <TableHead>Validation</TableHead>
+              <TableHead>Constraints</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
