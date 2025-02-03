@@ -15,6 +15,17 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface Device {
   id: string;
@@ -27,7 +38,8 @@ export default function PublicDevicesPage() {
   const [devices, setDevices] = useState<Device[]>([]);
   const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [copyingDevices, setCopyingDevices] = useState<Set<string>>(new Set());
+
+  const [deviceToDelete, setDeviceToDelete] = useState<Device | null>(null);
   const { toast } = useToast();
 
   const fetchDevices = async (searchTerm: string) => {
@@ -58,9 +70,15 @@ export default function PublicDevicesPage() {
     };
   }, [search]);
 
-  const deleteDevice = async (device: Device) => {
+  const handleDeleteClick = (device: Device) => {
+    setDeviceToDelete(device);
+  };
+
+  const confirmDelete = async () => {
+    if (!deviceToDelete) return;
+
     try {
-      const response = await fetch(`/api/devices/${device?.id}`, {
+      const response = await fetch(`/api/devices/${deviceToDelete.id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -86,6 +104,8 @@ export default function PublicDevicesPage() {
         description: "Could not delete Device: " + error,
         variant: "destructive",
       });
+    } finally {
+      setDeviceToDelete(null);
     }
   };
 
@@ -130,20 +150,41 @@ export default function PublicDevicesPage() {
                       )}
                     </CardDescription>
                   </div>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="ml-auto hover:bg-secondary"
-                    title="Add to my devices"
-                    onClick={() => deleteDevice(device)}
-                    disabled={copyingDevices.has(device.id)}
+
+                  <AlertDialog
+                    open={!!deviceToDelete}
+                    onOpenChange={(open) => !open && setDeviceToDelete(null)}
                   >
-                    {copyingDevices.has(device.id) ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Trash className="h-4 w-4" color="red" />
-                    )}
-                  </Button>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="ml-auto hover:bg-secondary"
+                        title="Delete Device"
+                        onClick={() => handleDeleteClick(device)}
+                      >
+                        <Trash className="h-4 w-4" color="red" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          Are you absolutely sure?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently
+                          delete the device "{deviceToDelete?.name}" and remove
+                          its data from our servers.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={confirmDelete}>
+                          Continue
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </CardHeader>
               </Card>
             ))}
