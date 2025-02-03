@@ -74,7 +74,6 @@ export default function PublicDevicesPage() {
         throw new Error("Failed to copy device");
       }
 
-      console.log("success!!!");
       toast({
         title: "Success",
         description: `${device.name} has been added to your devices.`,

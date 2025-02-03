@@ -8,7 +8,7 @@ const transformBigInts = (data: any): any => {
   if (data === null || data === undefined) return data;
 
   if (typeof data === "bigint") {
-    return Number(data); // or data.toString() if you prefer string representation
+    return Number(data);
   }
 
   if (Array.isArray(data)) {
@@ -31,7 +31,6 @@ export class DeviceService {
   static async getAllDevices() {
     try {
       const session = await getServerSession(authOptions);
-      console.log("Session:", session);
 
       if (!session?.user?.email) {
         return NextResponse.json(
@@ -39,14 +38,6 @@ export class DeviceService {
           { status: 401 },
         );
       }
-
-      // Get the current user
-      const user = await prisma.user.findUnique({
-        where: { id: session.user.id },
-      });
-      console.log("User:", user);
-
-      console.log("About to query devices with ownerId:", session.user.id);
 
       // Now try the full query
       try {
@@ -70,12 +61,10 @@ export class DeviceService {
             },
           },
         });
-        console.log("finished it!");
 
         // Transform BigInts before sending response
         const transformedDevices = transformBigInts(devices);
 
-        console.log(transformedDevices);
         return NextResponse.json({ devices: transformedDevices });
       } catch (e) {
         console.error("Error in full devices query:", e);

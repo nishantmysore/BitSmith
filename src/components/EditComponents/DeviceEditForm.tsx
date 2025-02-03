@@ -4,17 +4,9 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 import { useTheme } from "next-themes";
-import {
-  DeviceFormData,
-  DeviceValidateSchema,
-  RegisterValidateSchema,
-  FieldValidateSchema,
-  PeripheralValidateSchema,
-  FieldEnumValidateSchema,
-} from "@/types/validation";
+import { DeviceFormData, DeviceValidateSchema } from "@/types/validation";
 import { Upload } from "lucide-react";
 import { useState } from "react";
-import { SchemaDoc } from "./SchemaDocs";
 
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
@@ -64,8 +56,6 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
   };
 
   const onSubmit = async () => {
-    console.log(data);
-
     const result = DeviceValidateSchema.safeParse(data);
 
     if (!result.success) {
@@ -78,7 +68,6 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
             : undefined,
         friendlyPath: getFriendlyErrorPath(issue.path, data),
       }));
-      console.log(formattedErrors);
       setValidationErrors(formattedErrors);
     }
     if (!data) {
@@ -99,14 +88,10 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
         body: JSON.stringify(data),
       });
 
-      console.log("Finished!");
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to update device");
       }
-
-      console.log("Finished!");
-      const responseData = await response.json();
 
       toast({
         title: "Success",
@@ -163,7 +148,6 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
                 : undefined,
             friendlyPath: getFriendlyErrorPath(issue.path, jsonData),
           }));
-          console.log(formattedErrors);
           setValidationErrors(formattedErrors);
           toast({
             title: "Invalid configuration",
@@ -174,7 +158,6 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
         }
 
         setValidationErrors([]);
-        console.log(jsonData);
         setData(jsonData);
 
         toast({
@@ -187,50 +170,12 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
           description: "Failed to parse the JSON file",
           variant: "destructive",
         });
-        //console.error("Error processing file: ", error.stack);
       }
     };
 
     // Trigger the file input click
     fileInput.click();
   };
-
-  /*
-  const deleteDevice = async () => {
-    try {
-      const response = await fetch(`/api/devices/${selectedDevice?.id}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to delete device");
-      }
-
-      const updatedDevice = await response.json();
-      console.log(updatedDevice);
-
-      toast({
-        title: "Success",
-        description: "Device deleted successfully",
-      });
-
-      await refreshDevices();
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Could not delete Device: " + error,
-        variant: "destructive",
-      });
-    }
-  };
-  */
 
   return (
     <div className="space-y-6">

@@ -72,9 +72,6 @@ export default function PublicDevicesPage() {
         throw new Error(errorData.error || "Failed to delete device");
       }
 
-      const updatedDevice = await response.json();
-      console.log(updatedDevice);
-
       toast({
         title: "Success",
         description: "Device deleted successfully.",

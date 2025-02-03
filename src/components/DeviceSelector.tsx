@@ -66,7 +66,6 @@ export const DeviceSelector = () => {
       const data = await response.json();
       setSelectedDevice(data);
       localStorage.setItem(SELECTED_DEVICE_KEY, value);
-      console.log(data);
     } catch (error) {
       console.error("Failed to fetch device details:", error);
       localStorage.removeItem(SELECTED_DEVICE_KEY);
