@@ -31,6 +31,20 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    // Add device count check
+    const deviceCount = await prisma.device.count({
+      where: {
+        ownerId: user.id
+      }
+    });
+
+    if (deviceCount >= 100) {
+      return NextResponse.json(
+        { error: "Device limit reached. Maximum 100 devices allowed per user." },
+        { status: 403 },
+      );
+    }
+
     // First, fetch the original device with all its related data
     const originalDevice = await prisma.device.findUnique({
       where: { id: deviceId },

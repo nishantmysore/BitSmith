@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import MatrixRain from "./MatrixRain";
+import Link from "next/link";
 
 export const Hero = () => {
   return (
@@ -21,12 +22,14 @@ export const Hero = () => {
         </main>
 
         <p className="text-xl text-muted-foreground md:w-10/12 mx-auto lg:mx-0">
-          Your smart workbench for hardware register exploration and
-          configuration
+          Your smart workbench for hardware register configuration and
+          debug
         </p>
 
         <div className="space-y-4 md:space-y-0 md:space-x-4">
-          <Button className="w-full md:w-1/3">Get Started</Button>
+          <Link href="/home">
+            <Button className="w-full md:w-1/3">Get Started</Button>
+          </Link>
 
           {/*
           <a
