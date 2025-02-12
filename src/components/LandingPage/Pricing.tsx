@@ -1,3 +1,5 @@
+'use client'
+import { useRouter } from 'next/navigation';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +24,10 @@ interface PricingProps {
   description: string;
   buttonText: string;
   benefitList: string[];
+}
+
+interface PricingComponentProps {
+  enablePurchase?: boolean;
 }
 
 const pricingList: PricingProps[] = [
@@ -50,7 +56,7 @@ const pricingList: PricingProps[] = [
     buttonText: "Start Free Trial",
     benefitList: [
       "Full register visualization tools",
-      "Unlimited device configurations",
+      "100 device configurations",
       "JSON import/export capabilities",
       "Basic documentation storage",
       "Standard support",
@@ -66,15 +72,38 @@ const pricingList: PricingProps[] = [
     buttonText: "Contact Us",
     benefitList: [
       "Everything in Individual, plus:",
-      "Custom deployment options",
       "Priority technical support",
-      "Team collaboration features",
       "Custom integration support",
+      "Priority access to upcoming features"
     ],
   },
 ];
 
-export const Pricing = () => {
+export const Pricing = ({ enablePurchase = true }: PricingComponentProps) => {
+  const router = useRouter();
+
+  const handlePurchase = async (pricing: PricingProps) => {
+    if (!enablePurchase) {
+      router.push('/home');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ plan: pricing.title }),
+      });s
+
+      const { url } = await response.json();
+      window.location.href = url;
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+    }
+  };
+
   return (
     <section id="pricing" className="container py-24 sm:py-32 mx-auto">
       <h2 className="text-3xl md:text-4xl font-bold text-center">
@@ -123,7 +152,12 @@ export const Pricing = () => {
             </CardHeader>
 
             <CardContent>
-              <Button className="w-full">{pricing.buttonText}</Button>
+              <Button 
+                className="w-full"
+                onClick={() => handlePurchase(pricing)}
+              >
+                {pricing.buttonText}
+              </Button>
             </CardContent>
 
             <hr className="w-4/5 m-auto mb-4" />

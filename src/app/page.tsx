@@ -12,7 +12,7 @@ function App() {
       <Hero />
       <HowItWorks />
       <Services />
-      <Pricing />
+      <Pricing enablePurchase={false}/>
       <ScrollToTop />
     </>
   );

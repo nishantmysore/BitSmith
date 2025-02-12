@@ -39,6 +39,12 @@ model User {
   accounts      Account[]
   sessions      Session[]
   
+  // Subscription fields
+  stripeCustomerId      String?   @unique
+  subscriptionStatus    String?   // 'active', 'canceled', 'past_due', etc.
+  subscriptionPlan      String?   // 'basic', 'pro', etc.
+  currentPeriodEnd     DateTime?
+  
   // Device relationships
   ownedDevices     Device[]  @relation("DeviceOwner")
   sharedDevices    Device[]  @relation("DeviceSharing")
