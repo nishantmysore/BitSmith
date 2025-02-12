@@ -95,7 +95,7 @@ export const Pricing = ({ enablePurchase = true }: PricingComponentProps) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ plan: pricing.title }),
-      });s
+      });
 
       const { url } = await response.json();
       window.location.href = url;
