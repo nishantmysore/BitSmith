@@ -29,7 +29,7 @@ import { useRouter } from "next/navigation";
 const deviceLibraryItems = [
   {
     title: "View Device Maps",
-    url: "/",
+    url: "/home",
     icon: Home,
   },
   {
@@ -55,6 +55,9 @@ const deviceManagementItems = [
     url: "/schema",
     icon: BookOpen,
   },
+];
+
+const supportItems = [
   {
     title: "Contact Us",
     url: "mailto:nishant@cybersphereholdings.com",
@@ -105,6 +108,24 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {deviceManagementItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <Link href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Support</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {supportItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <Link href={item.url}>

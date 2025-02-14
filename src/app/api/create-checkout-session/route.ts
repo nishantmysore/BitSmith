@@ -13,8 +13,6 @@ export async function POST(request: Request) {
 
     const session = await getServerSession(authOptions);
 
-    console.log("REACHED BEGINNING________________");
-
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
@@ -25,7 +23,6 @@ export async function POST(request: Request) {
     });
 
     let stripeCustomerId = user?.stripeCustomerId;
-    console.log("REACHED MIDDLE______________");
 
     if (!stripeCustomerId) {
       const customer = await stripe.customers.create({
@@ -40,7 +37,6 @@ export async function POST(request: Request) {
         data: { stripeCustomerId: customer.id },
       });
     }
-    console.log("REACHED________________-", stripeCustomerId);
 
     try {
       // Create Checkout Sessions from body params.
@@ -56,6 +52,9 @@ export async function POST(request: Request) {
         success_url: `${origin}/success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${origin}/?canceled=true`,
         automatic_tax: { enabled: false },
+        subscription_data: {
+          trial_period_days: 30,
+        },
       });
 
       console.log("URL______________", checkoutSession.url);

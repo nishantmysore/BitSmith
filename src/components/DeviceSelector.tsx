@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { DeviceWithRelations } from "@/types/device";
 import { ReactNode } from "react";
-import { ClockIcon, ArrowLeftRight, GitFork } from "lucide-react";
+import { ClockIcon, ArrowLeftRight, GitFork, Loader2 } from "lucide-react";
 import { MemoryMap } from "./MemoryMap";
 import RegisterList from "./RegisterList"; // Add this at the top with other imports
 
@@ -22,7 +22,8 @@ interface PropertyItemProps {
   value: ReactNode;
 }
 
-const PropertyItem = ({ icon, label, value }: PropertyItemProps) => (
+// Memoize PropertyItem component since it's used multiple times
+const PropertyItem = React.memo(({ icon, label, value }: PropertyItemProps) => (
   <div className="flex items-center gap-2 p-2 rounded-md hover:bg-secondary/20 transition-colors duration-200">
     <div className="text-muted-foreground">{icon}</div>
     <div className="min-w-0 flex-1">
@@ -30,12 +31,19 @@ const PropertyItem = ({ icon, label, value }: PropertyItemProps) => (
       <div className="text-sm font-medium truncate">{value}</div>
     </div>
   </div>
-);
+));
+
+interface BasicDevice {
+  id: string;
+  name: string;
+}
 
 export const DeviceSelector = () => {
-  const [devices, setDevices] = useState<DeviceWithRelations[]>([]);
+  const [devices, setDevices] = useState<BasicDevice[]>([]);
   const [selectedDevice, setSelectedDevice] =
     useState<DeviceWithRelations | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
 
   // Fetch all devices on component mount
   useEffect(() => {
@@ -48,6 +56,7 @@ export const DeviceSelector = () => {
         // Check for saved device ID
         const savedDeviceId = localStorage.getItem(SELECTED_DEVICE_KEY);
         if (savedDeviceId) {
+          setSelectedDeviceId(savedDeviceId);
           handleDeviceSelection(savedDeviceId);
         }
       } catch (error) {
@@ -60,6 +69,8 @@ export const DeviceSelector = () => {
 
   // Fetch complete device information when a device is selected
   const handleDeviceSelection = async (value: string) => {
+    setIsLoading(true);
+    setSelectedDeviceId(value); // Set this immediately for UI feedback
     try {
       const response = await fetch(`/api/devices/${value}`);
       if (!response.ok) throw new Error("Failed to fetch device details");
@@ -70,10 +81,26 @@ export const DeviceSelector = () => {
       console.error("Failed to fetch device details:", error);
       localStorage.removeItem(SELECTED_DEVICE_KEY);
       setSelectedDevice(null);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const exportDevice = (): void => {
+  // Memoize the device fetching function to prevent recreating on each render
+  const fetchDeviceDetails = React.useCallback(async (deviceId: string) => {
+    try {
+      const response = await fetch(`/api/devices/${deviceId}`);
+      if (!response.ok) throw new Error("Failed to fetch device details");
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Failed to fetch device details:", error);
+      throw error;
+    }
+  }, []);
+
+  // Memoize the exportDevice function
+  const exportDevice = React.useCallback((): void => {
     if (selectedDevice) {
       const cleanObject = (obj: any): any => {
         return Object.fromEntries(
@@ -146,7 +173,43 @@ export const DeviceSelector = () => {
 
       URL.revokeObjectURL(url);
     }
-  };
+  }, [selectedDevice]);
+
+  // Memoize complex derived values
+  const propertyItems = React.useMemo(() => {
+    if (!selectedDevice) return [];
+
+    return [
+      selectedDevice.version && {
+        icon: <GitFork />,
+        label: "Version",
+        value: `${selectedDevice.version}`,
+      },
+      selectedDevice.defaultClockFreq !== undefined &&
+        selectedDevice.defaultClockFreq !== 0 && {
+          icon: <ClockIcon />,
+          label: "Clock Frequency",
+          value: `${selectedDevice.defaultClockFreq / 1e6} MHz`,
+        },
+      selectedDevice.littleEndian && {
+        icon: <ArrowLeftRight />,
+        label: "Endianness",
+        value: selectedDevice.littleEndian ? "Little" : "Big",
+      },
+    ].filter(Boolean);
+  }, [selectedDevice]);
+
+  // Memoize peripherals data for MemoryMap
+  const memoryMapPeripherals = React.useMemo(() => {
+    return (
+      selectedDevice?.peripherals.map((peripheral) => ({
+        name: peripheral.name,
+        baseAddress: peripheral.baseAddress,
+        size: peripheral.size,
+        description: peripheral.description,
+      })) ?? []
+    );
+  }, [selectedDevice?.peripherals]);
 
   return (
     <div className="w-full">
@@ -161,7 +224,7 @@ export const DeviceSelector = () => {
         {/* Device Selection Section */}
         <div className="space-y-3">
           <Select
-            value={selectedDevice?.id}
+            value={selectedDeviceId ?? undefined}
             onValueChange={handleDeviceSelection}
           >
             <SelectTrigger>
@@ -176,52 +239,35 @@ export const DeviceSelector = () => {
             </SelectContent>
           </Select>
 
-          {/* Device Description */}
-          {selectedDevice?.description && (
-            <p className="text-lg text-muted-foreground">
-              {selectedDevice.description}
-            </p>
+          {/* Add loading state */}
+          {isLoading ? (
+            <div className="flex items-center justify-center h-32">
+              <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+          ) : (
+            <>
+              {/* Device Description */}
+              {selectedDevice?.description && (
+                <p className="text-lg text-muted-foreground">
+                  {selectedDevice.description}
+                </p>
+              )}
+            </>
           )}
         </div>
 
         {/* Configuration Controls */}
         <div className="space-y-4 mt-4">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-            {selectedDevice?.version && (
-              <PropertyItem
-                icon={<GitFork />}
-                label="Version"
-                value={`${selectedDevice.version}`}
-              />
-            )}
-            {selectedDevice?.defaultClockFreq !== undefined &&
-              selectedDevice?.defaultClockFreq !== 0 && (
-                <PropertyItem
-                  icon={<ClockIcon />}
-                  label="Clock Frequency"
-                  value={`${(selectedDevice?.defaultClockFreq ?? 0) / 1e6} MHz`}
-                />
-              )}
-            {selectedDevice?.littleEndian && (
-              <PropertyItem
-                icon={<ArrowLeftRight />}
-                label="Endianness"
-                value={`${selectedDevice?.littleEndian}` ? "Little" : "Big"}
-              />
-            )}
+            {propertyItems.map((item, index) => (
+              <PropertyItem key={index} {...item} />
+            ))}
           </div>
         </div>
 
         {selectedDevice?.peripherals && (
           <div className="mt-4">
-            <MemoryMap
-              peripherals={selectedDevice.peripherals.map((peripheral) => ({
-                name: peripheral.name,
-                baseAddress: peripheral.baseAddress,
-                size: peripheral.size,
-                description: peripheral.description,
-              }))}
-            />
+            <MemoryMap peripherals={memoryMapPeripherals} />
           </div>
         )}
       </div>
