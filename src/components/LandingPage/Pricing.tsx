@@ -96,8 +96,8 @@ export const Pricing = ({ enablePurchase = true }: PricingComponentProps) => {
         },
         body: JSON.stringify({ plan: pricing.title }),
       });
-
       const { url } = await response.json();
+      console.log(url)
       window.location.href = url;
     } catch (error) {
       console.error('Error creating checkout session:', error);

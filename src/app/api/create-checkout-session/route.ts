@@ -7,7 +7,13 @@ import { prisma } from '@/lib/prisma'
 
 export async function POST(request: Request) {
   try {
+    // Get headers first, before any other operations
+    const headersList = await headers()
+    const origin = headersList.get('origin')
+
     const session = await getServerSession(authOptions)
+    
+    console.log("REACHED BEGINNING________________")
     
     if (!session?.user?.email) {
       return NextResponse.json(
@@ -16,16 +22,13 @@ export async function POST(request: Request) {
       )
     }
 
-    const headersList = headers()
-    const origin = headersList.get('origin')
-    const body = await request.json()
-
     // Get or create the stripe customer
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
     })
 
     let stripeCustomerId = user?.stripeCustomerId
+    console.log("REACHED MIDDLE______________")
 
     if (!stripeCustomerId) {
       const customer = await stripe.customers.create({
@@ -40,25 +43,33 @@ export async function POST(request: Request) {
         data: { stripeCustomerId: customer.id },
       })
     }
+    console.log("REACHED________________-", stripeCustomerId)
 
-    // Create Checkout Sessions from body params.
-    const checkoutSession = await stripe.checkout.sessions.create({
-      customer: stripeCustomerId,
-      line_items: [
-        {
-          // Provide the exact Price ID (for example, pr_1234) of the product you want to sell
-          price: 'price_1QqQD2LENE0vGSD4fTLJ4K8x',
-          quantity: 1,
-        },
-      ],
-      mode: 'subscription',
-      success_url: `${origin}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/?canceled=true`,
-      automatic_tax: { enabled: true },
-    });
-
-    // Return the session URL instead of redirecting
-    return NextResponse.json({ url: checkoutSession.url })
+    try {
+      // Create Checkout Sessions from body params.
+      const checkoutSession = await stripe.checkout.sessions.create({
+        customer: stripeCustomerId,
+        line_items: [
+          {
+            price: 'price_1Qrvp3LENE0vGSD4HpNui1ug',
+            quantity: 1,
+          },
+        ],
+        mode: 'subscription',
+        success_url: `${origin}/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${origin}/?canceled=true`,
+        automatic_tax: { enabled: false },
+      });
+      
+      console.log("URL______________", checkoutSession.url)
+      return NextResponse.json({ url: checkoutSession.url })
+    } catch (checkoutError: any) {
+      console.error("Checkout creation failed:", checkoutError);
+      return NextResponse.json(
+        { error: checkoutError.message },
+        { status: checkoutError.statusCode || 500 }
+      )
+    }
   } catch (err: any) {
     return NextResponse.json(
       { error: err.message },

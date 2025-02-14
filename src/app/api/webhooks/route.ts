@@ -33,36 +33,36 @@ export async function POST(req: Request) {
     switch (event.type) {
       case 'customer.subscription.created':
       case 'customer.subscription.updated':
+        console.log(`Subscription ${event.type} event received`)
+        
         await prisma.user.update({
           where: {
             stripeCustomerId: subscription.customer as string,
           },
           data: {
-            subscriptionStatus: subscription.status,
-            subscriptionPlan: subscription.items.data[0].price.lookup_key,
-            currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+            subscriptionStatus: subscription.cancel_at_period_end 
+              ? 'active_canceling'
+              : subscription.status,
+            subscriptionPlan: subscription.items.data[0].price.lookup_key ?? null,
+            currentPeriodEnd: subscription.current_period_end 
+              ? new Date(subscription.current_period_end * 1000)
+              : null,
           },
         })
         break
 
       case 'customer.subscription.deleted':
-        const activeSubscription = await stripe.subscriptions.list({
-          customer: subscription.customer as string,
-          status: 'active',
-          limit: 1,
+        console.log('Subscription deleted event received')
+        await prisma.user.update({
+          where: {
+            stripeCustomerId: subscription.customer as string,
+          },
+          data: {
+            subscriptionStatus: 'canceled',
+            subscriptionPlan: null,
+            currentPeriodEnd: null,
+          },
         })
-
-        if (activeSubscription.data.length === 0) {
-          await prisma.user.update({
-            where: {
-              stripeCustomerId: subscription.customer as string,
-            },
-            data: {
-              subscriptionStatus: 'canceled',
-              currentPeriodEnd: null,
-            },
-          })
-        }
         break
 
       case 'customer.created':
