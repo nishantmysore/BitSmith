@@ -1,5 +1,5 @@
-'use client'
-import { useRouter } from 'next/navigation';
+"use client";
+import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -74,7 +74,7 @@ const pricingList: PricingProps[] = [
       "Everything in Individual, plus:",
       "Priority technical support",
       "Custom integration support",
-      "Priority access to upcoming features"
+      "Priority access to upcoming features",
     ],
   },
 ];
@@ -83,24 +83,30 @@ export const Pricing = ({ enablePurchase = true }: PricingComponentProps) => {
   const router = useRouter();
 
   const handlePurchase = async (pricing: PricingProps) => {
+    if (pricing.title === "Enterprise") {
+      // Open email client with mailto link
+      window.location.href = "mailto:nishant@cybersphereholdings.com";
+      return;
+    }
+
     if (!enablePurchase) {
-      router.push('/home');
+      router.push("/home");
       return;
     }
 
     try {
-      const response = await fetch('/api/create-checkout-session', {
-        method: 'POST',
+      const response = await fetch("/api/create-checkout-session", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ plan: pricing.title }),
       });
       const { url } = await response.json();
-      console.log(url)
+      console.log(url);
       window.location.href = url;
     } catch (error) {
-      console.error('Error creating checkout session:', error);
+      console.error("Error creating checkout session:", error);
     }
   };
 
@@ -152,7 +158,7 @@ export const Pricing = ({ enablePurchase = true }: PricingComponentProps) => {
             </CardHeader>
 
             <CardContent>
-              <Button 
+              <Button
                 className="w-full"
                 onClick={() => handlePurchase(pricing)}
               >

@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -10,29 +10,29 @@ export default function SubscriptionRequired() {
 
   useEffect(() => {
     // If not logged in, redirect to login
-    if (status === 'unauthenticated') {
-      router.push('/login');
+    if (status === "unauthenticated") {
+      router.push("/login");
       return;
     }
 
     // If logged in, check subscription status
-    if (status === 'authenticated') {
-      fetch('/api/check-subscription')
+    if (status === "authenticated") {
+      fetch("/api/check-subscription")
         .then(async (response) => {
           const data = await response.json();
-          
+
           // If subscription is active, redirect to home
           if (data.active) {
-            router.push('/home');
+            router.push("/home");
           }
         })
         .catch((error) => {
-          console.error('Error checking subscription:', error);
+          console.error("Error checking subscription:", error);
         });
     }
   }, [status, router]);
 
-  if (status === 'loading') {
+  if (status === "loading") {
     return (
       <div className="grid place-items-center h-screen">
         <p>Loading...</p>
@@ -47,10 +47,10 @@ export default function SubscriptionRequired() {
           Subscription Required
         </h1>
         <p className="text-center text-muted-foreground mb-12">
-          Your subscription has expired or is inactive. Please choose a plan to continue.
+          Please choose a plan to continue.
         </p>
         <Pricing enablePurchase={true} />
       </div>
     </div>
   );
-} 
+}

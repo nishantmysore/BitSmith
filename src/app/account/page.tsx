@@ -1,5 +1,5 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from '@/lib/auth'
+import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import AccountClient from "./AccountClient";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -14,12 +14,11 @@ export default async function AccountPage() {
 
   return (
     <SidebarProvider>
-    <AppSidebar />
-    <SidebarTrigger />
+      <AppSidebar />
+      <SidebarTrigger />
       <div className="grid place-items-center h-screen w-full">
         <AccountClient user={session.user} />
       </div>
     </SidebarProvider>
-
   );
-} 
+}

@@ -261,7 +261,7 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
                           Description
                         </CardTitle>
                         <Button
-                          variant="outline"
+                          variant="default"
                           size="sm"
                           className="hover:shadow-md transition-all duration-200"
                           onClick={() => setShowBitViewer(!showBitViewer)}

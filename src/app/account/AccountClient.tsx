@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { User } from 'next-auth';
+import { useState, useEffect } from "react";
+import { User } from "next-auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -18,7 +18,9 @@ interface AccountClientProps {
 }
 
 export default function AccountClient({ user }: AccountClientProps) {
-  const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
+  const [subscription, setSubscription] = useState<SubscriptionData | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
   const [cancelLoading, setCancelLoading] = useState(false);
 
@@ -28,11 +30,12 @@ export default function AccountClient({ user }: AccountClientProps) {
 
   const fetchSubscriptionData = async () => {
     try {
-      const response = await fetch('/api/get-subscription');
+      const response = await fetch("/api/get-subscription");
       const data = await response.json();
       setSubscription(data);
+      console.log(data);
     } catch (error) {
-      console.error('Error fetching subscription:', error);
+      console.error("Error fetching subscription:", error);
     } finally {
       setLoading(false);
     }
@@ -40,24 +43,24 @@ export default function AccountClient({ user }: AccountClientProps) {
 
   const handleCancelSubscription = async () => {
     if (!subscription?.subscriptionId) return;
-    
+
     setCancelLoading(true);
     try {
-      const response = await fetch('/api/cancel-subscription', {
-        method: 'POST',
+      const response = await fetch("/api/cancel-subscription", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ subscriptionId: subscription.subscriptionId }),
       });
-      
+
       if (response.ok) {
         await fetchSubscriptionData();
       } else {
-        throw new Error('Failed to cancel subscription');
+        throw new Error("Failed to cancel subscription");
       }
     } catch (error) {
-      console.error('Error canceling subscription:', error);
+      console.error("Error canceling subscription:", error);
     } finally {
       setCancelLoading(false);
     }
@@ -77,10 +80,12 @@ export default function AccountClient({ user }: AccountClientProps) {
           <h3 className="text-lg font-medium">Profile Information</h3>
           <div className="text-sm text-muted-foreground space-y-1">
             <p>
-              <span className="font-medium text-foreground">Email:</span> {user.email}
+              <span className="font-medium text-foreground">Email:</span>{" "}
+              {user.email}
             </p>
             <p>
-              <span className="font-medium text-foreground">Name:</span> {user.name}
+              <span className="font-medium text-foreground">Name:</span>{" "}
+              {user.name}
             </p>
           </div>
         </div>
@@ -94,24 +99,30 @@ export default function AccountClient({ user }: AccountClientProps) {
               <>
                 <div className="flex items-center gap-2">
                   <span className="font-medium">Status:</span>
-                  <Badge variant={subscription.status === 'active' ? 'default' : 'secondary'}>
+                  <Badge
+                    variant={
+                      subscription.status === "active" ? "default" : "secondary"
+                    }
+                  >
                     {subscription.status}
                   </Badge>
                 </div>
                 {subscription.currentPeriodEnd && (
                   <p>
-                    <span className="font-medium">Current Period Ends:</span>{' '}
-                    {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+                    <span className="font-medium">Subscription Ends:</span>{" "}
+                    {new Date(
+                      subscription.currentPeriodEnd,
+                    ).toLocaleDateString()}
                   </p>
                 )}
-                {subscription.status === 'active' && (
+                {subscription.status === "active" && (
                   <Button
                     variant="destructive"
                     onClick={handleCancelSubscription}
                     disabled={cancelLoading}
                     className="mt-4"
                   >
-                    {cancelLoading ? 'Canceling...' : 'Cancel Subscription'}
+                    {cancelLoading ? "Canceling..." : "Cancel Subscription"}
                   </Button>
                 )}
               </>
@@ -123,4 +134,4 @@ export default function AccountClient({ user }: AccountClientProps) {
       </CardContent>
     </Card>
   );
-} 
+}

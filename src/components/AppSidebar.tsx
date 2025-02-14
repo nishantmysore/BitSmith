@@ -1,5 +1,5 @@
 "use client";
-import { Home, Settings, Upload, Search, BookOpen } from "lucide-react";
+import { Home, Settings, Upload, Search, BookOpen, Mail } from "lucide-react";
 import Link from "next/link";
 import {
   Sidebar,
@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ModeToggle } from "@/components/ModeToggle";
 import { clearDevicesCache } from "@/utils/cache";
+import { useRouter } from "next/navigation";
 
 const deviceLibraryItems = [
   {
@@ -54,15 +55,28 @@ const deviceManagementItems = [
     url: "/schema",
     icon: BookOpen,
   },
+  {
+    title: "Contact Us",
+    url: "mailto:nishant@cybersphereholdings.com",
+    icon: Mail,
+  },
 ];
 
 export function AppSidebar() {
   const { data: session } = useSession();
+  const router = useRouter();
+
   return (
     <Sidebar variant="sidebar">
       <SidebarHeader className="text-xl font-semibold">
         <div className="flex w-full justify-between items-center">
-          BitSmith
+          <div
+            className="bitsmith"
+            onClick={() => router.push("/home")}
+            style={{ cursor: "pointer" }}
+          >
+            BitSmith
+          </div>
           <ModeToggle />
         </div>
       </SidebarHeader>
@@ -119,6 +133,11 @@ export function AppSidebar() {
                   side="top"
                   className="w-[--radix-popper-anchor-width]"
                 >
+                  <DropdownMenuItem asChild>
+                    <Link href="/account">
+                      <span>Account Settings</span>
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuItem
                     onSelect={() => {
                       clearDevicesCache(session.user.id);

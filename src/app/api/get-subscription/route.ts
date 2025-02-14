@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from '@/lib/auth'
+import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { stripe } from "@/lib/stripe";
 
@@ -43,16 +43,16 @@ export async function GET() {
         currentPeriodEnd: null,
       });
     }
-    console.log(subscription)
+    console.log(subscription);
     return NextResponse.json({
       subscriptionId: subscription.id,
-      status: subscription.status,
-      currentPeriodEnd: subscription.current_period_end 
+      status: user.subscriptionStatus,
+      currentPeriodEnd: subscription.current_period_end
         ? new Date(subscription.current_period_end * 1000).toISOString()
         : null,
     });
   } catch (error) {
-    console.error('Error fetching subscription:', error);
+    console.error("Error fetching subscription:", error);
     return new NextResponse("Internal error", { status: 500 });
   }
-} 
+}

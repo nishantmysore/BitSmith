@@ -1,14 +1,14 @@
-import { getServerSession } from 'next-auth'
-import { NextResponse } from 'next/server'
-import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getServerSession } from "next-auth";
+import { NextResponse } from "next/server";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
-      return NextResponse.json({ active: false }, { status: 401 })
+      return NextResponse.json({ active: false }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
@@ -19,15 +19,20 @@ export async function GET() {
         subscriptionStatus: true,
         currentPeriodEnd: true,
       },
-    })
+    });
 
-    const isActive = (user?.subscriptionStatus === 'active' || user?.subscriptionStatus === 'active_canceling') && 
-                    user?.currentPeriodEnd && 
-                    user.currentPeriodEnd > new Date()
+    const isActive =
+      (user?.subscriptionStatus === "active" ||
+        user?.subscriptionStatus === "active_canceling") &&
+      user?.currentPeriodEnd &&
+      user.currentPeriodEnd > new Date();
 
-    return NextResponse.json({ active: isActive })
+    return NextResponse.json({ active: isActive });
   } catch (error) {
-    console.error('Error checking subscription:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error("Error checking subscription:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
-} 
+}

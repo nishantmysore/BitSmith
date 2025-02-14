@@ -34,13 +34,15 @@ export async function POST(req: Request) {
     // Add device count check
     const deviceCount = await prisma.device.count({
       where: {
-        ownerId: user.id
-      }
+        ownerId: user.id,
+      },
     });
 
     if (deviceCount >= 100) {
       return NextResponse.json(
-        { error: "Device limit reached. Maximum 100 devices allowed per user." },
+        {
+          error: "Device limit reached. Maximum 100 devices allowed per user.",
+        },
         { status: 403 },
       );
     }

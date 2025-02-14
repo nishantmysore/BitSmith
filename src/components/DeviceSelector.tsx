@@ -75,50 +75,64 @@ export const DeviceSelector = () => {
 
   const exportDevice = (): void => {
     if (selectedDevice) {
-      const exportedDeviceObject = {
+      const cleanObject = (obj: any): any => {
+        return Object.fromEntries(
+          Object.entries(obj).filter(([_, value]) => value != null),
+        );
+      };
+
+      const exportedDeviceObject = cleanObject({
         name: selectedDevice.name,
         description: selectedDevice.description,
         littleEndian: selectedDevice.littleEndian,
         isPublic: selectedDevice.isPublic,
         defaultClockFreq: selectedDevice.defaultClockFreq,
         version: selectedDevice.version,
-        peripherals: selectedDevice.peripherals.map((peripheral) => ({
-          name: peripheral.name,
-          description: peripheral.description,
-          baseAddress: peripheral.baseAddress,
-          size: peripheral.size,
-          registers: peripheral.registers.map((register) => ({
-            name: register.name,
-            description: register.description,
-            width: register.width,
-            addressOffset: register.addressOffset,
-            resetValue: register.resetValue,
-            resetMask: register.resetMask,
-            readAction: register.addressOffset,
-            writeAction: register.writeAction,
-            modifiedWriteValues: register.modifiedWriteValues,
-            isArray: register.isArray,
-            arraySize: register.arraySize,
-            arrayStride: register.arrayStride,
-            namePattern: register.namePattern,
-            access: register.access,
-            fields: register.fields.map((field) => ({
-              name: field.name,
-              description: field.description,
-              access: field.access,
-              bitOffset: field.bitOffset,
-              bitWidth: field.bitWidth,
-              readAction: field.readAction,
-              writeAction: field.writeAction,
-              enumeratedValues: field.enumeratedValues.map((enumVal) => ({
-                name: enumVal.name,
-                value: enumVal.value,
-                description: enumVal.description,
-              })),
-            })),
-          })),
-        })),
-      };
+        peripherals: selectedDevice.peripherals.map((peripheral) =>
+          cleanObject({
+            name: peripheral.name,
+            description: peripheral.description,
+            baseAddress: peripheral.baseAddress,
+            size: peripheral.size,
+            registers: peripheral.registers.map((register) =>
+              cleanObject({
+                name: register.name,
+                description: register.description,
+                width: register.width,
+                addressOffset: register.addressOffset,
+                resetValue: register.resetValue,
+                resetMask: register.resetMask,
+                readAction: register.readAction,
+                writeAction: register.writeAction,
+                modifiedWriteValues: register.modifiedWriteValues,
+                isArray: register.isArray,
+                arraySize: register.arraySize,
+                arrayStride: register.arrayStride,
+                namePattern: register.namePattern,
+                access: register.access,
+                fields: register.fields.map((field) =>
+                  cleanObject({
+                    name: field.name,
+                    description: field.description,
+                    access: field.access,
+                    bitOffset: field.bitOffset,
+                    bitWidth: field.bitWidth,
+                    readAction: field.readAction,
+                    writeAction: field.writeAction,
+                    enumeratedValues: field.enumeratedValues.map((enumVal) =>
+                      cleanObject({
+                        name: enumVal.name,
+                        value: enumVal.value,
+                        description: enumVal.description,
+                      }),
+                    ),
+                  }),
+                ),
+              }),
+            ),
+          }),
+        ),
+      });
 
       const jsonString = JSON.stringify(exportedDeviceObject, null, 2);
       const blob = new Blob([jsonString], { type: "application/json" });
