@@ -14,6 +14,7 @@ import { ClockIcon, ArrowLeftRight, GitFork, Loader2 } from "lucide-react";
 import { MemoryMap } from "./MemoryMap";
 import RegisterList from "./RegisterList"; // Add this at the top with other imports
 import useSWR from 'swr';
+import { preload } from 'swr';
 
 const SELECTED_DEVICE_KEY = "selectedDeviceId";
 
@@ -39,8 +40,26 @@ interface BasicDevice {
   name: string;
 }
 
-// Add this fetcher function near the top of the file
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+// Modify the fetcher to include more detailed logging
+const fetcher = async (url: string) => {
+  console.log('[DeviceSelector] Starting fetch:', url);
+  const start = performance.now();
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    console.log(`[DeviceSelector] Fetch completed in ${performance.now() - start}ms`, data);
+    return data;
+  } catch (error) {
+    console.error('[DeviceSelector] Fetch error:', error);
+    throw error;
+  }
+};
+
+// Modify the prefetch function to include logging
+const prefetchDevices = () => {
+  console.log('Prefetching devices...');
+  preload('/api/devices/getdevices', fetcher);
+};
 
 // Add this configuration object
 const swrConfig = {
@@ -55,35 +74,46 @@ const swrConfig = {
 };
 
 export const DeviceSelector = () => {
-  const [devices, setDevices] = useState<BasicDevice[]>([]);
+  // Add logging to the initial useEffect
+  useEffect(() => {
+    console.log('Component mounted, triggering prefetch');
+    prefetchDevices();
+  }, []);
+
+  const { data: devicesData, isLoading: isLoadingDevices, error } = useSWR<{ devices: BasicDevice[] }>(
+    '/api/devices',
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 3600000,
+      onError: (error: any) => {
+        console.error('[DeviceSelector] Failed to fetch devices:', error);
+      },
+      onSuccess: (data) => {
+        console.log('[DeviceSelector] Devices fetched successfully:', data?.devices?.length);
+      },
+      loadingTimeout: 3000,
+      onLoadingSlow: (key) => {
+        console.warn('[DeviceSelector] Slow loading detected for:', key);
+      }
+    }
+  );
+
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
   
-  // Update the SWR hook with the config
+  // Keep the existing selectedDevice SWR hook
   const { data: selectedDevice, isLoading } = useSWR<DeviceWithRelations>(
     selectedDeviceId ? `/api/devices/${selectedDeviceId}` : null,
     fetcher,
     swrConfig
   );
 
-  // Fetch all devices on component mount
+  // Check for saved device ID on mount
   useEffect(() => {
-    const fetchDevices = async () => {
-      try {
-        const response = await fetch("/api/devices");
-        if (!response.ok) throw new Error("Failed to fetch devices");
-        const data = await response.json();
-        setDevices(data.devices);
-        // Check for saved device ID
-        const savedDeviceId = localStorage.getItem(SELECTED_DEVICE_KEY);
-        if (savedDeviceId) {
-          setSelectedDeviceId(savedDeviceId);
-        }
-      } catch (error) {
-        console.error("Failed to fetch devices:", error);
-      }
-    };
-
-    fetchDevices();
+    const savedDeviceId = localStorage.getItem(SELECTED_DEVICE_KEY);
+    if (savedDeviceId) {
+      setSelectedDeviceId(savedDeviceId);
+    }
   }, []);
 
   // Add a log in the selection handler
@@ -219,12 +249,17 @@ export const DeviceSelector = () => {
           <Select
             value={selectedDeviceId ?? undefined}
             onValueChange={handleDeviceSelection}
+            onOpenChange={(open) => {
+              if (open) {
+                prefetchDevices(); // Prefetch when dropdown is opened
+              }
+            }}
           >
-            <SelectTrigger>
-              <SelectValue placeholder="Select device" />
+            <SelectTrigger disabled={isLoadingDevices}>
+              <SelectValue placeholder={isLoadingDevices ? "Loading..." : "Select device"} />
             </SelectTrigger>
             <SelectContent>
-              {devices?.map((device) => (
+              {devicesData?.devices?.map((device) => (
                 <SelectItem key={device.id} value={device.id}>
                   {device.name}
                 </SelectItem>
@@ -265,6 +300,12 @@ export const DeviceSelector = () => {
         )}
       </div>
       {selectedDevice && <RegisterList selectedDevice={selectedDevice} />}
+
+      {error && (
+        <div className="text-red-500">
+          Error loading devices: {error.message}
+        </div>
+      )}
     </div>
   );
 };
