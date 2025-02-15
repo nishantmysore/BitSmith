@@ -42,22 +42,13 @@ interface BasicDevice {
 
 // Modify the fetcher to include more detailed logging
 const fetcher = async (url: string) => {
-  console.log('[DeviceSelector] Starting fetch:', url);
-  const start = performance.now();
-  try {
-    const response = await fetch(url);
-    const data = await response.json();
-    console.log(`[DeviceSelector] Fetch completed in ${performance.now() - start}ms`, data);
-    return data;
-  } catch (error) {
-    console.error('[DeviceSelector] Fetch error:', error);
-    throw error;
-  }
+  const response = await fetch(url);
+  const data = await response.json();
+  return data;
 };
 
 // Modify the prefetch function to include logging
 const prefetchDevices = () => {
-  console.log('Prefetching devices...');
   preload('/api/devices/getdevices', fetcher);
 };
 
@@ -65,18 +56,11 @@ const prefetchDevices = () => {
 const swrConfig = {
   revalidateOnFocus: false,
   dedupingInterval: 3600000, // 1 hour
-  onSuccess: (data: DeviceWithRelations) => {
-    console.log('SWR Cache Hit:', data.name);
-  },
-  onError: (error: any) => {
-    console.error('SWR Error:', error);
-  }
 };
 
 export const DeviceSelector = () => {
   // Add logging to the initial useEffect
   useEffect(() => {
-    console.log('Component mounted, triggering prefetch');
     prefetchDevices();
   }, []);
 
@@ -86,16 +70,7 @@ export const DeviceSelector = () => {
     {
       revalidateOnFocus: false,
       dedupingInterval: 3600000,
-      onError: (error: any) => {
-        console.error('[DeviceSelector] Failed to fetch devices:', error);
-      },
-      onSuccess: (data) => {
-        console.log('[DeviceSelector] Devices fetched successfully:', data?.devices?.length);
-      },
-      loadingTimeout: 3000,
-      onLoadingSlow: (key) => {
-        console.warn('[DeviceSelector] Slow loading detected for:', key);
-      }
+      loadingTimeout: 3000
     }
   );
 

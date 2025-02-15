@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -27,7 +27,11 @@ export async function GET() {
       user?.currentPeriodEnd &&
       user.currentPeriodEnd > new Date();
 
-    return NextResponse.json({ active: isActive });
+    return NextResponse.json({ active: isActive }, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=3600',
+      },
+    });
   } catch (error) {
     console.error("Error checking subscription:", error);
     return NextResponse.json(
