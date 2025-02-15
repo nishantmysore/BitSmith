@@ -13,6 +13,7 @@ import { ReactNode } from "react";
 import { ClockIcon, ArrowLeftRight, GitFork, Loader2 } from "lucide-react";
 import { MemoryMap } from "./MemoryMap";
 import RegisterList from "./RegisterList"; // Add this at the top with other imports
+import useSWR from 'swr';
 
 const SELECTED_DEVICE_KEY = "selectedDeviceId";
 
@@ -38,12 +39,22 @@ interface BasicDevice {
   name: string;
 }
 
+// Add this fetcher function near the top of the file
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
 export const DeviceSelector = () => {
   const [devices, setDevices] = useState<BasicDevice[]>([]);
-  const [selectedDevice, setSelectedDevice] =
-    useState<DeviceWithRelations | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
+  
+  // Replace the selectedDevice state with SWR
+  const { data: selectedDevice, isLoading } = useSWR<DeviceWithRelations>(
+    selectedDeviceId ? `/api/devices/${selectedDeviceId}` : null,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 3600000, // 1 hour
+    }
+  );
 
   // Fetch all devices on component mount
   useEffect(() => {
@@ -57,7 +68,6 @@ export const DeviceSelector = () => {
         const savedDeviceId = localStorage.getItem(SELECTED_DEVICE_KEY);
         if (savedDeviceId) {
           setSelectedDeviceId(savedDeviceId);
-          handleDeviceSelection(savedDeviceId);
         }
       } catch (error) {
         console.error("Failed to fetch devices:", error);
@@ -67,37 +77,11 @@ export const DeviceSelector = () => {
     fetchDevices();
   }, []);
 
-  // Fetch complete device information when a device is selected
-  const handleDeviceSelection = async (value: string) => {
-    setIsLoading(true);
-    setSelectedDeviceId(value); // Set this immediately for UI feedback
-    try {
-      const response = await fetch(`/api/devices/${value}`);
-      if (!response.ok) throw new Error("Failed to fetch device details");
-      const data = await response.json();
-      setSelectedDevice(data);
-      localStorage.setItem(SELECTED_DEVICE_KEY, value);
-    } catch (error) {
-      console.error("Failed to fetch device details:", error);
-      localStorage.removeItem(SELECTED_DEVICE_KEY);
-      setSelectedDevice(null);
-    } finally {
-      setIsLoading(false);
-    }
+  // Simplify the handleDeviceSelection since SWR will handle the fetching
+  const handleDeviceSelection = (value: string) => {
+    setSelectedDeviceId(value);
+    localStorage.setItem(SELECTED_DEVICE_KEY, value);
   };
-
-  // Memoize the device fetching function to prevent recreating on each render
-  const fetchDeviceDetails = React.useCallback(async (deviceId: string) => {
-    try {
-      const response = await fetch(`/api/devices/${deviceId}`);
-      if (!response.ok) throw new Error("Failed to fetch device details");
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error("Failed to fetch device details:", error);
-      throw error;
-    }
-  }, []);
 
   // Memoize the exportDevice function
   const exportDevice = React.useCallback((): void => {
