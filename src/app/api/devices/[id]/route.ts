@@ -72,6 +72,8 @@ export async function GET(
     return NextResponse.json(transformBigInts(device), {
       headers: {
         'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+        'Vary': 'Accept',
+        'ETag': `"${device.id}-${device.version || '1'}"`,
       },
     });
   } catch (error) {

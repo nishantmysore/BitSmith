@@ -42,18 +42,27 @@ interface BasicDevice {
 // Add this fetcher function near the top of the file
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
+// Add this configuration object
+const swrConfig = {
+  revalidateOnFocus: false,
+  dedupingInterval: 3600000, // 1 hour
+  onSuccess: (data: DeviceWithRelations) => {
+    console.log('SWR Cache Hit:', data.name);
+  },
+  onError: (error: any) => {
+    console.error('SWR Error:', error);
+  }
+};
+
 export const DeviceSelector = () => {
   const [devices, setDevices] = useState<BasicDevice[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
   
-  // Replace the selectedDevice state with SWR
+  // Update the SWR hook with the config
   const { data: selectedDevice, isLoading } = useSWR<DeviceWithRelations>(
     selectedDeviceId ? `/api/devices/${selectedDeviceId}` : null,
     fetcher,
-    {
-      revalidateOnFocus: false,
-      dedupingInterval: 3600000, // 1 hour
-    }
+    swrConfig
   );
 
   // Fetch all devices on component mount
@@ -77,7 +86,7 @@ export const DeviceSelector = () => {
     fetchDevices();
   }, []);
 
-  // Simplify the handleDeviceSelection since SWR will handle the fetching
+  // Add a log in the selection handler
   const handleDeviceSelection = (value: string) => {
     setSelectedDeviceId(value);
     localStorage.setItem(SELECTED_DEVICE_KEY, value);
@@ -173,7 +182,7 @@ export const DeviceSelector = () => {
         selectedDevice.defaultClockFreq !== 0 && {
           icon: <ClockIcon />,
           label: "Clock Frequency",
-          value: `${selectedDevice.defaultClockFreq / 1e6} MHz`,
+          value: `${selectedDevice.defaultClockFreq ?? 0 / 1e6} MHz`,
         },
       selectedDevice.littleEndian && {
         icon: <ArrowLeftRight />,
