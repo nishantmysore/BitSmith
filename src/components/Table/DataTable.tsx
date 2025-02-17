@@ -52,7 +52,7 @@ export function DataTable<TData, TValue>({
 
     initialState: {
       pagination: {
-        pageSize: 50,
+        pageSize: 10,
       },
     },
     state: {
@@ -124,6 +124,10 @@ export function DataTable<TData, TValue>({
         </Table>
       </div>
       <div className="flex items-center justify-end py-4">
+        <div className="text-sm text-gray-500 mx-4">
+          Page {table.getState().pagination.pageIndex + 1} of{" "}
+          {table.getPageCount()}
+        </div>
         <Button
           variant="outline"
           size="icon"

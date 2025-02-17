@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Select,
   SelectContent,
@@ -7,94 +7,160 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { useDevice } from "../DeviceContext";
 import { Button } from "@/components/ui/button";
-import { Register, AccessType } from "@prisma/client";
+import { DeviceWithRelations } from "@/types/device";
+import { ReactNode } from "react";
+import { ClockIcon, ArrowLeftRight, GitFork, Loader2 } from "lucide-react";
+import { MemoryMap } from "./MemoryMap";
+import RegisterList from "./RegisterList"; // Add this at the top with other imports
+import useSWR from "swr";
+import { preload } from "swr";
 
-type FieldExport = {
+const SELECTED_DEVICE_KEY = "selectedDeviceId";
+
+interface PropertyItemProps {
+  icon: ReactNode;
+  label: string;
+  value: ReactNode;
+}
+
+// Memoize PropertyItem component since it's used multiple times
+const PropertyItem = React.memo(({ icon, label, value }: PropertyItemProps) => (
+  <div className="flex items-center gap-2 p-2 rounded-md hover:bg-secondary/20 transition-colors duration-200">
+    <div className="text-muted-foreground">{icon}</div>
+    <div className="min-w-0 flex-1">
+      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className="text-sm font-medium truncate">{value}</div>
+    </div>
+  </div>
+));
+PropertyItem.displayName = "PropertyItem";
+
+interface BasicDevice {
+  id: string;
   name: string;
-  description: string;
-  bits: string;
-  access: AccessType;
+}
+
+// Modify the fetcher to include more detailed logging
+const fetcher = async (url: string) => {
+  const response = await fetch(url);
+  const data = await response.json();
+  return data;
 };
 
-type RegisterWithFields = Register & {
-  fields: {
-    name: string;
-    description: string;
-    bits: string;
-    access: AccessType;
-  }[];
+// Modify the prefetch function to include logging
+const prefetchDevices = () => {
+  preload("/api/devices/getdevices", fetcher);
 };
 
-// Hex validation functions remain the same
-const isValidHex = (value: string): boolean => {
-  if (!value || value === "0x") return true;
-  const hexRegex = /^0x[0-9A-Fa-f]{1,16}$/;
-  return hexRegex.test(value);
-};
-
-const formatHexInput = (value: string): string => {
-  let cleaned = value.replace(/[^0-9A-Fa-f]/g, "").toUpperCase();
-  if (!value.startsWith("0x")) {
-    cleaned = `0x${cleaned}`;
-  } else {
-    cleaned = `0x${value
-      .slice(2)
-      .replace(/[^0-9A-Fa-f]/g, "")
-      .toUpperCase()}`;
-  }
-  return cleaned;
+// Add this configuration object
+const swrConfig = {
+  revalidateOnFocus: false,
+  dedupingInterval: 3600000, // 1 hour
 };
 
 export const DeviceSelector = () => {
+  // Add logging to the initial useEffect
+  useEffect(() => {
+    prefetchDevices();
+  }, []);
+
   const {
-    selectedDevice,
-    setSelectedDevice,
-    devices,
-    baseAddr,
-    setBaseAddr,
-    offsetBaseAddr,
-    setOffsetBaseAddr,
-  } = useDevice();
+    data: devicesData,
+    isLoading: isLoadingDevices,
+    error,
+  } = useSWR<{ devices: BasicDevice[] }>("/api/devices", fetcher, {
+    revalidateOnFocus: false,
+    dedupingInterval: 3600000,
+    loadingTimeout: 3000,
+  });
 
-  const [isTouched, setIsTouched] = React.useState(false);
-  const isValid = !isTouched || isValidHex(baseAddr);
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
 
-  const handleBaseAddrChange = (value: string) => {
-    setIsTouched(true);
-    const formattedValue = formatHexInput(value);
-    setBaseAddr(formattedValue);
+  // Keep the existing selectedDevice SWR hook
+  const { data: selectedDevice, isLoading } = useSWR<DeviceWithRelations>(
+    selectedDeviceId ? `/api/devices/${selectedDeviceId}` : null,
+    fetcher,
+    swrConfig,
+  );
+
+  // Check for saved device ID on mount
+  useEffect(() => {
+    const savedDeviceId = localStorage.getItem(SELECTED_DEVICE_KEY);
+    if (savedDeviceId) {
+      setSelectedDeviceId(savedDeviceId);
+    }
+  }, []);
+
+  // Add a log in the selection handler
+  const handleDeviceSelection = (value: string) => {
+    setSelectedDeviceId(value);
+    localStorage.setItem(SELECTED_DEVICE_KEY, value);
   };
 
-  const exportDevice = (): void => {
+  // Memoize the exportDevice function
+  const exportDevice = React.useCallback((): void => {
     if (selectedDevice) {
-      const exportedDeviceObject = {
-        name: selectedDevice.name,
-        description: selectedDevice.description,
-        base_address: selectedDevice.base_address,
-        isPublic: selectedDevice.isPublic,
-        registers: selectedDevice.registers.map(
-          (register: RegisterWithFields) => ({
-            name: register.name,
-            description: register.description,
-            address: register.address,
-            width: register.width.toString(),
-            fields: register.fields.map((field: FieldExport) => ({
-              name: field.name,
-              description: field.description,
-              bits: field.bits,
-              access: field.access,
-            })),
-          }),
-        ),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const cleanObject = (obj: any): any => {
+        return Object.fromEntries(
+          Object.entries(obj).filter(([, value]) => value != null),
+        );
       };
 
-      // Export the object
+      const exportedDeviceObject = cleanObject({
+        name: selectedDevice.name,
+        description: selectedDevice.description,
+        littleEndian: selectedDevice.littleEndian,
+        isPublic: selectedDevice.isPublic,
+        defaultClockFreq: selectedDevice.defaultClockFreq,
+        version: selectedDevice.version,
+        peripherals: selectedDevice.peripherals.map((peripheral) =>
+          cleanObject({
+            name: peripheral.name,
+            description: peripheral.description,
+            baseAddress: peripheral.baseAddress,
+            size: peripheral.size,
+            registers: peripheral.registers.map((register) =>
+              cleanObject({
+                name: register.name,
+                description: register.description,
+                width: register.width,
+                addressOffset: register.addressOffset,
+                resetValue: register.resetValue,
+                resetMask: register.resetMask,
+                readAction: register.readAction,
+                writeAction: register.writeAction,
+                modifiedWriteValues: register.modifiedWriteValues,
+                isArray: register.isArray,
+                arraySize: register.arraySize,
+                arrayStride: register.arrayStride,
+                namePattern: register.namePattern,
+                access: register.access,
+                fields: register.fields.map((field) =>
+                  cleanObject({
+                    name: field.name,
+                    description: field.description,
+                    access: field.access,
+                    bitOffset: field.bitOffset,
+                    bitWidth: field.bitWidth,
+                    readAction: field.readAction,
+                    writeAction: field.writeAction,
+                    enumeratedValues: field.enumeratedValues.map((enumVal) =>
+                      cleanObject({
+                        name: enumVal.name,
+                        value: enumVal.value,
+                        description: enumVal.description,
+                      }),
+                    ),
+                  }),
+                ),
+              }),
+            ),
+          }),
+        ),
+      });
+
       const jsonString = JSON.stringify(exportedDeviceObject, null, 2);
       const blob = new Blob([jsonString], { type: "application/json" });
       const url = URL.createObjectURL(blob);
@@ -107,33 +173,72 @@ export const DeviceSelector = () => {
 
       URL.revokeObjectURL(url);
     }
-  };
+  }, [selectedDevice]);
+
+  // Memoize complex derived values
+  const propertyItems = React.useMemo(() => {
+    if (!selectedDevice) return [];
+
+    return [
+      selectedDevice.version && {
+        icon: <GitFork />,
+        label: "Version",
+        value: `${selectedDevice.version}`,
+      },
+      selectedDevice.defaultClockFreq !== undefined &&
+        selectedDevice.defaultClockFreq !== 0 && {
+          icon: <ClockIcon />,
+          label: "Clock Frequency",
+          value: `${selectedDevice.defaultClockFreq ?? 0 / 1e6} MHz`,
+        },
+      selectedDevice.littleEndian && {
+        icon: <ArrowLeftRight />,
+        label: "Endianness",
+        value: selectedDevice.littleEndian ? "Little" : "Big",
+      },
+    ].filter(Boolean);
+  }, [selectedDevice]);
+
+  // Memoize peripherals data for MemoryMap
+  const memoryMapPeripherals = React.useMemo(() => {
+    return (
+      selectedDevice?.peripherals.map((peripheral) => ({
+        name: peripheral.name,
+        baseAddress: peripheral.baseAddress,
+        size: peripheral.size,
+        description: peripheral.description,
+      })) ?? []
+    );
+  }, [selectedDevice?.peripherals]);
 
   return (
-    <Card className="mb-4 px-2">
-      <CardHeader>
-        <CardTitle className="text-lg font-semibold">
-          <div className="flex justify-between">
-            Device Selection
-            <Button onClick={exportDevice}> Export to JSON </Button>
-          </div>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
+    <div className="w-full">
+      <div className="text-xl font-semibold w-full">
+        <div className="flex justify-between">
+          Device Selection
+          <Button onClick={exportDevice}> Export to JSON </Button>
+        </div>
+      </div>
+
+      <div className="space-y-6 mt-4">
         {/* Device Selection Section */}
         <div className="space-y-3">
           <Select
-            value={selectedDevice?.id}
-            onValueChange={(deviceId) => {
-              const device = devices.find((d) => d.id === deviceId);
-              if (device) setSelectedDevice(device);
+            value={selectedDeviceId ?? undefined}
+            onValueChange={handleDeviceSelection}
+            onOpenChange={(open) => {
+              if (open) {
+                prefetchDevices(); // Prefetch when dropdown is opened
+              }
             }}
           >
-            <SelectTrigger>
-              <SelectValue placeholder="Select device" />
+            <SelectTrigger disabled={isLoadingDevices}>
+              <SelectValue
+                placeholder={isLoadingDevices ? "Loading..." : "Select device"}
+              />
             </SelectTrigger>
             <SelectContent>
-              {devices.map((device) => (
+              {devicesData?.devices?.map((device) => (
                 <SelectItem key={device.id} value={device.id}>
                   {device.name}
                 </SelectItem>
@@ -141,51 +246,45 @@ export const DeviceSelector = () => {
             </SelectContent>
           </Select>
 
-          {/* Device Description */}
-          {selectedDevice?.description && (
-            <p className="text-sm text-muted-foreground">
-              {selectedDevice.description}
-            </p>
+          {/* Add loading state */}
+          {isLoading ? (
+            <div className="flex items-center justify-center h-32">
+              <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+          ) : (
+            <>
+              {/* Device Description */}
+              {selectedDevice?.description && (
+                <p className="text-lg text-muted-foreground">
+                  {selectedDevice.description}
+                </p>
+              )}
+            </>
           )}
         </div>
 
         {/* Configuration Controls */}
-        <div className="space-y-4">
-          {/* Base Address Input */}
-          <div className="flex flex-col space-y-2">
-            <Label htmlFor="base-addr-input">Base Address</Label>
-            <div className="flex justify-between">
-              <div className="flex items-center space-x-4">
-                <Input
-                  id="base-addr-input"
-                  className={`w-36 font-mono text-sm ${
-                    !isValid ? "border-red-500 focus-visible:ring-red-500" : ""
-                  }`}
-                  value={baseAddr}
-                  onChange={(e) => handleBaseAddrChange(e.target.value)}
-                  placeholder="0x00000000"
-                />
-                {/* Offset Registers Toggle */}
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="offset-base-addr"
-                    checked={offsetBaseAddr}
-                    onCheckedChange={setOffsetBaseAddr}
-                  />
-                  <Label htmlFor="offset-base-addr">
-                    Offset Registers by Base Address
-                  </Label>
-                </div>
-              </div>
-            </div>
-            {!isValid && (
-              <p className="text-xs text-red-500">
-                Please enter a valid hex address (0x00000000 - 0xFFFFFFFF)
-              </p>
-            )}
+        <div className="space-y-4 mt-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+            {propertyItems.filter(Boolean).map((item, index) => (
+              <PropertyItem key={index} {...(item as PropertyItemProps)} />
+            ))}
           </div>
         </div>
-      </CardContent>
-    </Card>
+
+        {selectedDevice?.peripherals && (
+          <div className="mt-4">
+            <MemoryMap peripherals={memoryMapPeripherals} />
+          </div>
+        )}
+      </div>
+      {selectedDevice && <RegisterList selectedDevice={selectedDevice} />}
+
+      {error && (
+        <div className="text-red-500">
+          Error loading devices: {error.message}
+        </div>
+      )}
+    </div>
   );
 };

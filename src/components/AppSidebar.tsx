@@ -1,5 +1,5 @@
 "use client";
-import { Home, Pencil, Upload } from "lucide-react";
+import { Home, Settings, Upload, Search, BookOpen, Mail } from "lucide-react";
 import Link from "next/link";
 import {
   Sidebar,
@@ -24,44 +24,72 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ModeToggle } from "@/components/ModeToggle";
 import { clearDevicesCache } from "@/utils/cache";
+import { useRouter } from "next/navigation";
 
-const appitems = [
+const deviceLibraryItems = [
   {
-    title: "Register Maps",
-    url: "/",
+    title: "View Device Maps",
+    url: "/home",
     icon: Home,
+  },
+  {
+    title: "Public Devices",
+    url: "/public",
+    icon: Search,
   },
 ];
 
-const deviceitems = [
+const deviceManagementItems = [
   {
-    title: "Edit Device Configurations",
-    url: "/edit",
-    icon: Pencil,
+    title: "My Devices",
+    url: "/mydevices",
+    icon: Settings,
   },
   {
-    title: "Upload New Configuration",
+    title: "Upload New Device",
     url: "/upload",
     icon: Upload,
+  },
+  {
+    title: "Device Schema",
+    url: "/schema",
+    icon: BookOpen,
+  },
+];
+
+const supportItems = [
+  {
+    title: "Contact Us",
+    url: "mailto:nishant@cybersphereholdings.com",
+    icon: Mail,
   },
 ];
 
 export function AppSidebar() {
   const { data: session } = useSession();
+  const router = useRouter();
+
   return (
     <Sidebar variant="sidebar">
       <SidebarHeader className="text-xl font-semibold">
         <div className="flex w-full justify-between items-center">
-          BitSmith
+          <div
+            className="bitsmith"
+            onClick={() => router.push("/home")}
+            style={{ cursor: "pointer" }}
+          >
+            BitSmith
+          </div>
           <ModeToggle />
         </div>
       </SidebarHeader>
       <SidebarContent>
+        <SidebarSeparator />
         <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
+          <SidebarGroupLabel>Device Library</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {appitems.map((item) => (
+              {deviceLibraryItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <Link href={item.url}>
@@ -75,12 +103,29 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarSeparator />
         <SidebarGroup>
-          <SidebarGroupLabel>Device Register Maps</SidebarGroupLabel>
+          <SidebarGroupLabel>Device Management</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {deviceitems.map((item) => (
+              {deviceManagementItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <Link href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Support</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {supportItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <Link href={item.url}>
@@ -109,6 +154,11 @@ export function AppSidebar() {
                   side="top"
                   className="w-[--radix-popper-anchor-width]"
                 >
+                  <DropdownMenuItem asChild>
+                    <Link href="/account">
+                      <span>Account Settings</span>
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuItem
                     onSelect={() => {
                       clearDevicesCache(session.user.id);

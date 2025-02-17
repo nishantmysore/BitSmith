@@ -46,6 +46,8 @@ export const authOptions: NextAuthOptions = {
     },
     // Add this to handle the redirect after sign in
     async redirect({ url, baseUrl }) {
+      // Redirect to /home after sign in
+      if (url.startsWith("/login")) return `${baseUrl}/home`;
       // If the url is relative, prefix it with the base url
       if (url.startsWith("/")) return `${baseUrl}${url}`;
       // If the url is already absolute but on the same host, return it
