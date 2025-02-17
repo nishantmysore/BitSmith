@@ -20,7 +20,8 @@ export async function GET() {
         currentPeriodEnd: true,
       },
     });
-
+    console.log("USER____________________", user);
+    console.log("STATUS____________________", user?.subscriptionStatus);
     const isActive =
       (user?.subscriptionStatus === "active" ||
         user?.subscriptionStatus === "active_canceling" || user?.subscriptionStatus === "trialing") &&
