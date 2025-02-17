@@ -38,9 +38,10 @@ export async function GET() {
     console.log("[Devices API] Session user ID:", session.user.id);
 
     const prismaStart = performance.now();
+    console.log("SESSION USER ID", session.user.id);
     const devices = await prisma.device.findMany({
       where: {
-        OR: [{ ownerId: session.user.id }, { isPublic: true }],
+        ownerId: session.user.id
       },
       select: {
         id: true,

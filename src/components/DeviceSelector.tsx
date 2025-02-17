@@ -69,7 +69,7 @@ export const DeviceSelector = () => {
     data: devicesData,
     isLoading: isLoadingDevices,
     error,
-  } = useSWR<{ devices: BasicDevice[] }>("/api/devices", fetcher, {
+  } = useSWR<{ devices: BasicDevice[] }>("/api/devices/getdevices", fetcher, {
     revalidateOnFocus: false,
     dedupingInterval: 3600000,
     loadingTimeout: 3000,
