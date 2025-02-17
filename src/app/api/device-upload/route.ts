@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 const BATCH_SIZE = 100; // Adjust based on your needs
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 async function createPeripheralsInBatches(deviceId: string, peripherals: any[]) {
   for (let i = 0; i < peripherals.length; i += BATCH_SIZE) {
     const batch = peripherals.slice(i, i + BATCH_SIZE);
