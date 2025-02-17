@@ -44,7 +44,7 @@ export async function POST(req: Request) {
             subscriptionPlan:
               subscription.items.data[0].price.lookup_key ?? null,
             currentPeriodEnd: subscription.current_period_end
-              ? subscription.current_period_end * 1000
+              ? new Date(subscription.current_period_end * 1000)
               : null,
           },
         });
