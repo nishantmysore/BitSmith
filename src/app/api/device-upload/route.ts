@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
-import { DeviceValidateSchema, DeviceFormData } from "@/types/validation";
+import { DeviceValidateSchema } from "@/types/validation";
 import { NextRequest, NextResponse } from "next/server";
 
 const BATCH_SIZE = 100; // Adjust based on your needs
@@ -28,7 +28,7 @@ async function createPeripheralsInBatches(deviceId: string, peripherals: any[]) 
     );
   }
 }
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 async function createRegistersInBatches(peripheralId: string, registers: any[]) {
   for (let i = 0; i < registers.length; i += BATCH_SIZE) {
     const batch = registers.slice(i, i + BATCH_SIZE);
@@ -61,7 +61,7 @@ async function createRegistersInBatches(peripheralId: string, registers: any[]) 
     );
   }
 }
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 async function createFieldsInBatches(registerId: string, fields: any[]) {
   for (let i = 0; i < fields.length; i += BATCH_SIZE) {
     const batch = fields.slice(i, i + BATCH_SIZE);
@@ -88,6 +88,7 @@ async function createFieldsInBatches(registerId: string, fields: any[]) {
   }
 }
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 async function createEnumValuesInBatches(fieldId: string, enumValues: any[]) {
   for (let i = 0; i < enumValues.length; i += BATCH_SIZE) {
     const batch = enumValues.slice(i, i + BATCH_SIZE);
