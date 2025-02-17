@@ -24,7 +24,7 @@ export async function GET(request: Request) {
     });
 
     return NextResponse.json(devices);
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Failed to fetch devices" },
       { status: 500 },

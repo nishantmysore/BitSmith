@@ -2,8 +2,9 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
-import { cache } from 'react';
+import { cache } from "react";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const transformBigInts = (data: any): any => {
   if (data === null || data === undefined) return data;
   if (typeof data === "bigint") return Number(data);
@@ -44,12 +45,12 @@ const getDevice = cache(async (id: string) => {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const new_params = await params;
     // Log the incoming request params for debugging
-    console.log("Received request for device ID:", new_params.id);
+    console.log(request);
+    const { id } = await params;
 
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -62,16 +63,16 @@ export async function GET(
     // Log session user for debugging
     console.log("Session user:", session.user);
 
-    const device = await getDevice(new_params.id);
+    const device = await getDevice(id);
 
     if (!device) {
-      console.log("Device not found for ID:", new_params.id);
+      console.log("Device not found for ID:", id);
       return NextResponse.json({ error: "Device not found" }, { status: 404 });
     }
 
     return NextResponse.json(transformBigInts(device), {
       headers: {
-        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
       },
     });
   } catch (error) {
@@ -85,11 +86,11 @@ export async function GET(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const new_params = await params;
-    console.log("Received DELETE request for device ID:", new_params.id);
+    const { id } = await params;
+    console.log("Received DELETE request for device ID:", id);
 
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -102,13 +103,13 @@ export async function DELETE(
     // First verify the device exists and belongs to the user
     const device = await prisma.device.findFirst({
       where: {
-        id: new_params.id,
+        id: id,
         ownerId: session.user.id,
       },
     });
 
     if (!device) {
-      console.log("Device not found or unauthorized for ID:", new_params.id);
+      console.log("Device not found or unauthorized for ID:", id);
       return NextResponse.json(
         { error: "Device not found or unauthorized" },
         { status: 404 },
@@ -118,11 +119,11 @@ export async function DELETE(
     // Delete the device and all related data
     await prisma.device.delete({
       where: {
-        id: new_params.id,
+        id: id,
       },
     });
 
-    console.log("Successfully deleted device:", new_params.id);
+    console.log("Successfully deleted device:", id);
     return NextResponse.json({ message: "Device deleted successfully" });
   } catch (error) {
     console.error("Failed to delete device:", error);

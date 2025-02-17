@@ -27,6 +27,7 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
   interface ValidationErrorDetail {
     path: (string | number)[];
     message: string;
+    /* eslint-disable @typescript-eslint/no-explicit-any */
     invalidValue?: any;
     friendlyPath?: string;
   }
@@ -64,7 +65,8 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
         message: issue.message,
         invalidValue:
           issue.path.length > 0
-            ? issue.path.reduce((obj, key) => obj?.[key], data)
+            ? /* eslint-disable @typescript-eslint/no-explicit-any */
+              issue.path.reduce((obj, key) => (obj as any)?.[key], data)
             : undefined,
         friendlyPath: getFriendlyErrorPath(issue.path, data),
       }));
@@ -144,7 +146,7 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
             message: issue.message,
             invalidValue:
               issue.path.length > 0
-                ? issue.path.reduce((obj, key) => obj?.[key], jsonData)
+                ? issue.path.reduce((obj, key) => (obj as any)?.[key], jsonData)
                 : undefined,
             friendlyPath: getFriendlyErrorPath(issue.path, jsonData),
           }));
@@ -164,7 +166,7 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
           title: "Success",
           description: "Configuration file loaded successfully!",
         });
-      } catch (error) {
+      } catch {
         toast({
           title: "Error",
           description: "Failed to parse the JSON file",

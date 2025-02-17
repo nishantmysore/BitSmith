@@ -48,8 +48,8 @@ export const HowItWorks = () => {
         </span>
       </h2>
       <p className="md:w-3/4 mx-auto mt-4 mb-8 text-xl text-muted-foreground">
-        Whether you're debugging, developing, or documenting, BitSmith provides
-        a clear path from complexity to clarity.
+        Whether you&apos;re debugging, developing, or documenting, BitSmith
+        provides a clear path from complexity to clarity.
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">

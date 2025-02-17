@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/table";
 
 interface SchemaDocProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   schema: z.ZodType<any>;
   title?: string;
 }
@@ -39,10 +40,12 @@ function SchemaField({
   schema,
   depth = 0,
 }: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   schema: z.ZodType<any>;
   depth?: number;
 }) {
   if (schema instanceof z.ZodObject) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const shape = schema._def.shape() as { [key: string]: z.ZodType<any> };
 
     return (
@@ -107,6 +110,7 @@ function SchemaField({
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function FieldBadges({ field }: { field: z.ZodType<any> }) {
   return (
     <>
@@ -116,6 +120,7 @@ function FieldBadges({ field }: { field: z.ZodType<any> }) {
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function FieldValidation({ field }: { field: z.ZodType<any> }) {
   const checks = getValidationChecks(field);
 
@@ -130,6 +135,7 @@ function FieldValidation({ field }: { field: z.ZodType<any> }) {
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getFieldType(field: z.ZodType<any>): string {
   // First, handle optional types by unwrapping them
   if (field instanceof z.ZodOptional) {
@@ -148,12 +154,14 @@ function getFieldType(field: z.ZodType<any>): string {
   return "unknown";
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getValidationChecks(field: z.ZodType<any>): string[] {
   const checks: string[] = [];
 
   if (field instanceof z.ZodString) {
     const def = field._def;
     if (def.checks) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       def.checks.forEach((check: any) => {
         if (check.kind === "min") checks.push(`Min length: ${check.value}`);
         if (check.kind === "max") checks.push(`Max length: ${check.value}`);
@@ -164,6 +172,7 @@ function getValidationChecks(field: z.ZodType<any>): string[] {
   if (field instanceof z.ZodNumber) {
     const def = field._def;
     if (def.checks) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       def.checks.forEach((check: any) => {
         if (check.kind === "min") checks.push(`Min: ${check.value}`);
         if (check.kind === "max") checks.push(`Max: ${check.value}`);

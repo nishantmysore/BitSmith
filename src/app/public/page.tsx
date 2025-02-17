@@ -56,7 +56,7 @@ export default function PublicDevicesPage() {
     return () => {
       debouncedFetch.cancel();
     };
-  }, [search]);
+  }, [debouncedFetch, search]);
 
   const copyDevice = async (device: Device) => {
     setCopyingDevices((prev) => new Set(prev).add(device.id));

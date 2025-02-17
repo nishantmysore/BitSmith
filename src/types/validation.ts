@@ -13,7 +13,12 @@ export const acceptedWidthsStr = [
   "128",
 ] as const;
 
-const STATUS_VALUES = ["unchanged", "added", "modified", "deleted"] as const;
+export const STATUS_VALUES = [
+  "unchanged",
+  "added",
+  "modified",
+  "deleted",
+] as const;
 export type Status = (typeof STATUS_VALUES)[number];
 
 export type DeviceFormData = {

@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { Pricing } from "@/components/LandingPage/Pricing";
 
 export default function SubscriptionRequired() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
 
   useEffect(() => {

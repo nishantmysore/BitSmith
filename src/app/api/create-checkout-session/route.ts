@@ -5,7 +5,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-export async function POST(request: Request) {
+export async function POST() {
   try {
     // Get headers first, before any other operations
     const headersList = await headers();
@@ -59,6 +59,7 @@ export async function POST(request: Request) {
 
       console.log("URL______________", checkoutSession.url);
       return NextResponse.json({ url: checkoutSession.url });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (checkoutError: any) {
       console.error("Checkout creation failed:", checkoutError);
       return NextResponse.json(
@@ -66,6 +67,7 @@ export async function POST(request: Request) {
         { status: checkoutError.statusCode || 500 },
       );
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     return NextResponse.json(
       { error: err.message },

@@ -1,8 +1,8 @@
-import { AccessType } from "@prisma/client";
+import { FieldAccessType } from "@prisma/client";
 import { getAccessStyles } from "@/lib/access_colors"; // adjust import path as needed
 
 interface AccessBadgeProps {
-  access: AccessType;
+  access: FieldAccessType;
 }
 
 export const AccessBadge = ({ access }: AccessBadgeProps) => {

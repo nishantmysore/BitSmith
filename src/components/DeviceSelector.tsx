@@ -13,8 +13,8 @@ import { ReactNode } from "react";
 import { ClockIcon, ArrowLeftRight, GitFork, Loader2 } from "lucide-react";
 import { MemoryMap } from "./MemoryMap";
 import RegisterList from "./RegisterList"; // Add this at the top with other imports
-import useSWR from 'swr';
-import { preload } from 'swr';
+import useSWR from "swr";
+import { preload } from "swr";
 
 const SELECTED_DEVICE_KEY = "selectedDeviceId";
 
@@ -34,6 +34,7 @@ const PropertyItem = React.memo(({ icon, label, value }: PropertyItemProps) => (
     </div>
   </div>
 ));
+PropertyItem.displayName = "PropertyItem";
 
 interface BasicDevice {
   id: string;
@@ -49,7 +50,7 @@ const fetcher = async (url: string) => {
 
 // Modify the prefetch function to include logging
 const prefetchDevices = () => {
-  preload('/api/devices/getdevices', fetcher);
+  preload("/api/devices/getdevices", fetcher);
 };
 
 // Add this configuration object
@@ -64,23 +65,23 @@ export const DeviceSelector = () => {
     prefetchDevices();
   }, []);
 
-  const { data: devicesData, isLoading: isLoadingDevices, error } = useSWR<{ devices: BasicDevice[] }>(
-    '/api/devices',
-    fetcher,
-    {
-      revalidateOnFocus: false,
-      dedupingInterval: 3600000,
-      loadingTimeout: 3000
-    }
-  );
+  const {
+    data: devicesData,
+    isLoading: isLoadingDevices,
+    error,
+  } = useSWR<{ devices: BasicDevice[] }>("/api/devices", fetcher, {
+    revalidateOnFocus: false,
+    dedupingInterval: 3600000,
+    loadingTimeout: 3000,
+  });
 
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
-  
+
   // Keep the existing selectedDevice SWR hook
   const { data: selectedDevice, isLoading } = useSWR<DeviceWithRelations>(
     selectedDeviceId ? `/api/devices/${selectedDeviceId}` : null,
     fetcher,
-    swrConfig
+    swrConfig,
   );
 
   // Check for saved device ID on mount
@@ -100,9 +101,10 @@ export const DeviceSelector = () => {
   // Memoize the exportDevice function
   const exportDevice = React.useCallback((): void => {
     if (selectedDevice) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const cleanObject = (obj: any): any => {
         return Object.fromEntries(
-          Object.entries(obj).filter(([_, value]) => value != null),
+          Object.entries(obj).filter(([, value]) => value != null),
         );
       };
 
@@ -231,7 +233,9 @@ export const DeviceSelector = () => {
             }}
           >
             <SelectTrigger disabled={isLoadingDevices}>
-              <SelectValue placeholder={isLoadingDevices ? "Loading..." : "Select device"} />
+              <SelectValue
+                placeholder={isLoadingDevices ? "Loading..." : "Select device"}
+              />
             </SelectTrigger>
             <SelectContent>
               {devicesData?.devices?.map((device) => (
@@ -262,8 +266,8 @@ export const DeviceSelector = () => {
         {/* Configuration Controls */}
         <div className="space-y-4 mt-4">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-            {propertyItems.map((item, index) => (
-              <PropertyItem key={index} {...item} />
+            {propertyItems.filter(Boolean).map((item, index) => (
+              <PropertyItem key={index} {...(item as PropertyItemProps)} />
             ))}
           </div>
         </div>

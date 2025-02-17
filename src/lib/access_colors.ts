@@ -1,6 +1,6 @@
-import { AccessType } from "@prisma/client";
+import { FieldAccessType } from "@prisma/client";
 
-export const getAccessDescription = (access: AccessType) => {
+export const getAccessDescription = (access: FieldAccessType) => {
   switch (access) {
     case "RO":
       return "Read Only - This field can only be read";
@@ -19,7 +19,7 @@ export const getAccessDescription = (access: AccessType) => {
   }
 };
 
-export const getAccessStyles = (access: AccessType) => {
+export const getAccessStyles = (access: FieldAccessType) => {
   switch (access) {
     case "RO":
       return "bg-gradient-to-br from-sky-600/90 via-blue-500/95 to-cyan-400/95 text-white dark:from-sky-800/90 dark:via-blue-700/95 dark:to-cyan-600/95 dark:text-blue-50";

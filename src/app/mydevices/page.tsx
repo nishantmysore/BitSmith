@@ -68,7 +68,7 @@ export default function PublicDevicesPage() {
     return () => {
       debouncedFetch.cancel();
     };
-  }, [search]);
+  }, [debouncedFetch, search]);
 
   const handleDeleteClick = (device: Device) => {
     setDeviceToDelete(device);
@@ -173,7 +173,7 @@ export default function PublicDevicesPage() {
                         </AlertDialogTitle>
                         <AlertDialogDescription>
                           This action cannot be undone. This will permanently
-                          delete the device "{deviceToDelete?.name}" and remove
+                          delete the device `{deviceToDelete?.name}` and remove
                           its data from our servers.
                         </AlertDialogDescription>
                       </AlertDialogHeader>

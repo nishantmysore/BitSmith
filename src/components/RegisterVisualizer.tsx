@@ -52,7 +52,7 @@ interface RegisterVisualizerProps {
     })[];
   };
 }
-const createBitString = (field: Field): String => {
+const createBitString = (field: Field): string => {
   const bitString =
     field.bitWidth === 1
       ? `${field.bitOffset}`

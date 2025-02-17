@@ -43,9 +43,11 @@ const RegisterList: React.FC<RegisterListProps> = ({ selectedDevice }) => {
       </Card>
     );
   }
-
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function flattenRegisters(device: any): RegisterData[] {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return device.peripherals.flatMap((peripheral: any) =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       peripheral.registers.flatMap((register: any) => {
         // If register is not an array, return single register data
         if (!register.isArray) {
