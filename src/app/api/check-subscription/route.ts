@@ -23,7 +23,7 @@ export async function GET() {
 
     const isActive =
       (user?.subscriptionStatus === "active" ||
-        user?.subscriptionStatus === "active_canceling") &&
+        user?.subscriptionStatus === "active_canceling" || user?.subscriptionStatus === "trialing") &&
       user?.currentPeriodEnd &&
       user.currentPeriodEnd > new Date();
 
