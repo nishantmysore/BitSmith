@@ -1,5 +1,5 @@
 "use client";
-import ReactJsonView from "@microlink/react-json-view";
+import dynamic from "next/dynamic";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -10,6 +10,10 @@ import { useState } from "react";
 
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
+
+const ReactJsonView = dynamic(() => import("@microlink/react-json-view"), {
+  ssr: false,
+});
 
 interface DeviceEditFormProps {
   newDevice?: boolean;
