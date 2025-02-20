@@ -23,6 +23,8 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
   const { toast } = useToast();
   const [data, setData] = useState<DeviceFormData | null>(null);
   const { theme } = useTheme();
+  console.log(theme)
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleJsonChange = (updatedSrc: DeviceFormData) => {
     setData(updatedSrc);
@@ -61,6 +63,15 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
   };
 
   const onSubmit = async () => {
+    if (!data) {
+      toast({
+        title: "Error",
+        description: "No data to submit",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const result = DeviceValidateSchema.safeParse(data);
 
     if (!result.success) {
@@ -76,15 +87,8 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
       }));
       setValidationErrors(formattedErrors);
     }
-    if (!data) {
-      toast({
-        title: "Error",
-        description: "No data to submit",
-        variant: "destructive",
-      });
-      return;
-    }
 
+    setIsUploading(true);
     try {
       const response = await fetch("/api/device-upload", {
         method: newDevice ? "POST" : "PUT",
@@ -113,6 +117,8 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
           error instanceof Error ? error.message : "An unknown error occurred",
         variant: "destructive",
       });
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -170,6 +176,14 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
           title: "Success",
           description: "Configuration file loaded successfully!",
         });
+        
+        // Scroll to bottom after a short delay to ensure content is rendered
+        setTimeout(() => {
+          window.scrollTo({
+            top: document.documentElement.scrollHeight,
+            behavior: 'smooth'
+          });
+        }, 100);
       } catch {
         toast({
           title: "Error",
@@ -225,7 +239,16 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
           </div>
           {/* Button below the JsonView */}
           <div className="flex justify-center mt-4">
-            <Button onClick={onSubmit}>Upload</Button>
+            <Button onClick={onSubmit} disabled={isUploading}>
+              {isUploading ? (
+                <>
+                  <span className="animate-spin mr-2">⏳</span>
+                  Uploading...
+                </>
+              ) : (
+                'Upload'
+              )}
+            </Button>
           </div>
         </CardContent>
       </Card>
