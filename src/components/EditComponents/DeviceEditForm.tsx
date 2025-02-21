@@ -23,7 +23,7 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
   const { toast } = useToast();
   const [data, setData] = useState<DeviceFormData | null>(null);
   const { theme } = useTheme();
-  console.log(theme)
+  console.log(theme);
   const [isUploading, setIsUploading] = useState(false);
 
   const handleJsonChange = (updatedSrc: DeviceFormData) => {
@@ -176,12 +176,12 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
           title: "Success",
           description: "Configuration file loaded successfully!",
         });
-        
+
         // Scroll to bottom after a short delay to ensure content is rendered
         setTimeout(() => {
           window.scrollTo({
             top: document.documentElement.scrollHeight,
-            behavior: 'smooth'
+            behavior: "smooth",
           });
         }, 100);
       } catch {
@@ -246,7 +246,7 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
                   Uploading...
                 </>
               ) : (
-                'Upload'
+                "Upload"
               )}
             </Button>
           </div>

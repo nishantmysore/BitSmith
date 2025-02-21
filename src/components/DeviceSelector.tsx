@@ -40,7 +40,8 @@ interface BasicDevice {
 export const DeviceSelector = () => {
   const [devices, setDevices] = useState<BasicDevice[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
-  const [selectedDevice, setSelectedDevice] = useState<DeviceWithRelations | null>(null);
+  const [selectedDevice, setSelectedDevice] =
+    useState<DeviceWithRelations | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,15 +50,15 @@ export const DeviceSelector = () => {
     const fetchDevices = async () => {
       console.log("[Client] Fetching devices...");
       try {
-        const response = await fetch('/api/devices/getdevices', {
+        const response = await fetch("/api/devices/getdevices", {
           // Add cache: 'no-store' to prevent caching
-          cache: 'no-store'
+          cache: "no-store",
         });
         const data = await response.json();
         console.log("[Client] Received devices:", data);
         setDevices(data.devices);
-      } catch (err) {
-        setError('Failed to fetch devices');
+      } catch {
+        setError("Failed to fetch devices");
       }
     };
     fetchDevices();
@@ -70,14 +71,14 @@ export const DeviceSelector = () => {
         setSelectedDevice(null);
         return;
       }
-      
+
       setIsLoading(true);
       try {
         const response = await fetch(`/api/devices/${selectedDeviceId}`);
         const data = await response.json();
         setSelectedDevice(data);
-      } catch (err) {
-        setError('Failed to fetch device details');
+      } catch {
+        setError("Failed to fetch device details");
       } finally {
         setIsLoading(false);
       }
@@ -218,7 +219,9 @@ export const DeviceSelector = () => {
             onValueChange={handleDeviceSelection}
           >
             <SelectTrigger disabled={isLoading}>
-              <SelectValue placeholder={isLoading ? "Loading..." : "Select device"} />
+              <SelectValue
+                placeholder={isLoading ? "Loading..." : "Select device"}
+              />
             </SelectTrigger>
             <SelectContent>
               {devices.map((device) => (
@@ -258,13 +261,13 @@ export const DeviceSelector = () => {
           </>
         )}
       </div>
-      
-      {!isLoading && selectedDevice && <RegisterList selectedDevice={selectedDevice} />}
+
+      {!isLoading && selectedDevice && (
+        <RegisterList selectedDevice={selectedDevice} />
+      )}
 
       {error && (
-        <div className="text-red-500">
-          Error loading devices: {error}
-        </div>
+        <div className="text-red-500">Error loading devices: {error}</div>
       )}
     </div>
   );

@@ -24,7 +24,8 @@ export async function GET() {
     console.log("STATUS____________________", user?.subscriptionStatus);
     const isActive =
       (user?.subscriptionStatus === "active" ||
-        user?.subscriptionStatus === "active_canceling" || user?.subscriptionStatus === "trialing") &&
+        user?.subscriptionStatus === "active_canceling" ||
+        user?.subscriptionStatus === "trialing") &&
       user?.currentPeriodEnd &&
       user.currentPeriodEnd > new Date();
 

@@ -21,7 +21,7 @@ export async function GET() {
 
     const devices = await prisma.device.findMany({
       where: {
-        ownerId: session.user.id
+        ownerId: session.user.id,
       },
       select: {
         id: true,
@@ -30,7 +30,7 @@ export async function GET() {
     });
 
     return NextResponse.json({ devices });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Failed to fetch devices" },
       { status: 500 },
