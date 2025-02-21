@@ -49,7 +49,7 @@ const MatrixRain: React.FC<MatrixRainProps> = ({ className }) => {
       if (!ctx || !canvas) return;
 
       // Add semi-transparent black rectangle to create fade effect
-      ctx.fillStyle = "rgba(0, 0, 0, 0.15)"; // Adjust opacity here (0.05 - 0.3)
+      ctx.fillStyle = "rgba(9, 9, 11, 0.15)"; // Adjust opacity here (0.05 - 0.3)
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       // Set the text style

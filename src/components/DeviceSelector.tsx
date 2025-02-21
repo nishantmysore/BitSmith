@@ -104,7 +104,6 @@ export const DeviceSelector = () => {
         name: selectedDevice.name,
         description: selectedDevice.description,
         littleEndian: selectedDevice.littleEndian,
-        isPublic: selectedDevice.isPublic,
         defaultClockFreq: selectedDevice.defaultClockFreq,
         version: selectedDevice.version,
         peripherals: selectedDevice.peripherals.map((peripheral) =>
