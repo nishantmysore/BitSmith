@@ -142,7 +142,7 @@ const RegisterVisualizer: React.FC<RegisterVisualizerProps> = ({
 
   const handleCopy = () => {
     navigator.clipboard.writeText(
-      convertToHexString(baseAddr + register.addressOffset),
+      convertToHexString(BigInt(baseAddr) + BigInt(register.addressOffset))
     );
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
