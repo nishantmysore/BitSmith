@@ -12,11 +12,7 @@ import { DeviceWithRelations } from "@/types/device";
 import { ReactNode } from "react";
 import { ClockIcon, ArrowLeftRight, GitFork, Loader2 } from "lucide-react";
 import { MemoryMap } from "./MemoryMap";
-import RegisterList from "./RegisterList"; // Add this at the top with other imports
-import useSWR from "swr";
-import { preload } from "swr";
-
-const SELECTED_DEVICE_KEY = "selectedDeviceId";
+import RegisterList from "./RegisterList";
 
 interface PropertyItemProps {
   icon: ReactNode;
@@ -41,61 +37,56 @@ interface BasicDevice {
   name: string;
 }
 
-// Modify the fetcher to include more detailed logging
-const fetcher = async (url: string) => {
-  const response = await fetch(url);
-  const data = await response.json();
-  return data;
-};
-
-// Modify the prefetch function to include logging
-const prefetchDevices = () => {
-  preload("/api/devices/getdevices", fetcher);
-};
-
-// Add this configuration object
-const swrConfig = {
-  revalidateOnFocus: false,
-  dedupingInterval: 3600000, // 1 hour
-};
-
 export const DeviceSelector = () => {
-  // Add logging to the initial useEffect
-  useEffect(() => {
-    prefetchDevices();
-  }, []);
-
-  const {
-    data: devicesData,
-    isLoading: isLoadingDevices,
-    error,
-  } = useSWR<{ devices: BasicDevice[] }>("/api/devices/getdevices", fetcher, {
-    revalidateOnFocus: false,
-    dedupingInterval: 3600000,
-    loadingTimeout: 3000,
-  });
-
+  const [devices, setDevices] = useState<BasicDevice[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
+  const [selectedDevice, setSelectedDevice] = useState<DeviceWithRelations | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Keep the existing selectedDevice SWR hook
-  const { data: selectedDevice, isLoading } = useSWR<DeviceWithRelations>(
-    selectedDeviceId ? `/api/devices/${selectedDeviceId}` : null,
-    fetcher,
-    swrConfig,
-  );
-
-  // Check for saved device ID on mount
+  // Fetch devices on mount
   useEffect(() => {
-    const savedDeviceId = localStorage.getItem(SELECTED_DEVICE_KEY);
-    if (savedDeviceId) {
-      setSelectedDeviceId(savedDeviceId);
-    }
+    const fetchDevices = async () => {
+      console.log("[Client] Fetching devices...");
+      try {
+        const response = await fetch('/api/devices/getdevices', {
+          // Add cache: 'no-store' to prevent caching
+          cache: 'no-store'
+        });
+        const data = await response.json();
+        console.log("[Client] Received devices:", data);
+        setDevices(data.devices);
+      } catch (err) {
+        setError('Failed to fetch devices');
+      }
+    };
+    fetchDevices();
   }, []);
 
-  // Add a log in the selection handler
+  // Fetch selected device details when ID changes
+  useEffect(() => {
+    const fetchSelectedDevice = async () => {
+      if (!selectedDeviceId) {
+        setSelectedDevice(null);
+        return;
+      }
+      
+      setIsLoading(true);
+      try {
+        const response = await fetch(`/api/devices/${selectedDeviceId}`);
+        const data = await response.json();
+        setSelectedDevice(data);
+      } catch (err) {
+        setError('Failed to fetch device details');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchSelectedDevice();
+  }, [selectedDeviceId]);
+
   const handleDeviceSelection = (value: string) => {
     setSelectedDeviceId(value);
-    localStorage.setItem(SELECTED_DEVICE_KEY, value);
   };
 
   // Memoize the exportDevice function
@@ -216,29 +207,21 @@ export const DeviceSelector = () => {
       <div className="text-xl font-semibold w-full">
         <div className="flex justify-between">
           Device Selection
-          <Button onClick={exportDevice}> Export to JSON </Button>
+          <Button onClick={exportDevice}>Export to JSON</Button>
         </div>
       </div>
 
       <div className="space-y-6 mt-4">
-        {/* Device Selection Section */}
         <div className="space-y-3">
           <Select
             value={selectedDeviceId ?? undefined}
             onValueChange={handleDeviceSelection}
-            onOpenChange={(open) => {
-              if (open) {
-                prefetchDevices(); // Prefetch when dropdown is opened
-              }
-            }}
           >
-            <SelectTrigger disabled={isLoadingDevices}>
-              <SelectValue
-                placeholder={isLoadingDevices ? "Loading..." : "Select device"}
-              />
+            <SelectTrigger disabled={isLoading}>
+              <SelectValue placeholder={isLoading ? "Loading..." : "Select device"} />
             </SelectTrigger>
             <SelectContent>
-              {devicesData?.devices?.map((device) => (
+              {devices.map((device) => (
                 <SelectItem key={device.id} value={device.id}>
                   {device.name}
                 </SelectItem>
@@ -246,43 +229,41 @@ export const DeviceSelector = () => {
             </SelectContent>
           </Select>
 
-          {/* Add loading state */}
-          {isLoading ? (
-            <div className="flex items-center justify-center h-32">
-              <Loader2 className="h-8 w-8 animate-spin" />
-            </div>
-          ) : (
-            <>
-              {/* Device Description */}
-              {selectedDevice?.description && (
-                <p className="text-lg text-muted-foreground">
-                  {selectedDevice.description}
-                </p>
-              )}
-            </>
+          {selectedDevice?.description && (
+            <p className="text-lg text-muted-foreground">
+              {selectedDevice.description}
+            </p>
           )}
         </div>
 
-        {/* Configuration Controls */}
-        <div className="space-y-4 mt-4">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-            {propertyItems.filter(Boolean).map((item, index) => (
-              <PropertyItem key={index} {...(item as PropertyItemProps)} />
-            ))}
+        {isLoading ? (
+          <div className="flex justify-center items-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
-        </div>
+        ) : (
+          <>
+            <div className="space-y-4 mt-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                {propertyItems.filter(Boolean).map((item, index) => (
+                  <PropertyItem key={index} {...(item as PropertyItemProps)} />
+                ))}
+              </div>
+            </div>
 
-        {selectedDevice?.peripherals && (
-          <div className="mt-4">
-            <MemoryMap peripherals={memoryMapPeripherals} />
-          </div>
+            {selectedDevice?.peripherals && (
+              <div className="mt-4">
+                <MemoryMap peripherals={memoryMapPeripherals} />
+              </div>
+            )}
+          </>
         )}
       </div>
-      {selectedDevice && <RegisterList selectedDevice={selectedDevice} />}
+      
+      {!isLoading && selectedDevice && <RegisterList selectedDevice={selectedDevice} />}
 
       {error && (
         <div className="text-red-500">
-          Error loading devices: {error.message}
+          Error loading devices: {error}
         </div>
       )}
     </div>
