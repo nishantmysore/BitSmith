@@ -3,7 +3,18 @@ import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+// Constants for batch processing
+const BATCH_SIZE = 100;
+
+// Helper function to log timing information
+function logTiming(operation: string, startTime: number) {
+  const duration = Date.now() - startTime;
+  console.log(`[Performance] ${operation}: ${duration}ms`);
+  return duration;
+}
+
 export async function POST(req: Request) {
+  const apiStartTime = Date.now();
   try {
     // Get the current user's session
     const session = await getServerSession(authOptions);
@@ -56,108 +67,30 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Device not found" }, { status: 404 });
     }
 
-    // Use a transaction to ensure data consistency
-    const newDevice = await prisma.$transaction(async (tx) => {
-      // 1. Create a new device with basic properties from the original
-      const device = await tx.device.create({
-        data: {
-          name: `${originalDevice.name} (Copy)`,
-          description: originalDevice.description,
-          isPublic: false, // Set to private as requested
-          littleEndian: originalDevice.littleEndian,
-          defaultClockFreq: originalDevice.defaultClockFreq,
-          version: originalDevice.version,
-          ownerId: user.id, // Set the new owner as requested
-          originalDeviceId: deviceId, // Track the original device
-        },
-      });
-
-      // 2. Get all peripherals from the original device
-      const peripherals = await tx.peripheral.findMany({
-        where: { deviceId: deviceId },
-        include: {
-          registers: {
-            include: {
-              fields: {
-                include: {
-                  enumeratedValues: true,
-                },
-              },
-            },
-          },
-        },
-      });
-
-      // 3. Create peripherals for the new device
-      for (const peripheral of peripherals) {
-        const newPeripheral = await tx.peripheral.create({
-          data: {
-            deviceId: device.id,
-            name: peripheral.name,
-            description: peripheral.description,
-            baseAddress: peripheral.baseAddress,
-            size: peripheral.size,
-          },
-        });
-
-        // 4. Create registers for each peripheral
-        for (const register of peripheral.registers) {
-          const newRegister = await tx.register.create({
-            data: {
-              peripheralId: newPeripheral.id,
-              name: register.name,
-              description: register.description,
-              width: register.width,
-              addressOffset: register.addressOffset,
-              resetValue: register.resetValue,
-              resetMask: register.resetMask,
-              readAction: register.readAction,
-              writeAction: register.writeAction,
-              modifiedWriteValues: register.modifiedWriteValues,
-              access: register.access,
-              isArray: register.isArray,
-              arraySize: register.arraySize,
-              arrayStride: register.arrayStride,
-              namePattern: register.namePattern,
-            },
-          });
-
-          // 5. Create fields for each register
-          for (const field of register.fields) {
-            const newField = await tx.field.create({
-              data: {
-                registerId: newRegister.id,
-                name: field.name,
-                description: field.description,
-                bitOffset: field.bitOffset,
-                bitWidth: field.bitWidth,
-                readAction: field.readAction,
-                writeAction: field.writeAction,
-                access: field.access,
-              },
-            });
-
-            // 6. Create enumerated values for each field
-            if (field.enumeratedValues.length > 0) {
-              await tx.fieldEnum.createMany({
-                data: field.enumeratedValues.map(enumValue => ({
-                  fieldId: newField.id,
-                  name: enumValue.name,
-                  description: enumValue.description || null,
-                  value: enumValue.value,
-                })),
-              });
-            }
-          }
-        }
-      }
-
-      return device;
-    }, {
-      timeout: 30000, // Increase timeout to 30 seconds
+    // Create the new device with basic properties from the original
+    const deviceStartTime = Date.now();
+    const newDevice = await prisma.device.create({
+      data: {
+        name: `${originalDevice.name} (Copy)`,
+        description: originalDevice.description,
+        isPublic: false, // Set to private as requested
+        littleEndian: originalDevice.littleEndian,
+        defaultClockFreq: originalDevice.defaultClockFreq,
+        version: originalDevice.version,
+        ownerId: user.id, // Set the new owner as requested
+        originalDeviceId: deviceId, // Track the original device
+      },
     });
+    logTiming("Base device creation", deviceStartTime);
 
-    return NextResponse.json(newDevice);
+    // Process the copy operation in the background
+    // This allows us to return a response to the user quickly
+    void copyDeviceStructure(deviceId, newDevice.id);
+
+    return NextResponse.json({
+      ...newDevice,
+      message: "Device copy initiated. The structure will be copied in the background.",
+    });
   } catch (error) {
     console.error("Error copying device:", error);
     return NextResponse.json(
@@ -165,4 +98,191 @@ export async function POST(req: Request) {
       { status: 500 },
     );
   }
+}
+
+// Function to copy the device structure in the background
+async function copyDeviceStructure(sourceDeviceId: string, targetDeviceId: string) {
+  const copyStartTime = Date.now();
+  try {
+    // Get all peripherals from the original device with their related data
+    const peripherals = await prisma.peripheral.findMany({
+      where: { deviceId: sourceDeviceId },
+      include: {
+        registers: {
+          include: {
+            fields: {
+              include: {
+                enumeratedValues: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Process peripherals in batches
+    await processPeripherals(peripherals, targetDeviceId);
+
+    logTiming(`Completed copying device structure from ${sourceDeviceId} to ${targetDeviceId}`, copyStartTime);
+  } catch (error) {
+    console.error(`Error in background copy process for device ${targetDeviceId}:`, error);
+  }
+}
+
+async function processPeripherals(peripherals: any[], targetDeviceId: string) {
+  const startTime = Date.now();
+  
+  // Create all peripherals first
+  for (let i = 0; i < peripherals.length; i += BATCH_SIZE) {
+    const batch = peripherals.slice(i, i + BATCH_SIZE);
+    
+    // Create peripherals in parallel
+    const newPeripherals = await Promise.all(
+      batch.map(async (peripheral) => {
+        const newPeripheral = await prisma.peripheral.create({
+          data: {
+            deviceId: targetDeviceId,
+            name: peripheral.name,
+            description: peripheral.description,
+            baseAddress: peripheral.baseAddress,
+            size: peripheral.size,
+          },
+        });
+        
+        return {
+          original: peripheral,
+          new: newPeripheral,
+        };
+      })
+    );
+    
+    // Process registers for each peripheral in this batch
+    await Promise.all(
+      newPeripherals.map(async (peripheralPair) => {
+        await processRegisters(
+          peripheralPair.original.registers,
+          peripheralPair.new.id
+        );
+      })
+    );
+  }
+  
+  logTiming(`Processed ${peripherals.length} peripherals`, startTime);
+}
+
+async function processRegisters(registers: any[], newPeripheralId: string) {
+  const startTime = Date.now();
+  
+  // Process registers in batches
+  for (let i = 0; i < registers.length; i += BATCH_SIZE) {
+    const batch = registers.slice(i, i + BATCH_SIZE);
+    
+    // Create registers in parallel
+    const newRegisters = await Promise.all(
+      batch.map(async (register) => {
+        const newRegister = await prisma.register.create({
+          data: {
+            peripheralId: newPeripheralId,
+            name: register.name,
+            description: register.description,
+            width: register.width,
+            addressOffset: register.addressOffset,
+            resetValue: register.resetValue,
+            resetMask: register.resetMask,
+            readAction: register.readAction,
+            writeAction: register.writeAction,
+            modifiedWriteValues: register.modifiedWriteValues,
+            access: register.access,
+            isArray: register.isArray,
+            arraySize: register.arraySize,
+            arrayStride: register.arrayStride,
+            namePattern: register.namePattern,
+          },
+        });
+        
+        return {
+          original: register,
+          new: newRegister,
+        };
+      })
+    );
+    
+    // Process fields for each register in this batch
+    await Promise.all(
+      newRegisters.map(async (registerPair) => {
+        await processFields(
+          registerPair.original.fields,
+          registerPair.new.id
+        );
+      })
+    );
+  }
+  
+  logTiming(`Processed ${registers.length} registers`, startTime);
+}
+
+async function processFields(fields: any[], newRegisterId: string) {
+  const startTime = Date.now();
+  
+  // Process fields in batches
+  for (let i = 0; i < fields.length; i += BATCH_SIZE) {
+    const batch = fields.slice(i, i + BATCH_SIZE);
+    
+    // Create fields in parallel
+    const newFields = await Promise.all(
+      batch.map(async (field) => {
+        const newField = await prisma.field.create({
+          data: {
+            registerId: newRegisterId,
+            name: field.name,
+            description: field.description,
+            bitOffset: field.bitOffset,
+            bitWidth: field.bitWidth,
+            readAction: field.readAction,
+            writeAction: field.writeAction,
+            access: field.access,
+          },
+        });
+        
+        return {
+          original: field,
+          new: newField,
+        };
+      })
+    );
+    
+    // Process enumerated values for each field in this batch
+    await Promise.all(
+      newFields.map(async (fieldPair) => {
+        if (fieldPair.original.enumeratedValues?.length > 0) {
+          await processEnumValues(
+            fieldPair.original.enumeratedValues,
+            fieldPair.new.id
+          );
+        }
+      })
+    );
+  }
+  
+  logTiming(`Processed ${fields.length} fields`, startTime);
+}
+
+async function processEnumValues(enumValues: any[], newFieldId: string) {
+  const startTime = Date.now();
+  
+  // Process enum values in batches using createMany for better performance
+  for (let i = 0; i < enumValues.length; i += BATCH_SIZE) {
+    const batch = enumValues.slice(i, i + BATCH_SIZE);
+    
+    await prisma.fieldEnum.createMany({
+      data: batch.map((enumValue) => ({
+        fieldId: newFieldId,
+        name: enumValue.name,
+        description: enumValue.description || null,
+        value: enumValue.value,
+      })),
+    });
+  }
+  
+  logTiming(`Processed ${enumValues.length} enum values`, startTime);
 }
