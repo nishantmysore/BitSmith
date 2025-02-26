@@ -22,7 +22,7 @@ export default function CanceledPage() {
         </CardHeader>
         <CardContent className="text-center">
           <p className="text-muted-foreground">
-            You can try again whenever you're ready. Premium features remain available through subscription.
+            You can try again whenever you&apos;re ready. Premium features remain available through subscription.
           </p>
         </CardContent>
         <CardFooter className="flex justify-center">
