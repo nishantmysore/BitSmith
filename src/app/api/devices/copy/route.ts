@@ -47,75 +47,112 @@ export async function POST(req: Request) {
       );
     }
 
-    // First, fetch the original device with all its related data
+    // First, fetch the original device
     const originalDevice = await prisma.device.findUnique({
       where: { id: deviceId },
-      include: {
-        peripherals: {
-          include: {
-            registers: {
-              include: {
-                fields: {
-                  include: {
-                    enumeratedValues: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
     });
 
     if (!originalDevice) {
       return NextResponse.json({ error: "Device not found" }, { status: 404 });
     }
 
-    // Create a new device with all its related data
-    const newDevice = await prisma.device.create({
-      data: {
-        name: `${originalDevice.name} (Copy)`,
-        description: originalDevice.description,
-        isPublic: false, // Set to false by default for copied devices
-        littleEndian: originalDevice.littleEndian,
-        defaultClockFreq: originalDevice.defaultClockFreq,
-        version: originalDevice.version,
-        ownerId: user.id,
-        originalDeviceId: originalDevice.id,
-        peripherals: {
-          create: originalDevice.peripherals.map((peripheral) => ({
-            name: peripheral.name,
-            baseAddress: peripheral.baseAddress,
-            description: peripheral.description,
-            size: peripheral.size,
-            registers: {
-              create: peripheral.registers.map((register) => ({
-                name: register.name,
-                addressOffset: register.addressOffset,
-                description: register.description,
-                access: register.access,
-                width: register.width,
-                fields: {
-                  create: register.fields.map((field) => ({
-                    name: field.name,
-                    description: field.description,
-                    bitOffset: field.bitOffset,
-                    bitWidth: field.bitWidth,
-                    access: field.access,
-                    enumeratedValues: {
-                      create: field.enumeratedValues.map((enumValue) => ({
-                        name: enumValue.name,
-                        description: enumValue.description,
-                        value: enumValue.value,
-                      })),
-                    },
-                  })),
-                },
-              })),
-            },
-          })),
+    // Use a transaction to ensure data consistency
+    const newDevice = await prisma.$transaction(async (tx) => {
+      // 1. Create a new device with basic properties from the original
+      const device = await tx.device.create({
+        data: {
+          name: `${originalDevice.name} (Copy)`,
+          description: originalDevice.description,
+          isPublic: false, // Set to private as requested
+          littleEndian: originalDevice.littleEndian,
+          defaultClockFreq: originalDevice.defaultClockFreq,
+          version: originalDevice.version,
+          ownerId: user.id, // Set the new owner as requested
+          originalDeviceId: deviceId, // Track the original device
         },
-      },
+      });
+
+      // 2. Get all peripherals from the original device
+      const peripherals = await tx.peripheral.findMany({
+        where: { deviceId: deviceId },
+        include: {
+          registers: {
+            include: {
+              fields: {
+                include: {
+                  enumeratedValues: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      // 3. Create peripherals for the new device
+      for (const peripheral of peripherals) {
+        const newPeripheral = await tx.peripheral.create({
+          data: {
+            deviceId: device.id,
+            name: peripheral.name,
+            description: peripheral.description,
+            baseAddress: peripheral.baseAddress,
+            size: peripheral.size,
+          },
+        });
+
+        // 4. Create registers for each peripheral
+        for (const register of peripheral.registers) {
+          const newRegister = await tx.register.create({
+            data: {
+              peripheralId: newPeripheral.id,
+              name: register.name,
+              description: register.description,
+              width: register.width,
+              addressOffset: register.addressOffset,
+              resetValue: register.resetValue,
+              resetMask: register.resetMask,
+              readAction: register.readAction,
+              writeAction: register.writeAction,
+              modifiedWriteValues: register.modifiedWriteValues,
+              access: register.access,
+              isArray: register.isArray,
+              arraySize: register.arraySize,
+              arrayStride: register.arrayStride,
+              namePattern: register.namePattern,
+            },
+          });
+
+          // 5. Create fields for each register
+          for (const field of register.fields) {
+            const newField = await tx.field.create({
+              data: {
+                registerId: newRegister.id,
+                name: field.name,
+                description: field.description,
+                bitOffset: field.bitOffset,
+                bitWidth: field.bitWidth,
+                readAction: field.readAction,
+                writeAction: field.writeAction,
+                access: field.access,
+              },
+            });
+
+            // 6. Create enumerated values for each field
+            if (field.enumeratedValues.length > 0) {
+              await tx.fieldEnum.createMany({
+                data: field.enumeratedValues.map(enumValue => ({
+                  fieldId: newField.id,
+                  name: enumValue.name,
+                  description: enumValue.description || null,
+                  value: enumValue.value,
+                })),
+              });
+            }
+          }
+        }
+      }
+
+      return device;
     });
 
     return NextResponse.json(newDevice);

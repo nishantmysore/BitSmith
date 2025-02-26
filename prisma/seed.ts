@@ -3,7 +3,11 @@ import { DeviceValidateSchema, DeviceFormData } from "../src/types/validation";
 import fs from "fs/promises";
 import path from "path";
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  log: ['warn', 'error']
+});
+
+const BATCH_SIZE = 20; // Process one file at a time for testing
 
 // Modified version of prepareDeviceData that doesn't require userId
 function preparePublicDeviceData(data: DeviceFormData) {
@@ -62,6 +66,60 @@ function preparePublicDeviceData(data: DeviceFormData) {
   };
 }
 
+async function processFile(filePath: string, fileName: string) {
+  try {
+    console.log(`📖 Reading file ${fileName}...`);
+    const fileContent = await fs.readFile(filePath, "utf-8");
+    
+    console.log(`🔍 Parsing JSON for ${fileName}...`);
+    const deviceData = JSON.parse(fileContent);
+
+    // Validate the data
+    console.log(`✨ Validating data for ${fileName}...`);
+    const validatedData = DeviceValidateSchema.safeParse(deviceData);
+    if (!validatedData.success) {
+      console.error(`❌ Validation failed for ${fileName}:`, validatedData.error);
+      return false;
+    }
+
+    // Check if device already exists
+    console.log(`🔎 Checking if device ${deviceData.name} exists...`);
+    const existingDevice = await prisma.device.findFirst({
+      where: {
+        name: deviceData.name,
+        isPublic: true,
+        ownerId: null,
+      },
+    });
+
+    if (existingDevice) {
+      console.log(`⏭️  Device ${deviceData.name} already exists, skipping...`);
+      return true;
+    }
+
+    // Create the device
+    console.log(`📝 Preparing data for ${fileName}...`);
+    const preparedData = preparePublicDeviceData(validatedData.data);
+    
+    console.log(`💾 Creating device from ${fileName}...`);
+    await prisma.device.create({
+      data: preparedData,
+    });
+
+    console.log(`✅ Successfully created public device from ${fileName}`);
+    return true;
+  } catch (error) {
+    console.error(`❌ Error processing ${fileName}:`, error);
+    // Log more detailed error information
+    if (error instanceof Error) {
+      console.error('Error name:', error.name);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+    }
+    return false;
+  }
+}
+
 async function seedPublicDevices() {
   try {
     // Get all JSON files from the public_devices directory
@@ -70,48 +128,33 @@ async function seedPublicDevices() {
     const jsonFiles = files.filter((file) => file.endsWith(".json"));
 
     console.log(`Found ${jsonFiles.length} public device files to process`);
+    console.log(`Processing in batches of ${BATCH_SIZE} files`);
 
-    for (const file of jsonFiles) {
-      try {
-        // Read and parse JSON file
-        const filePath = path.join(publicDevicesPath, file);
-        const fileContent = await fs.readFile(filePath, "utf-8");
-        const deviceData = JSON.parse(fileContent);
+    // Process files in batches
+    for (let i = 0; i < jsonFiles.length; i += BATCH_SIZE) {
+      const batch = jsonFiles.slice(i, i + BATCH_SIZE);
+      console.log(`\nProcessing batch ${Math.floor(i/BATCH_SIZE) + 1} of ${Math.ceil(jsonFiles.length/BATCH_SIZE)}`);
+      
+      const results = await Promise.all(
+        batch.map((file) => {
+          const filePath = path.join(publicDevicesPath, file);
+          return processFile(filePath, file);
+        })
+      );
 
-        // Validate the data
-        const validatedData = DeviceValidateSchema.safeParse(deviceData);
-        if (!validatedData.success) {
-          console.error(`Validation failed for ${file}:`, validatedData.error);
-          continue;
-        }
-
-        // Check if device already exists
-        const existingDevice = await prisma.device.findFirst({
-          where: {
-            name: deviceData.name,
-            isPublic: true,
-            ownerId: null,
-          },
-        });
-
-        if (existingDevice) {
-          console.log(`Device ${deviceData.name} already exists, skipping...`);
-          continue;
-        }
-
-        // Create the device
-        const preparedData = preparePublicDeviceData(validatedData.data);
-        await prisma.device.create({
-          data: preparedData,
-        });
-
-        console.log(`Successfully created public device from ${file}`);
-      } catch (error) {
-        console.error(`Error processing ${file}:`, error);
+      const successCount = results.filter(Boolean).length;
+      console.log(`Batch completed: ${successCount}/${batch.length} files processed successfully`);
+      
+      // Small delay between batches to prevent overwhelming the connection
+      if (i + BATCH_SIZE < jsonFiles.length) {
+        console.log("Waiting 2 seconds before next batch...");
+        await new Promise(resolve => setTimeout(resolve, 2000));
       }
     }
+
+    console.log("\n✨ Seeding completed!");
   } catch (error) {
-    console.error("Seeding failed:", error);
+    console.error("❌ Seeding failed:", error);
     throw error;
   } finally {
     await prisma.$disconnect();
