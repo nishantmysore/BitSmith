@@ -30,12 +30,7 @@ export async function GET() {
       user.currentPeriodEnd > new Date();
 
     return NextResponse.json(
-      { active: isActive },
-      {
-        headers: {
-          "Cache-Control": "public, s-maxage=300, stale-while-revalidate=3600",
-        },
-      },
+      { active: isActive }
     );
   } catch (error) {
     console.error("Error checking subscription:", error);
