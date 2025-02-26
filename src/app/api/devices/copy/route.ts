@@ -136,14 +136,13 @@ export async function POST(req: Request) {
     });
     logTiming("Base device creation", deviceStartTime);
 
-    // Wait for the copy operation to complete before returning
-    const totalStartTime = Date.now();
-    await copyDeviceStructure(deviceId, newDevice.id);
-    const totalDuration = logTiming("Total device copy operation", totalStartTime);
+    // Process the copy operation in the background
+    // This allows us to return a response to the user quickly
+    void copyDeviceStructure(deviceId, newDevice.id);
 
     return NextResponse.json({
       ...newDevice,
-      message: `Device copied successfully in ${totalDuration}ms.`,
+      message: "Device copy initiated. The structure will be copied in the background.",
     });
   } catch (error) {
     console.error("Error copying device:", error);
@@ -154,7 +153,7 @@ export async function POST(req: Request) {
   }
 }
 
-// Function to copy the device structure
+// Function to copy the device structure in the background
 async function copyDeviceStructure(sourceDeviceId: string, targetDeviceId: string) {
   const copyStartTime = Date.now();
   try {
@@ -179,8 +178,7 @@ async function copyDeviceStructure(sourceDeviceId: string, targetDeviceId: strin
 
     logTiming(`Completed copying device structure from ${sourceDeviceId} to ${targetDeviceId}`, copyStartTime);
   } catch (error) {
-    console.error(`Error copying device structure from ${sourceDeviceId} to ${targetDeviceId}:`, error);
-    throw error; // Re-throw the error to be caught by the POST handler
+    console.error(`Error in background copy process for device ${targetDeviceId}:`, error);
   }
 }
 
