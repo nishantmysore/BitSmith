@@ -2,9 +2,63 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { RegisterAccessType, FieldAccessType } from "@prisma/client";
 
 // Constants for batch processing
 const BATCH_SIZE = 100;
+
+// Define interfaces based on Prisma schema
+interface Peripheral {
+  id: string;
+  name: string;
+  description: string;
+  baseAddress: bigint;
+  size: bigint;
+  deviceId: string;
+  registers: Register[];
+}
+
+interface Register {
+  id: string;
+  name: string;
+  description: string;
+  width: number;
+  addressOffset: bigint;
+  resetValue: bigint;
+  resetMask?: bigint | null;
+  readAction?: string | null;
+  writeAction?: string | null;
+  modifiedWriteValues?: string | null;
+  access: RegisterAccessType;
+  isArray: boolean;
+  arraySize?: number | null;
+  arrayStride?: bigint | null;
+  namePattern?: string | null;
+  peripheralId: string;
+  fields: Field[];
+}
+
+interface Field {
+  id: string;
+  name: string;
+  description: string;
+  bitOffset: number;
+  bitWidth: number;
+  readAction?: string | null;
+  writeAction?: string | null;
+  access: FieldAccessType;
+  registerId: string;
+  enumeratedValues: FieldEnum[];
+}
+
+interface FieldEnum {
+  id: string;
+  name: string;
+  description?: string | null;
+  value: number;
+  fieldId: string;
+}
+
 
 // Helper function to log timing information
 function logTiming(operation: string, startTime: number) {
@@ -14,7 +68,6 @@ function logTiming(operation: string, startTime: number) {
 }
 
 export async function POST(req: Request) {
-  const apiStartTime = Date.now();
   try {
     // Get the current user's session
     const session = await getServerSession(authOptions);
@@ -129,7 +182,7 @@ async function copyDeviceStructure(sourceDeviceId: string, targetDeviceId: strin
   }
 }
 
-async function processPeripherals(peripherals: any[], targetDeviceId: string) {
+async function processPeripherals(peripherals: Peripheral[], targetDeviceId: string) {
   const startTime = Date.now();
   
   // Create all peripherals first
@@ -170,7 +223,7 @@ async function processPeripherals(peripherals: any[], targetDeviceId: string) {
   logTiming(`Processed ${peripherals.length} peripherals`, startTime);
 }
 
-async function processRegisters(registers: any[], newPeripheralId: string) {
+async function processRegisters(registers: Register[], newPeripheralId: string) {
   const startTime = Date.now();
   
   // Process registers in batches
@@ -221,7 +274,7 @@ async function processRegisters(registers: any[], newPeripheralId: string) {
   logTiming(`Processed ${registers.length} registers`, startTime);
 }
 
-async function processFields(fields: any[], newRegisterId: string) {
+async function processFields(fields: Field[], newRegisterId: string) {
   const startTime = Date.now();
   
   // Process fields in batches
@@ -267,7 +320,7 @@ async function processFields(fields: any[], newRegisterId: string) {
   logTiming(`Processed ${fields.length} fields`, startTime);
 }
 
-async function processEnumValues(enumValues: any[], newFieldId: string) {
+async function processEnumValues(enumValues: FieldEnum[], newFieldId: string) {
   const startTime = Date.now();
   
   // Process enum values in batches using createMany for better performance
