@@ -202,6 +202,25 @@ async function createEnumValuesInBatches(fieldId: string, enumValues: any[]) {
   logTiming(`Created ${enumValues.length} enum values`, startTime);
 }
 
+// Function to process device creation in the background
+async function processDeviceCreation(deviceId: string, peripherals: any[]) {
+  const processStartTime = Date.now();
+  try {
+    // Process peripherals if they exist
+    if (peripherals?.length) {
+      const peripheralsStartTime = Date.now();
+      await createPeripheralsInBatches(deviceId, peripherals);
+      logTiming("Peripherals processing", peripheralsStartTime);
+    }
+
+    logTiming(`Completed device creation for device ${deviceId}`, processStartTime);
+  } catch (error) {
+    console.error(`Error in background device creation process for device ${deviceId}:`, error);
+    // Consider implementing a way to mark the device as having an error
+    // This could be a status field in the device model that gets updated here
+  }
+}
+
 export async function POST(request: NextRequest) {
   const apiStartTime = Date.now();
   try {
@@ -285,23 +304,19 @@ export async function POST(request: NextRequest) {
     });
     logTiming("Base device creation", deviceStartTime);
 
-    // Process peripherals
+    // Process peripherals in the background
     if (validatedData.data.peripherals?.length) {
-      const peripheralsStartTime = Date.now();
-      await createPeripheralsInBatches(
-        device.id,
-        validatedData.data.peripherals,
-      );
-      logTiming("Peripherals processing", peripheralsStartTime);
+      void processDeviceCreation(device.id, validatedData.data.peripherals);
     }
 
-    const totalDuration = logTiming("Total API execution", apiStartTime);
+    const responseTime = logTiming("API response preparation", apiStartTime);
     return NextResponse.json({
       success: true,
       deviceId: device.id,
+      message: "Device creation initiated. The structure will be processed in the background.",
       timing: {
-        totalDuration,
-        message: `Successfully created device with ${validatedData.data.peripherals?.length || 0} peripherals in ${totalDuration}ms`,
+        responseTime,
+        peripheralCount: validatedData.data.peripherals?.length || 0,
       },
     });
   } catch (error) {
