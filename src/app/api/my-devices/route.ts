@@ -41,7 +41,12 @@ export async function GET(request: Request) {
       },
     });
 
-    return NextResponse.json(devices);
+    return NextResponse.json(devices, {
+      headers: {
+        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+        "x-next-cache-tags": "devices-list",
+      },
+    });
   } catch {
     return NextResponse.json(
       { error: "Failed to fetch devices" },

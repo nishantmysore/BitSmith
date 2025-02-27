@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { RegisterAccessType, FieldAccessType } from "@prisma/client";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 // Constants for batch processing
 const BATCH_SIZE = 100;
@@ -176,6 +177,30 @@ async function copyDeviceStructure(sourceDeviceId: string, targetDeviceId: strin
     // Process peripherals in batches
     await processPeripherals(peripherals, targetDeviceId);
 
+    // Revalidate the device path to update the ISR cache
+    revalidatePath(`/devices/${targetDeviceId}`);
+    revalidatePath(`/api/devices/${targetDeviceId}`);
+    
+    // Also revalidate using tag-based approach
+    revalidateTag(`device-${targetDeviceId}`);
+    
+    // Revalidate the devices list pages
+    revalidatePath('/devices');
+    revalidatePath('/api/devices');
+    revalidatePath('/api/my-devices');
+    revalidateTag('devices-list');
+    
+    // Check if the original device was public, and if so, revalidate public devices list
+    const originalDevice = await prisma.device.findUnique({
+      where: { id: sourceDeviceId },
+      select: { isPublic: true },
+    });
+    
+    if (originalDevice?.isPublic) {
+      revalidatePath('/api/public-devices');
+      revalidateTag('public-devices-list');
+    }
+    
     logTiming(`Completed copying device structure from ${sourceDeviceId} to ${targetDeviceId}`, copyStartTime);
   } catch (error) {
     console.error(`Error in background copy process for device ${targetDeviceId}:`, error);

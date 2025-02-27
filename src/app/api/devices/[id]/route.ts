@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
 import { cache } from "react";
+import { revalidateTag } from "next/cache";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const transformBigInts = (data: any): any => {
@@ -73,6 +74,7 @@ export async function GET(
     return NextResponse.json(transformBigInts(device), {
       headers: {
         "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+        "x-next-cache-tags": `device-${id}`,
       },
     });
   } catch (error) {
