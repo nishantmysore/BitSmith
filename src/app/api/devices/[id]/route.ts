@@ -70,12 +70,7 @@ export async function GET(
       return NextResponse.json({ error: "Device not found" }, { status: 404 });
     }
 
-    return NextResponse.json(transformBigInts(device), {
-      headers: {
-        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
-        "x-next-cache-tags": `device-${id}`,
-      },
-    });
+    return NextResponse.json(transformBigInts(device));
   } catch (error) {
     console.error("Failed to fetch device:", error);
     return NextResponse.json(
