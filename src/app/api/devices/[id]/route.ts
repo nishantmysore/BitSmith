@@ -3,7 +3,6 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
 import { cache } from "react";
-import { revalidateTag } from "next/cache";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const transformBigInts = (data: any): any => {
