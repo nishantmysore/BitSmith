@@ -20,6 +20,7 @@ const transformBigInts = (data: any): any => {
   return data;
 };
 
+
 // Cache the database query
 const getDevice = cache(async (id: string) => {
   const device = await prisma.device.findUnique({
