@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/card";
 import { Layers, Database, Share2 } from "lucide-react";
 import Image from "next/image";
-import serviceImage from "@/assets/916shots_so.png";
+import serviceImage from "@/assets/landing_image.png";
 
 interface ServiceProps {
   title: string;
