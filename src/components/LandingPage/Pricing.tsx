@@ -53,7 +53,7 @@ const pricingList: PricingProps[] = [
     price: 10,
     description:
       "Perfect for developers and small teams working with hardware registers.",
-    buttonText: "Start Free Trial",
+    buttonText: "Start 30-day Free Trial",
     benefitList: [
       "Full register visualization tools",
       "100 device configurations",
