@@ -2,7 +2,6 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
-import { cache } from "react";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const transformBigInts = (data: any): any => {
@@ -20,9 +19,8 @@ const transformBigInts = (data: any): any => {
   return data;
 };
 
-
-// Cache the database query
-const getDevice = cache(async (id: string) => {
+// Remove the cache wrapper and update the function
+const getDevice = async (id: string) => {
   const device = await prisma.device.findUnique({
     where: { id },
     include: {
@@ -41,8 +39,46 @@ const getDevice = cache(async (id: string) => {
       },
     },
   });
+
+  console.log("I REACHED HERE______________________________________________________________________")
+  console.log(device?.originalDeviceId)
+  console.log(device?.peripherals.length)
+  // If device has an originalDeviceId and no peripherals of its own,
+  // fetch peripherals from the original device
+  if (device && device.originalDeviceId && device.peripherals.length === 0) {
+    console.log(`Device ${id} is a reference to original device ${device.originalDeviceId}`);
+    
+    // Get the original device's peripherals
+    const originalDevice = await prisma.device.findUnique({
+      where: { id: device.originalDeviceId },
+      include: {
+        peripherals: {
+          include: {
+            registers: {
+              include: {
+                fields: {
+                  include: {
+                    enumeratedValues: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+    
+    if (originalDevice) {
+      // Use the original device's peripherals for this device
+      return {
+        ...device,
+        peripherals: originalDevice.peripherals,
+      };
+    }
+  }
+  
   return device;
-});
+};
 
 export async function GET(
   request: NextRequest,

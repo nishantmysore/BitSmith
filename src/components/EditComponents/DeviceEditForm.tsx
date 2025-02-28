@@ -23,7 +23,6 @@ export function DeviceEditForm({ newDevice = false }: DeviceEditFormProps) {
   const { toast } = useToast();
   const [data, setData] = useState<DeviceFormData | null>(null);
   const { theme } = useTheme();
-  console.log(theme);
   const [isUploading, setIsUploading] = useState(false);
 
   const handleJsonChange = (updatedSrc: DeviceFormData) => {
