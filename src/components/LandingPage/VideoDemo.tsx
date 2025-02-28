@@ -1,5 +1,4 @@
 import { Card, CardContent } from "@/components/ui/card";
-import dynamic from 'next/dynamic';
 
 const demoVideoPath = '/demo.mp4';
 
