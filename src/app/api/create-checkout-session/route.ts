@@ -44,7 +44,7 @@ export async function POST() {
         customer: stripeCustomerId,
         line_items: [
           {
-            price: "price_1Qrvp3LENE0vGSD4HpNui1ug",
+            price: "price_1QqQHYLENE0vGSD40sBj1y54",
             quantity: 1,
           },
         ],
