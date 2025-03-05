@@ -4,7 +4,7 @@ import fs from "fs/promises";
 import path from "path";
 
 const prisma = new PrismaClient({
-  log: ['warn', 'error']
+  // Removed log configuration to stop printing Prisma transactions
 });
 
 const BATCH_SIZE = 20; // Process one file at a time for testing
